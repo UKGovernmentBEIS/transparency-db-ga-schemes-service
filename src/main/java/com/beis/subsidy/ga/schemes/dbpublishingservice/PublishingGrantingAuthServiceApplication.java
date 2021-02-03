@@ -11,7 +11,6 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 
 @SpringBootApplication
-//@EnableFeignClients("com.beis.subsidy.award.transperancy.dbpublishingservice.service")
 public class PublishingGrantingAuthServiceApplication {
 
 	public static void main(String[] args) {

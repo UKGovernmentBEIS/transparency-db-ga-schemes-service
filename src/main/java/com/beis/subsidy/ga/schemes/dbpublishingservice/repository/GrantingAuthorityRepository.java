@@ -11,4 +11,6 @@ public interface GrantingAuthorityRepository
 	GrantingAuthority findBygaId(Long gaId);
 	
 	GrantingAuthority findBygrantingAuthorityName(String grantingAuthorityName);
+
+	GrantingAuthority findByGrantingAuthorityName(String Name);
 }

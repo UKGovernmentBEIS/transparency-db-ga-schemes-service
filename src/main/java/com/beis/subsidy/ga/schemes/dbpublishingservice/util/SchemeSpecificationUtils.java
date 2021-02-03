@@ -1,0 +1,58 @@
+package com.beis.subsidy.ga.schemes.dbpublishingservice.util;
+
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
+import org.springframework.data.jpa.domain.Specification;
+
+import java.text.MessageFormat;
+
+public final class SchemeSpecificationUtils {
+
+	public static Specification<SubsidyMeasure> schemeByGrantingAuthority(Long gaId) {
+		return (root, query, builder) -> builder.equal(root.get("grantingAuthority").get("gaId"), gaId);
+	}
+
+	/**
+	 * To define specification for award status
+	 * @param status
+	 * @return Specification<Award>
+	 */
+	public static Specification<SubsidyMeasure> schemeByStatus(String status) {
+		return (root, query, builder) -> builder.equal(root.get("status"), status);
+	}
+
+	/**
+	 * To define specification for subsidy measure title
+	 *
+	 * @param subsidySchemeName - Add subsidy measure title
+	 * @return Specification<Award> - Specification for Award
+	 */
+	public static Specification<SubsidyMeasure> subsidySchemeName(String subsidySchemeName) {
+		return (root, query, builder) -> builder.like(root.get("subsidyMeasureTitle"), contains(subsidySchemeName));
+	}
+
+	/**
+	 * To define specification for subsidy measure title
+	 *
+	 * @param subsidyNumber - Add subsidy measure title
+	 * @return Specification<Award> - Specification for Award
+	 */
+	public static Specification<SubsidyMeasure> subsidyNumber(String subsidyNumber) {
+		return (root, query, builder) -> builder.equal(root.get("scNumber"), subsidyNumber);
+	}
+
+	/**
+	 * To check contains operations
+	 * @param expression - input string
+	 * @return - message format with like expression
+	 */
+	private static String contains(String expression) {
+		return MessageFormat.format("%{0}%", expression);
+	}
+
+
+	public static Specification<SubsidyMeasure> grantingAuthorityName(String searchName) {
+
+		return (root, query, builder) -> builder.like(root.get("grantingAuthority").get("grantingAuthorityName"),
+				contains(searchName));
+	}
+}
