@@ -13,7 +13,7 @@ variables:
   azureSubscription: '8e9969b3-7574-441c-a10f-7114dc3314f7'
 
   # Web app name
-  webAppName: 'dev-transparency-db-public-search-service'
+  webAppName: 'dev-transparency-db-ga-schemes-service'
 
   # Agent VM image name
   vmImageName: 'ubuntu-20.04'
@@ -43,7 +43,7 @@ stages:
               sonarQubeRunAnalysis: false
               goals: 'package spring-boot:repackage'
           - task: CopyFiles@2
-            displayName: 'Copy Files to artifact staging directory'
+            displayName: 'Copy Filess to artifact staging directory'
             inputs:
               SourceFolder: '$(System.DefaultWorkingDirectory)'
               Contents: '**/target/*.?(war|jar)'
