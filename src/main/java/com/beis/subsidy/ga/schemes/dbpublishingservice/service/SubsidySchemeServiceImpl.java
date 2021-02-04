@@ -9,6 +9,7 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.SubsidyMeasure
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeDetailsRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeSearchInput;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchSubsidyResultsResponse;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SubsidyMeasureResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.impl.SubsidySchemeService;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.AccessManagementConstant;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SchemeSpecificationUtils;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.time.temporal.ChronoUnit;
@@ -177,6 +179,12 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
         subsidyMeasureRepository.save(schemeById);
         return ResponseEntity.status(200).build();
+    }
+
+    @Override
+    public SubsidyMeasureResponse findSubsidySchemeById(String scNumber) {
+        SubsidyMeasure subsidyMeasure = subsidyMeasureRepository.findById(scNumber).get();
+        return new SubsidyMeasureResponse(subsidyMeasure);
     }
 
 
