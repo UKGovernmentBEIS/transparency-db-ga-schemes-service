@@ -13,9 +13,7 @@ import lombok.Setter;
 @Setter
 @Getter
 public class SchemeSearchInput {
-	private String subsidySchemeName;
-	private String scNumber;
-	private String gaName;
+	private String searchName;
 	private Integer pageNumber;
 	private Integer totalRecordsPerPage;
 	private String[] sortBy;

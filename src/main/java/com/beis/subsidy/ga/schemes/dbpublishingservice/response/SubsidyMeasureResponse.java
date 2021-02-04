@@ -34,8 +34,13 @@ public class SubsidyMeasureResponse {
     private String gaName;
 
     @JsonProperty
-    private String lastModifiedDate;
+    private String adhoc;
 
+    @JsonProperty
+    private String gaSubsidyWebLink;
+
+    @JsonProperty
+    private String lastModifiedDate;
 
     public SubsidyMeasureResponse(SubsidyMeasure subsidyMeasure) {
         this.scNumber = subsidyMeasure.getScNumber();
@@ -45,6 +50,8 @@ public class SubsidyMeasureResponse {
         this.duration = SearchUtils.getDurationInYears(subsidyMeasure.getDuration());
         this.budget = subsidyMeasure.getBudget();
         this.gaName = subsidyMeasure.getGrantingAuthority().getGrantingAuthorityName();
+        this.adhoc = ""+subsidyMeasure.isAdhoc();
+        this.gaSubsidyWebLink = subsidyMeasure.getGaSubsidyWebLink();
         this.lastModifiedDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getLastModifiedTimestamp());
     }
 

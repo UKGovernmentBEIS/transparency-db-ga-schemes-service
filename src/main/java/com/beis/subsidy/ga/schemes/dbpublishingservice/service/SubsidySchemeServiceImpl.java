@@ -15,6 +15,7 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SchemeSpecificationU
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SearchUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.formula.functions.Days360;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,8 +24,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import java.time.temporal.ChronoUnit;
 
+import java.math.BigInteger;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -39,7 +43,8 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
     @Override
     public SearchSubsidyResultsResponse findMatchingSubsidySchemeDetails(SchemeSearchInput searchInput) {
         Specification<SubsidyMeasure> schemeSpecifications = getSpecificationSchemeDetails(searchInput);
-
+        Specification<SubsidyMeasure> schemeSpecificationsWithout = getSpecificationSchemeDetailsWithoutStatus(searchInput);
+        List<SubsidyMeasure> totalSchemeList = new ArrayList<>();
         List<Sort.Order> orders = getOrderByCondition(searchInput.getSortBy());
 
         Pageable pagingSortSchemes = PageRequest.of(searchInput.getPageNumber() - 1, searchInput.getTotalRecordsPerPage(), Sort.by(orders));
@@ -48,19 +53,27 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
         List<SubsidyMeasure> schemeResults = pageAwards.getContent();
 
+        if(!StringUtils.isEmpty(searchInput.getSearchName())){
+            totalSchemeList = subsidyMeasureRepository.findAll(schemeSpecificationsWithout);
+        } else {
+            totalSchemeList = subsidyMeasureRepository.findAll();
+        }
         SearchSubsidyResultsResponse searchResults = null;
 
         if (!schemeResults.isEmpty()) {
             searchResults = new SearchSubsidyResultsResponse(schemeResults, pageAwards.getTotalElements(),
-                    pageAwards.getNumber() + 1, pageAwards.getTotalPages(), schemeCounts(schemeResults));
+                    pageAwards.getNumber() + 1, pageAwards.getTotalPages(), schemeCounts(totalSchemeList));
         } else {
             searchResults = new SearchSubsidyResultsResponse(schemeCounts(schemeResults));
         }
         return searchResults;
     }
-
+    public BigInteger getDuration(LocalDate startDate, LocalDate endDate){
+        long noOfDaysBetween = ChronoUnit.DAYS.between(startDate, endDate);
+        return BigInteger.valueOf(noOfDaysBetween);
+    }
     @Override
-    public ResponseEntity<Object> addSubsidySchemeDetails(SchemeDetailsRequest scheme) {
+    public String addSubsidySchemeDetails(SchemeDetailsRequest scheme) {
         SubsidyMeasure schemeToSave = new SubsidyMeasure();
         LegalBasis legalBasis = new LegalBasis();
         if(!StringUtils.isEmpty(scheme.getSubsidyMeasureTitle())){
@@ -75,8 +88,8 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
        /* if(!StringUtils.isEmpty(scheme.getCreatedBy())){
             schemeToSave.setCreatedBy(scheme.getCreatedBy());
         }*/
-        if(scheme.getDuration() != null){
-            schemeToSave.setDuration(scheme.getDuration());
+        if(scheme.getStartDate() != null && scheme.getEndDate() != null){
+            schemeToSave.setDuration(getDuration(scheme.getStartDate(), scheme.getEndDate()));
         }
         if(scheme.getStartDate() != null){
             schemeToSave.setStartDate(scheme.getStartDate());
@@ -97,9 +110,8 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
             Long gaId = gaRepository.findByGrantingAuthorityName(scheme.getGaName()).getGaId();
             schemeToSave.setGaId(gaId);
         }
-        if(scheme.getPublishedMeasureDate() != null){
-            schemeToSave.setPublishedMeasureDate(scheme.getPublishedMeasureDate());
-        }
+        schemeToSave.setPublishedMeasureDate(LocalDate.now());
+
         if(!StringUtils.isEmpty(scheme.getLegalBasisText())){
             legalBasis.setLegalBasisText(scheme.getLegalBasisText());
         }
@@ -112,7 +124,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
         SubsidyMeasure savedScheme = subsidyMeasureRepository.save(schemeToSave);
         log.info("Scheme saved successfully with Id : "+savedScheme.getScNumber());
-        return ResponseEntity.status(200).build();
+        return savedScheme.getScNumber();
     }
 
     @Override
@@ -191,7 +203,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
     }
 
     public Specification<SubsidyMeasure>  getSpecificationSchemeDetails(SchemeSearchInput searchInput) {
-        String searchName = getSearchName(searchInput);
+        String searchName = searchInput.getSearchName();
         Specification<SubsidyMeasure> schemeSpecifications = Specification
                 .where(
                         SearchUtils.checkNullOrEmptyString(searchName)
@@ -205,18 +217,18 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
                         ? null : SchemeSpecificationUtils.schemeByStatus(searchInput.getStatus().trim()));
         return schemeSpecifications;
     }
-    private String getSearchName(SchemeSearchInput searchInput){
-        String searchName = "";
-        if(searchInput.getSubsidySchemeName() != null && !searchInput.getSubsidySchemeName().isEmpty()){
-            searchName = searchInput.getSubsidySchemeName();
-        }
-        if(searchInput.getScNumber() != null && !searchInput.getScNumber().isEmpty()){
-            searchName = searchInput.getScNumber();
-        }
-        if(searchInput.getGaName() != null && !searchInput.getGaName().isEmpty()){
-            searchName = searchInput.getGaName();
-        }
-        return searchName;
+    public Specification<SubsidyMeasure>  getSpecificationSchemeDetailsWithoutStatus(SchemeSearchInput searchInput) {
+        String searchName = searchInput.getSearchName();
+        Specification<SubsidyMeasure> schemeSpecifications = Specification
+                .where(
+                        SearchUtils.checkNullOrEmptyString(searchName)
+                                ? null : SchemeSpecificationUtils.subsidySchemeName(searchName.trim())
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                        ? null : SchemeSpecificationUtils.subsidyNumber(searchName.trim()))
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                        ? null :SchemeSpecificationUtils.grantingAuthorityName(searchName.trim()))
+                );
+        return schemeSpecifications;
     }
     private List<Sort.Order> getOrderByCondition(String[] sortBy) {
         List<Sort.Order> orders = new ArrayList<Sort.Order>();

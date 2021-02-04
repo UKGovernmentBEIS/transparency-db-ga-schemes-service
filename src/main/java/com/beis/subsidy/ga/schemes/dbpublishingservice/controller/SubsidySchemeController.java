@@ -43,7 +43,7 @@ public class SubsidySchemeController {
     @PostMapping(
             value = "/add"
     )
-    public ResponseEntity<Object> addSchemeDetails(@Valid @RequestBody SchemeDetailsRequest scheme) {
+    public String addSchemeDetails(@Valid @RequestBody SchemeDetailsRequest scheme) {
         return subsidySchemeService.addSubsidySchemeDetails(scheme);
     }
 
