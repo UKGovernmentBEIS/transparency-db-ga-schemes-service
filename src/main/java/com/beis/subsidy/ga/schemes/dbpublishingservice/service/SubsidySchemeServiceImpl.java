@@ -150,8 +150,8 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getCreatedBy())){
             schemeById.setCreatedBy(scheme.getCreatedBy());
         }
-        if(scheme.getDuration() != null){
-            schemeById.setDuration(scheme.getDuration());
+        if(scheme.getStartDate() != null && scheme.getEndDate() != null){
+            schemeById.setDuration(getDuration(scheme.getStartDate(), scheme.getEndDate()));
         }
         if(scheme.getStartDate() != null){
             schemeById.setStartDate(scheme.getStartDate());
