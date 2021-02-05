@@ -40,6 +40,9 @@ public class SubsidyMeasureResponse {
     private String gaSubsidyWebLink;
 
     @JsonProperty
+    private String gaSubsidyWebLinkDescription;
+
+    @JsonProperty
     private String lastModifiedDate;
 
     @JsonProperty
@@ -55,6 +58,7 @@ public class SubsidyMeasureResponse {
         this.gaName = subsidyMeasure.getGrantingAuthority().getGrantingAuthorityName();
         this.adhoc = ""+subsidyMeasure.isAdhoc();
         this.gaSubsidyWebLink = subsidyMeasure.getGaSubsidyWebLink();
+        this.gaSubsidyWebLinkDescription = subsidyMeasure.getGaSubsidyWebLinkDescription();
         this.legalBasisText = subsidyMeasure.getLegalBases().getLegalBasisText();
         this.lastModifiedDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getLastModifiedTimestamp());
     }

@@ -24,6 +24,7 @@ public class SchemeDetailsRequest {
     private String budget;
     private boolean adhoc;
     private String gaSubsidyWebLink;
+    private String gaSubsidyWebLinkDescription;
     private LocalDate publishedMeasureDate;
     private String createdBy;
     private String approvedBy;

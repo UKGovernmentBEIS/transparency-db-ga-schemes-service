@@ -81,15 +81,11 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getSubsidyMeasureTitle())){
             schemeToSave.setSubsidyMeasureTitle(scheme.getSubsidyMeasureTitle());
         }
-       /* if(!StringUtils.isEmpty(scheme.getApprovedBy())){
-            schemeToSave.setApprovedBy(scheme.getApprovedBy());
-        }*/
+        schemeToSave.setApprovedBy("SYSTEM");
+        schemeToSave.setCreatedBy("SYSTEM");
         if(!StringUtils.isEmpty(scheme.getBudget())){
             schemeToSave.setBudget(scheme.getBudget());
         }
-       /* if(!StringUtils.isEmpty(scheme.getCreatedBy())){
-            schemeToSave.setCreatedBy(scheme.getCreatedBy());
-        }*/
         if(scheme.getStartDate() != null && scheme.getEndDate() != null){
             schemeToSave.setDuration(getDuration(scheme.getStartDate(), scheme.getEndDate()));
         }
@@ -101,6 +97,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         }
         if(!StringUtils.isEmpty(scheme.getGaSubsidyWebLink())){
             schemeToSave.setGaSubsidyWebLink(scheme.getGaSubsidyWebLink());
+        }
+        if(!StringUtils.isEmpty(scheme.getGaSubsidyWebLinkDescription())){
+            schemeToSave.setGaSubsidyWebLinkDescription(scheme.getGaSubsidyWebLinkDescription());
         }
         if(scheme.isAdhoc() || !scheme.isAdhoc()){
             schemeToSave.setAdhoc(scheme.isAdhoc());
@@ -120,6 +119,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         schemeToSave.setLastModifiedTimestamp(LocalDate.now());
 
         legalBasis.setLastModifiedTimestamp(new Date());
+        legalBasis.setStatus("Active");
+        legalBasis.setCreatedBy("SYSTEM");
+        legalBasis.setApprovedBy("SYSTEM");
         legalBasis.setCreatedTimestamp(new Date());
         schemeToSave.setLegalBases(legalBasis);
         legalBasis.setSubsidyMeasure(schemeToSave);
@@ -160,6 +162,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getGaSubsidyWebLink())){
             schemeById.setGaSubsidyWebLink(scheme.getGaSubsidyWebLink());
         }
+        if(!StringUtils.isEmpty(scheme.getGaSubsidyWebLinkDescription())){
+            schemeById.setGaSubsidyWebLinkDescription(scheme.getGaSubsidyWebLinkDescription());
+        }
         if(scheme.isAdhoc() || !scheme.isAdhoc()){
             schemeById.setAdhoc(scheme.isAdhoc());
         }
@@ -173,7 +178,6 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
         legalBasis.setLastModifiedTimestamp(new Date());
         legalBasis.setCreatedTimestamp(new Date());
-        //legalBasis.setStatus("Draft");
         schemeById.setLegalBases(legalBasis);
         legalBasis.setSubsidyMeasure(schemeById);
 

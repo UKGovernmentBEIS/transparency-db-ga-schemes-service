@@ -89,6 +89,9 @@ public class SubsidyMeasure {
 	@Column(name = "STATUS")
 	private String status;
 
+	@Column(name = "GA_SUBSIDY_WEBLINK_DESCRIPTION")
+	private String gaSubsidyWebLinkDescription;
+
 	@CreationTimestamp
 	@Column(name = "CREATED_TIMESTAMP")
 	private LocalDate createdTimestamp;
