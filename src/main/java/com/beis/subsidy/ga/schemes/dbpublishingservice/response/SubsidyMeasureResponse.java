@@ -42,6 +42,9 @@ public class SubsidyMeasureResponse {
     @JsonProperty
     private String lastModifiedDate;
 
+    @JsonProperty
+    private String legalBasisText;
+
     public SubsidyMeasureResponse(SubsidyMeasure subsidyMeasure) {
         this.scNumber = subsidyMeasure.getScNumber();
         this.subsidyMeasureTitle  = subsidyMeasure.getSubsidyMeasureTitle();
@@ -52,6 +55,7 @@ public class SubsidyMeasureResponse {
         this.gaName = subsidyMeasure.getGrantingAuthority().getGrantingAuthorityName();
         this.adhoc = ""+subsidyMeasure.isAdhoc();
         this.gaSubsidyWebLink = subsidyMeasure.getGaSubsidyWebLink();
+        this.legalBasisText = subsidyMeasure.getLegalBases().getLegalBasisText();
         this.lastModifiedDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getLastModifiedTimestamp());
     }
 
