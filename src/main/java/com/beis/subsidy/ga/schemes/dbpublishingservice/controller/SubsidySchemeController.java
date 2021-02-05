@@ -56,7 +56,7 @@ public class SubsidySchemeController {
     @PostMapping(
             value = "/update"
     )
-    public ResponseEntity<Object> updateSchemeDetails(@Valid @RequestBody SchemeDetailsRequest scheme) {
+    public String updateSchemeDetails(@Valid @RequestBody SchemeDetailsRequest scheme) {
         return subsidySchemeService.updateSubsidySchemeDetails(scheme);
     }
     @GetMapping(

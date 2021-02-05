@@ -132,7 +132,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
     }
 
     @Override
-    public ResponseEntity<Object> updateSubsidySchemeDetails(SchemeDetailsRequest scheme) {
+    public String updateSubsidySchemeDetails(SchemeDetailsRequest scheme) {
         SubsidyMeasure schemeById = subsidyMeasureRepository.findById(scheme.getScNumber()).get();
         LegalBasis legalBasis = schemeById.getLegalBases();
         if (Objects.isNull(schemeById)) {
@@ -181,8 +181,8 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         schemeById.setLegalBases(legalBasis);
         legalBasis.setSubsidyMeasure(schemeById);
 
-        subsidyMeasureRepository.save(schemeById);
-        return ResponseEntity.status(200).build();
+        SubsidyMeasure updatedScheme = subsidyMeasureRepository.save(schemeById);
+        return updatedScheme.getScNumber();
     }
 
     @Override

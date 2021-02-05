@@ -13,7 +13,7 @@ public interface SubsidySchemeService {
 
     String addSubsidySchemeDetails(SchemeDetailsRequest scheme);
 
-    ResponseEntity<Object> updateSubsidySchemeDetails(SchemeDetailsRequest scheme);
+    String updateSubsidySchemeDetails(SchemeDetailsRequest scheme);
 
     SubsidyMeasureResponse findSubsidySchemeById(String scNumber);
 }
