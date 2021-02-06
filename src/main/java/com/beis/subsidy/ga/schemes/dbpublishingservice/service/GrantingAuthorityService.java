@@ -52,12 +52,12 @@ public class GrantingAuthorityService {
 	}
 
 	@Transactional
-	public GrantingAuthority updateGrantingAuthority(GrantingAuthorityRequest grantingAuthorityRequest) {
+	public GrantingAuthority updateGrantingAuthority(GrantingAuthorityRequest grantingAuthorityRequest,Long gaNumber) {
 		try {
 			log.info("inside createGrantingAuthority ");
 
 			GrantingAuthority grantingAuthority = new GrantingAuthority(
-					Long.valueOf(grantingAuthorityRequest.getGaNumber()), grantingAuthorityRequest.getName(), "SYSTEM",
+					gaNumber, grantingAuthorityRequest.getName(), "SYSTEM",
 					"SYSTEM", "Active", LocalDate.now(), LocalDate.now());
 
 			GrantingAuthority savedAwards = gaRepository.save(grantingAuthority);
@@ -73,12 +73,12 @@ public class GrantingAuthorityService {
 
 	
 	@Transactional
-	public GrantingAuthority deActivateGrantingAuthority(GrantingAuthorityRequest grantingAuthorityRequest) {
+	public GrantingAuthority deActivateGrantingAuthority(GrantingAuthorityRequest grantingAuthorityRequest,Long gaNumber) {
 		try {
 			log.info("inside createGrantingAuthority ");
 
 			GrantingAuthority grantingAuthority = new GrantingAuthority(
-					Long.valueOf(grantingAuthorityRequest.getGaNumber()), grantingAuthorityRequest.getName(), "SYSTEM",
+					gaNumber, grantingAuthorityRequest.getName(), "SYSTEM",
 					"SYSTEM", "Inactive", LocalDate.now(), LocalDate.now());
 
 			GrantingAuthority savedAwards = gaRepository.save(grantingAuthority);

@@ -5,9 +5,8 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -70,8 +69,11 @@ public class GrantingAuthorityController {
 	 *            - Input as SearchInput object from front end
 	 * @return ResponseEntity - Return response status and description
 	 */
-	@PutMapping("grantingAuthority")
-	public ResponseEntity<ValidationResult> updateGrantingAuthority(@Valid @RequestBody GrantingAuthorityRequest gaInputRequest) {
+	@PutMapping(
+			value="grantingAuthority/{gaNumber}"
+		
+			)
+	public ResponseEntity<ValidationResult> updateGrantingAuthority(@Valid @RequestBody GrantingAuthorityRequest gaInputRequest,@PathVariable("gaNumber") Long gaNumber) {
 
 		try {
 			log.info("Beofre calling update award::::");
@@ -81,7 +83,7 @@ public class GrantingAuthorityController {
 			}
 			ValidationResult validationResult = new ValidationResult();
 			
-			GrantingAuthority grantingAuthority = grantingAuthorityService.updateGrantingAuthority(gaInputRequest);
+			GrantingAuthority grantingAuthority = grantingAuthorityService.updateGrantingAuthority(gaInputRequest,gaNumber);
 			
 			validationResult.setMessage(grantingAuthority.getGaId()+ " updated successfully");
 
@@ -104,8 +106,10 @@ public class GrantingAuthorityController {
 	 *            - Input as SearchInput object from front end
 	 * @return ResponseEntity - Return response status and description
 	 */
-	@DeleteMapping("grantingAuthority")
-	public ResponseEntity<ValidationResult> deActivateGrantingAuthority(@Valid @RequestBody GrantingAuthorityRequest gaInputRequest) {
+	@DeleteMapping(
+			value="grantingAuthority/{gaNumber}"
+			)
+	public ResponseEntity<ValidationResult> deActivateGrantingAuthority(@Valid @RequestBody GrantingAuthorityRequest gaInputRequest,@PathVariable("gaNumber") Long gaNumber) {
 
 		try {
 			log.info("Beofre calling update award::::");
@@ -115,7 +119,7 @@ public class GrantingAuthorityController {
 			}
 			ValidationResult validationResult = new ValidationResult();
 			
-			GrantingAuthority grantingAuthority = grantingAuthorityService.deActivateGrantingAuthority(gaInputRequest);
+			GrantingAuthority grantingAuthority = grantingAuthorityService.deActivateGrantingAuthority(gaInputRequest,gaNumber);
 			
 			validationResult.setMessage(grantingAuthority.getGaId()+ " updated as Inactive successfully");
 
@@ -137,7 +141,7 @@ public class GrantingAuthorityController {
 	 * @return ResponseEntity - Return response status and description
 	 */
 	
-	@PutMapping("searchGrantingAuthority")
+	@PostMapping("searchGrantingAuthority")
 	public ResponseEntity<SearchResults> findSearchResults(@Valid @RequestBody SearchInput searchInput) {
 
 			//Set Default Page records

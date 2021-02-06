@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class GrantingAuthorityRequest {
 
-	private String gaNumber;
 	private String name;
 
 }
