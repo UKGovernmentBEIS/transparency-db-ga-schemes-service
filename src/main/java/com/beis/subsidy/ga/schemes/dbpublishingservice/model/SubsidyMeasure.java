@@ -28,11 +28,6 @@ import java.time.LocalDate;
 @Getter
 public class SubsidyMeasure {
 
-	//@GeneratedValue(generator = "system-uuid")
-	//@GenericGenerator(name="system-uuid", strategy = "uuid")
-	//@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "subsidy_control_read_seq")
-	//@SequenceGenerator(name = "subsidy_control_read_seq", sequenceName = "subsidy_control_read_seq",
-	//		allocationSize = 1)
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "subsidy_control_read_seq")
 	@GenericGenerator(
@@ -41,7 +36,7 @@ public class SubsidyMeasure {
 			parameters = {
 					@Parameter(name = SequenceGenerator.INCREMENT_PARAM, value = "1"),
 					@Parameter(name = SequenceGenerator.VALUE_PREFIX_PARAMETER, value = "SC"),
-					@Parameter(name = SequenceGenerator.NUMBER_FORMAT_PARAMETER, value = "%06d")})
+					@Parameter(name = SequenceGenerator.NUMBER_FORMAT_PARAMETER, value = "%05d")})
 	@Column(name="SC_NUMBER")
 	private String scNumber;
 
