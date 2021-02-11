@@ -44,6 +44,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
     @Override
     public SearchSubsidyResultsResponse findMatchingSubsidySchemeDetails(SchemeSearchInput searchInput) {
+        log.info("Inside findMatchingSubsidySchemeDetails searchName : "+searchInput.getSearchName());
         Specification<SubsidyMeasure> schemeSpecifications = getSpecificationSchemeDetails(searchInput);
         Specification<SubsidyMeasure> schemeSpecificationsWithout = getSpecificationSchemeDetailsWithoutStatus(searchInput);
         List<SubsidyMeasure> totalSchemeList = new ArrayList<>();
@@ -76,6 +77,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
     }
     @Override
     public String addSubsidySchemeDetails(SchemeDetailsRequest scheme) {
+        log.info("Inside addSubsidySchemeDetails method :");
         SubsidyMeasure schemeToSave = new SubsidyMeasure();
         LegalBasis legalBasis = new LegalBasis();
         if(!StringUtils.isEmpty(scheme.getSubsidyMeasureTitle())){
@@ -88,11 +90,15 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         }
         if(scheme.getStartDate() != null && scheme.getEndDate() != null){
             schemeToSave.setDuration(getDuration(scheme.getStartDate(), scheme.getEndDate()));
+        } else if(scheme.getStartDate() != null && scheme.isAdhoc()) {
+            schemeToSave.setDuration(BigInteger.ONE);
         }
         if(scheme.getStartDate() != null){
             schemeToSave.setStartDate(scheme.getStartDate());
         }
-        if(scheme.getEndDate() != null){
+        if(scheme.isAdhoc()){
+            schemeToSave.setEndDate(scheme.getStartDate());
+        } else if(scheme.getEndDate() != null){
             schemeToSave.setEndDate(scheme.getEndDate());
         }
         if(!StringUtils.isEmpty(scheme.getGaSubsidyWebLink())){
@@ -127,12 +133,13 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         legalBasis.setSubsidyMeasure(schemeToSave);
 
         SubsidyMeasure savedScheme = subsidyMeasureRepository.save(schemeToSave);
-        log.info("Scheme saved successfully with Id : "+savedScheme.getScNumber());
+        log.info("Scheme added successfully with Id : "+savedScheme.getScNumber());
         return savedScheme.getScNumber();
     }
 
     @Override
     public String updateSubsidySchemeDetails(SchemeDetailsRequest scheme) {
+        log.info("Inside updateSubsidySchemeDetails method - sc number "+scheme.getScNumber());
         SubsidyMeasure schemeById = subsidyMeasureRepository.findById(scheme.getScNumber()).get();
         LegalBasis legalBasis = schemeById.getLegalBases();
         if (Objects.isNull(schemeById)) {
@@ -152,11 +159,15 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         }
         if(scheme.getStartDate() != null && scheme.getEndDate() != null){
             schemeById.setDuration(getDuration(scheme.getStartDate(), scheme.getEndDate()));
+        } else if(scheme.getStartDate() != null && scheme.isAdhoc()) {
+            schemeById.setDuration(BigInteger.ONE);
         }
         if(scheme.getStartDate() != null){
             schemeById.setStartDate(scheme.getStartDate());
         }
-        if(scheme.getEndDate() != null){
+        if(scheme.isAdhoc()){
+            schemeById.setEndDate(scheme.getStartDate());
+        } else if(scheme.getEndDate() != null){
             schemeById.setEndDate(scheme.getEndDate());
         }
         if(!StringUtils.isEmpty(scheme.getGaSubsidyWebLink())){
@@ -182,6 +193,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         legalBasis.setSubsidyMeasure(schemeById);
 
         SubsidyMeasure updatedScheme = subsidyMeasureRepository.save(schemeById);
+        log.info("Updated successfully : "+schemeById.getScNumber());
         return updatedScheme.getScNumber();
     }
 

@@ -12,7 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception{
-        http.cors().and().csrf().disable();
+        http.csrf().disable();
     }
     @Bean
     public WebMvcConfigurer corsConfigurer() {
