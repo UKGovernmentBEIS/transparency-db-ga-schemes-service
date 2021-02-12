@@ -18,6 +18,8 @@ public class SearchInput {
 	private String grantingAuthorityName;
 
 	private String grantingAuthorityID;
+	
+	private String status;
 
 	private int pageNumber;
 

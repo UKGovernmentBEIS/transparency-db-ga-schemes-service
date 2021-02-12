@@ -135,7 +135,7 @@ public class GrantingAuthorityService {
 
 		Specification<GrantingAuthority> gaSpecifications = null;
 
-		if (searchInput.getGrantingAuthorityID() != null || searchInput.getGrantingAuthorityName() != null) {
+		if (searchInput.getGrantingAuthorityID() != null || searchInput.getGrantingAuthorityName() != null || searchInput.getStatus()!=null) {
 			gaSpecifications = getSpecificationGADetails(searchInput);
 		}
 
@@ -236,7 +236,13 @@ public class GrantingAuthorityService {
 				// getGrantingAuthorityName from input parameter
 				.and(searchinput.getGrantingAuthorityName() == null || searchinput.getGrantingAuthorityName().isEmpty()
 						? null
-						: GrantingAuthSpecificationUtils.grantingAuthorityName(searchinput.getGrantingAuthorityName()));
+						: GrantingAuthSpecificationUtils.grantingAuthorityName(searchinput.getGrantingAuthorityName()))
+						
+						.and(searchinput.getStatus() == null || searchinput.getStatus().isEmpty()
+						? null
+						: GrantingAuthSpecificationUtils.status(searchinput.getStatus()));		
+						
+					
 
 		return awardSpecifications;
 	}

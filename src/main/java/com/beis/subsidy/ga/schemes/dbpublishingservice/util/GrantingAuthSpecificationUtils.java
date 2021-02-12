@@ -45,7 +45,7 @@ public final class GrantingAuthSpecificationUtils {
 	 * @return Specification<Award> - Specification for Granting Authority
 	 */
 	public static Specification<GrantingAuthority> status(String status) {
-		return (root, query, builder) -> builder.like(root.get("status"), status);
+		return (root, query, builder) -> builder.equal(root.get("status"), status);
 	}
 
 	/**
@@ -58,5 +58,7 @@ public final class GrantingAuthSpecificationUtils {
 	private static String contains(String expression) {
 		return MessageFormat.format("%{0}%", expression);
 	}
+	
+	
 
 }
