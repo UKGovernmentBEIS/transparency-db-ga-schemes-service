@@ -20,8 +20,10 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.AccessTokenExce
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.InvalidRequestException;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthorityRequest;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.UsersGroupRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SearchInput;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchResults;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.UserDetailsResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.ValidationResult;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.AccessTokenResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.GrantingAuthorityService;
@@ -96,8 +98,8 @@ public class GrantingAuthorityController {
 				throw new Exception("gaInputRequest is empty");
 			}
 			ValidationResult validationResult = new ValidationResult();
-			
-			GrantingAuthority grantingAuthority = grantingAuthorityService.updateGrantingAuthority(gaInputRequest,gaNumber);
+			String accessToken=getBearerToken();
+			GrantingAuthority grantingAuthority = grantingAuthorityService.updateGrantingAuthority(gaInputRequest,gaNumber,accessToken);
 			
 			validationResult.setMessage(grantingAuthority.getGaId()+ " updated successfully");
 
@@ -123,27 +125,26 @@ public class GrantingAuthorityController {
 	@DeleteMapping(
 			value="grantingAuthority/{gaNumber}"
 			)
-	public ResponseEntity<ValidationResult> deActivateGrantingAuthority(@Valid @RequestBody GrantingAuthorityRequest gaInputRequest,@PathVariable("gaNumber") Long gaNumber) {
+	public ResponseEntity<UserDetailsResponse> deActivateGrantingAuthority(@Valid @RequestBody GrantingAuthorityRequest gaInputRequest,@PathVariable("gaNumber") Long gaNumber) {
 
 		try {
-			log.info("Beofre calling update award::::");
+			log.info("Beofre calling deActivateGrantingAuthority::::");
 			// TODO - check if we can result list of errors here it self
 			if(gaInputRequest==null) {
 				throw new Exception("gaInputRequest is empty");
 			}
 			ValidationResult validationResult = new ValidationResult();
+			String accessToken=getBearerToken();
 			
-			GrantingAuthority grantingAuthority = grantingAuthorityService.deActivateGrantingAuthority(gaInputRequest,gaNumber);
+			UserDetailsResponse userDetailsResponse  = grantingAuthorityService.deActivateGrantingAuthority(gaInputRequest,gaNumber,accessToken);
 			
-			validationResult.setMessage(grantingAuthority.getGaId()+ " updated as Inactive successfully");
-
-			return ResponseEntity.status(HttpStatus.OK).body(validationResult);
+			return new ResponseEntity<UserDetailsResponse>(userDetailsResponse, HttpStatus.OK);
 		} catch (Exception e) {
 
 			// 2.0 - CatchException and return validation errors
 			ValidationResult validationResult = new ValidationResult();
 
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(validationResult);
+			return new ResponseEntity<UserDetailsResponse>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 	}
@@ -175,7 +176,7 @@ public class GrantingAuthorityController {
 
 		log.info("inside getBearerToken method::{}", environment);
 
-        log.info("graph api scope::{}", environment.getProperty("graph-api-scope"));
+		log.info("graph api scope::{}", environment.getProperty("graph-api-scope"));
 		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 
 		map.add("grant_type", "client_credentials");
@@ -184,15 +185,52 @@ public class GrantingAuthorityController {
 		map.add("scope", environment.getProperty("graph-api-scope"));
 
 		AccessTokenResponse openIdTokenResponse = graphAPILoginFeignClient
-                .getAccessIdToken(environment.getProperty("tenant-id"),map);
-		
+				.getAccessIdToken(environment.getProperty("tenant-id"), map);
 
 		if (openIdTokenResponse == null) {
 			throw new AccessTokenException(HttpStatus.valueOf(500),
 					"Graph Api Service Failed while bearer token generate");
 		}
-		log.warn(" after access token ");
+
+		log.warn(" after access token " + openIdTokenResponse.getAccessToken());
 		return openIdTokenResponse.getAccessToken();
+	}
+	
+	/**
+	 * get the Granting AUthority as input from UI and update the same in DBand  return Validation results based on input.
+	 * 
+	 * @param searchInput
+	 *            - Input as SearchInput object from front end
+	 * @return ResponseEntity - Return response status and description
+	 */
+	@DeleteMapping(
+			value="usersGroup/{gaNumber}"
+			)
+	public ResponseEntity<ValidationResult> deleteUsersGroup(@Valid @RequestBody UsersGroupRequest usersGroupRequest,@PathVariable("gaNumber") Long gaNumber) {
+
+		try {
+			log.info("Beofre calling delete UsersGroup::::");
+			// TODO - check if we can result list of errors here it self
+			if(usersGroupRequest==null) {
+				throw new Exception("usersGroupRequest is empty");
+			}
+			ValidationResult validationResult = new ValidationResult();
+			
+			String accessToken=getBearerToken();
+			
+			GrantingAuthority grantingAuthority = grantingAuthorityService.deleteUser(accessToken, usersGroupRequest,gaNumber);
+			
+			validationResult.setMessage(grantingAuthority.getGaId()+ " deActivated  successfully");
+
+			return ResponseEntity.status(HttpStatus.OK).body(validationResult);
+		} catch (Exception e) {
+
+			// 2.0 - CatchException and return validation errors
+			ValidationResult validationResult = new ValidationResult();
+
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(validationResult);
+		}
+
 	}
 
 }

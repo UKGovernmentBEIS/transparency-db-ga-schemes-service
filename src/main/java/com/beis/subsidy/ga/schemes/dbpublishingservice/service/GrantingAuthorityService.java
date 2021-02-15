@@ -30,12 +30,14 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.InvalidRequestE
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.SearchResultNotFoundException;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthorityRequest;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.UsersGroupRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.GrantingAuthorityRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.AddGroupRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SearchInput;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.GrantingAuthorityResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.GroupResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchResults;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.UserDetailsResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.GrantingAuthSpecificationUtils;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -85,10 +87,11 @@ public class GrantingAuthorityService {
 	}
 
 	@Transactional
-	public GrantingAuthority updateGrantingAuthority(GrantingAuthorityRequest grantingAuthorityRequest, Long gaNumber) {
+	public GrantingAuthority updateGrantingAuthority(GrantingAuthorityRequest grantingAuthorityRequest, Long gaNumber,String accessToken) {
 		try {
 			log.info("inside createGrantingAuthority ");
 
+			//GroupResponse response = addGroup(accessToken, request);
 			GrantingAuthority grantingAuthority = new GrantingAuthority(gaNumber, grantingAuthorityRequest.getName(),
 					"SYSTEM", "SYSTEM", "Active", null, LocalDate.now(), LocalDate.now());
 
@@ -104,18 +107,20 @@ public class GrantingAuthorityService {
 	}
 
 	@Transactional
-	public GrantingAuthority deActivateGrantingAuthority(GrantingAuthorityRequest grantingAuthorityRequest,
-			Long gaNumber) {
+	public UserDetailsResponse deActivateGrantingAuthority(GrantingAuthorityRequest grantingAuthorityRequest,
+			Long gaNumber,String accessToken) {
 		try {
-			log.info("inside createGrantingAuthority ");
-
-			GrantingAuthority grantingAuthority = new GrantingAuthority(gaNumber, grantingAuthorityRequest.getName(),
-					"SYSTEM", "SYSTEM", "Inactive", null, LocalDate.now(), LocalDate.now());
-
-			GrantingAuthority savedAwards = gaRepository.save(grantingAuthority);
+			log.info("inside deActivateGrantingAuthority ");
+			UserDetailsResponse userDetailsResponse=null;
+			GrantingAuthority		grantingAuthorityById =gaRepository.findBygaId(gaNumber);
+			if(grantingAuthorityById!=null) {
+			 userDetailsResponse= getUserRolesByGrpId(accessToken,grantingAuthorityById.getAzureGroupId());
+			}
+			
+		
 			log.info("End createGrantingAuthority ");
 
-			return savedAwards;
+			return userDetailsResponse;
 
 		} catch (Exception serviceException) {
 			log.info("serviceException occured::" + serviceException.getMessage());
@@ -317,4 +322,115 @@ public class GrantingAuthorityService {
 		}
 	}
 
+	/**
+	 * 
+	 * @param token
+	 * @param request
+	 * @return
+	 */
+	public GroupResponse deleteGroup(String token, String groupId) {
+		Response response = null;
+
+		GroupResponse groupResponse;
+		Object clazz;
+		try {
+			long time1 = System.currentTimeMillis();
+			response = graphAPIFeignClient.deleteGroup("Bearer " + token, groupId);
+			log.info("{}:: Time taken to call Graph Api is {}", loggingComponentName,
+					(System.currentTimeMillis() - time1));
+			log.info("{}:: Graph Api status  {}", response.status());
+
+			if (response.status() == 204) {
+				clazz = GroupResponse.class;
+				ResponseEntity<Object> responseResponseEntity = toResponseEntity(response, clazz);
+				groupResponse = (GroupResponse) responseResponseEntity.getBody();
+				
+			} else if (response.status() == 400) {
+				throw new InvalidRequestException("create user request is invalid");
+			} else {
+				log.error("{}:: Graph Api failed:: status code {}", loggingComponentName, 500);
+				throw new AccessManagementException(HttpStatus.valueOf(500), "Create User Graph Api Failed");
+			}
+
+		} catch (FeignException ex) {
+			log.error("{}:: Graph Api failed:: status code {} & message {}", loggingComponentName, ex.status(),
+					ex.getMessage());
+			throw new AccessManagementException(HttpStatus.valueOf(ex.status()), "Delete group Graph Api failed");
+		}
+		return groupResponse;
+	}	
+	
+
+	public GrantingAuthority deleteUser(String token, UsersGroupRequest usersGroupRequest,long gaNumber) {
+		Response response = null;
+		int status = 0;
+		try {
+			List<String> userIds=usersGroupRequest.getUserId();
+			long time1 = System.currentTimeMillis();
+			for (String userId : userIds) {
+				response = graphAPIFeignClient.deleteUser("Bearer " + token, userId);
+			}
+			GrantingAuthority		grantingAuthorityById =gaRepository.findBygaId(gaNumber);
+			deleteGroup("Bearer " + token, grantingAuthorityById.getAzureGroupId());
+			log.info("{}:: Time taken to call Graph Api deleteUser is {}", loggingComponentName,
+					(System.currentTimeMillis() - time1));
+
+			if (response.status() == 204) {
+				status = response.status();
+			} else {
+				throw new AccessManagementException(HttpStatus.valueOf(response.status()),
+						"unable to delete the user profile");
+			}
+			
+			
+			GrantingAuthority grantingAuthority = new GrantingAuthority(gaNumber, usersGroupRequest.getName(),
+					"SYSTEM", "SYSTEM", "Inactive", null, LocalDate.now(), LocalDate.now());
+
+			GrantingAuthority savedAwards = gaRepository.save(grantingAuthority);
+			log.info("End createGrantingAuthority ");
+
+			return grantingAuthority;
+
+		} catch (FeignException ex) {
+			log.error("{}:: Graph Api failed:: status code {} & message {}", loggingComponentName, ex.status(),
+					ex.getMessage());
+			throw new AccessManagementException(HttpStatus.valueOf(ex.status()), "Delete User Graph Api failed");
+		}
+		
+	}
+	
+	 public UserDetailsResponse getUserRolesByGrpId(String token, String groupId) {
+	        // Graph API call.
+	        UserDetailsResponse userDetailsResponse = null;
+	        Response response = null;
+	        Object clazz;
+	        try {
+	            long time1 = System.currentTimeMillis();
+	            log.info("{}::before calling toGraph deActivateGrantingAuthority  Api is",loggingComponentName);
+	            response = graphAPIFeignClient.getUsersByGroupId("Bearer " + token,groupId);
+	            log.info("{}:: Time taken to call Graph Api is {}", loggingComponentName, (System.currentTimeMillis() - time1));
+
+	            if (response.status() == 200) {
+	                clazz = UserDetailsResponse.class;
+	                ResponseEntity<Object> responseResponseEntity =  toResponseEntity(response, clazz);
+	                userDetailsResponse
+	                        = (UserDetailsResponse) responseResponseEntity.getBody();
+	               
+
+	            } else if (response.status() == 404) {
+	                throw new SearchResultNotFoundException("Group Id not found");
+	            } else {
+	                log.error("get user details by groupId Graph Api is failed ::{}",response.status());
+	                throw new AccessManagementException(HttpStatus.valueOf(response.status()),
+	                        "Graph Api failed");
+	            }
+
+	        } catch (FeignException ex) {
+	            log.error("{}:: get  groupId Graph Api is failed:: status code {} & message {}",
+	                    loggingComponentName, ex.status(), ex.getMessage());
+	            throw new AccessManagementException(HttpStatus.valueOf(ex.status()), "Graph Api failed");
+	        }
+	        return userDetailsResponse;
+	    }
+	
 }

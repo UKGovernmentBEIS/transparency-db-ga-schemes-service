@@ -36,4 +36,15 @@ public interface GraphAPIFeignClient {
     @RequestLine("DELETE v1.0/groups")
     Response deleteGroup(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                         @PathVariable("id")  String groupId);
+    
+    @DeleteMapping(value = "v1.0/users/{userId}")
+    @RequestLine("DELETE v1.0/users")
+    Response deleteUser(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                        @PathVariable("userId")  String userId);
+   
+    @GetMapping(value = "/v1.0/groups/{groupId}/members")
+    @RequestLine("GET /v1.0/groups/{groupId}/members")
+    @Headers({"Authorization: {authorization}","Content-Type: application/json"})
+    Response getUsersByGroupId(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                               @PathVariable("groupId")  String groupId);
 }
