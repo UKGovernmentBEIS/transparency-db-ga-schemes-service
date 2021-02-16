@@ -68,8 +68,8 @@ public class GrantingAuthorityService {
 		
 			log.info("inside createGrantingAuthority ");
 
-			AddGroupRequest request = new AddGroupRequest(grantingAuthorityRequest.getName(),
-					grantingAuthorityRequest.getName(), false, grantingAuthorityRequest.getName(), true);
+			AddGroupRequest request = new AddGroupRequest(grantingAuthorityRequest.getAz_group_name(),
+					grantingAuthorityRequest.getAz_group_name(), false, grantingAuthorityRequest.getAz_group_name(), true);
 			GroupResponse response = addGroup(accessToken, request);
 			//
 			if(response==null || response.getId()==null) {
