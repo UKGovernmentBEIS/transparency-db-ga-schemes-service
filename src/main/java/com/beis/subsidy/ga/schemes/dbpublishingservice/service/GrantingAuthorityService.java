@@ -76,7 +76,7 @@ public class GrantingAuthorityService {
 				throw new AccessManagementException(HttpStatus.INTERNAL_SERVER_ERROR, "Create Group id is null");
 			}
 			GrantingAuthority grantingAuthority = new GrantingAuthority(null, grantingAuthorityRequest.getName(),
-					"SYSTEM", "SYSTEM", "Active", response.getId(), LocalDate.now(),
+					"SYSTEM", "SYSTEM", "Active", response.getId(),grantingAuthorityRequest.getAz_group_name(), LocalDate.now(),
 					LocalDate.now());
 
 			GrantingAuthority savedAwards = gaRepository.save(grantingAuthority);
@@ -93,7 +93,7 @@ public class GrantingAuthorityService {
 
 			//GroupResponse response = addGroup(accessToken, request);
 			GrantingAuthority grantingAuthority = new GrantingAuthority(gaNumber, grantingAuthorityRequest.getName(),
-					"SYSTEM", "SYSTEM", "Active", null, LocalDate.now(), LocalDate.now());
+					"SYSTEM", "SYSTEM", "Active", null, grantingAuthorityRequest.getAz_group_name(),LocalDate.now(), LocalDate.now());
 
 			GrantingAuthority savedAwards = gaRepository.save(grantingAuthority);
 			log.info("End createGrantingAuthority ");
@@ -384,7 +384,7 @@ public class GrantingAuthorityService {
 			
 			
 			GrantingAuthority grantingAuthority = new GrantingAuthority(gaNumber, usersGroupRequest.getName(),
-					"SYSTEM", "SYSTEM", "Inactive", null, LocalDate.now(), LocalDate.now());
+					"SYSTEM", "SYSTEM", "Inactive", null, grantingAuthorityById.getAzureGroupName(),LocalDate.now(), LocalDate.now());
 
 			GrantingAuthority savedAwards = gaRepository.save(grantingAuthority);
 			log.info("End createGrantingAuthority ");

@@ -47,6 +47,9 @@ public class GrantingAuthority {
 	@Column(name = "AZ_GROUP_ID")
 	private String azureGroupId;
 	
+	@Column(name = "AZ_GROUP_NAME")
+	private String azureGroupName;
+	
 	@CreationTimestamp
 	@Column(name = "CREATED_TIMESTAMP")
 	private LocalDate createdTimestamp;
