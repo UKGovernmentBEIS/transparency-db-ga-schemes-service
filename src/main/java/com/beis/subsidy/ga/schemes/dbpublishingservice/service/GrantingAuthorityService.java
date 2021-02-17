@@ -107,17 +107,12 @@ public class GrantingAuthorityService {
 	}
 
 	@Transactional
-	public UserDetailsResponse deActivateGrantingAuthority(GrantingAuthorityRequest grantingAuthorityRequest,
-			Long gaNumber,String accessToken) {
+	public UserDetailsResponse deActivateGrantingAuthority(String azGrpId,String accessToken) {
 		try {
 			log.info("inside deActivateGrantingAuthority ");
 			UserDetailsResponse userDetailsResponse=null;
-			GrantingAuthority		grantingAuthorityById =gaRepository.findBygaId(gaNumber);
-			if(grantingAuthorityById!=null) {
-			 userDetailsResponse= getUserRolesByGrpId(accessToken,grantingAuthorityById.getAzureGroupId());
-			}
-			
-		
+
+			userDetailsResponse= getUserDetailsByGrpId(accessToken,azGrpId);
 			log.info("End createGrantingAuthority ");
 
 			return userDetailsResponse;
@@ -304,7 +299,8 @@ public class GrantingAuthorityService {
 	public static MultiValueMap<String, String> convertHeaders(Map<String, Collection<String>> responseHeaders) {
 		MultiValueMap<String, String> responseEntityHeaders = new LinkedMultiValueMap<>();
 		responseHeaders.entrySet().stream().forEach(e -> {
-			if (!(e.getKey().equalsIgnoreCase("request-context") || e.getKey().equalsIgnoreCase("x-powered-by")
+			if (!(e.getKey().equalsIgnoreCase("request-context") ||
+					e.getKey().equalsIgnoreCase("x-powered-by")
 					|| e.getKey().equalsIgnoreCase("content-length"))) {
 				responseEntityHeaders.put(e.getKey(), new ArrayList<>(e.getValue()));
 			}
@@ -316,7 +312,8 @@ public class GrantingAuthorityService {
 	public static Optional<Object> decode(Response response, Object clazz) {
 		try {
 			return Optional
-					.of(json.readValue(response.body().asReader(Charset.defaultCharset()), (Class<Object>) clazz));
+					.of(json.readValue(response.body().asReader(Charset.defaultCharset()),
+							(Class<Object>) clazz));
 		} catch (IOException e) {
 			return Optional.empty();
 		}
@@ -325,81 +322,79 @@ public class GrantingAuthorityService {
 	/**
 	 * 
 	 * @param token
-	 * @param request
 	 * @return
 	 */
-	public GroupResponse deleteGroup(String token, String groupId) {
+	public int deleteGroup(String token, String groupId) {
 		Response response = null;
-
 		GroupResponse groupResponse;
 		Object clazz;
+		int status;
 		try {
-			long time1 = System.currentTimeMillis();
 			response = graphAPIFeignClient.deleteGroup("Bearer " + token, groupId);
-			log.info("{}:: Time taken to call Graph Api is {}", loggingComponentName,
-					(System.currentTimeMillis() - time1));
-			log.info("{}:: Graph Api status  {}", response.status());
+			log.info("{}:: Graph Api deleteGroup status  {}", loggingComponentName, response.status());
 
 			if (response.status() == 204) {
-				clazz = GroupResponse.class;
-				ResponseEntity<Object> responseResponseEntity = toResponseEntity(response, clazz);
-				groupResponse = (GroupResponse) responseResponseEntity.getBody();
+				status = 204;
 				
-			} else if (response.status() == 400) {
-				throw new InvalidRequestException("create user request is invalid");
 			} else {
-				log.error("{}:: Graph Api failed:: status code {}", loggingComponentName, 500);
-				throw new AccessManagementException(HttpStatus.valueOf(500), "Create User Graph Api Failed");
+				status = response.status();
+				log.info("{}:: Graph Api failed:: status code {}", loggingComponentName, response.status());
+
 			}
 
 		} catch (FeignException ex) {
-			log.error("{}:: Graph Api failed:: status code {} & message {}", loggingComponentName, ex.status(),
+			log.error("{}:: Delete Group Graph Api failed:: status code {} & message {}",
+					loggingComponentName, ex.status(),
 					ex.getMessage());
 			throw new AccessManagementException(HttpStatus.valueOf(ex.status()), "Delete group Graph Api failed");
 		}
-		return groupResponse;
+		return status;
 	}	
 	
 
-	public GrantingAuthority deleteUser(String token, UsersGroupRequest usersGroupRequest,long gaNumber) {
+	public GrantingAuthority deleteUser(String token, UsersGroupRequest usersGroupRequest,String azGrpId) {
 		Response response = null;
 		int status = 0;
+		boolean isInValid = false;
+		GrantingAuthority grantingAuthority = null;
 		try {
-			List<String> userIds=usersGroupRequest.getUserId();
+			List<String> userIds=usersGroupRequest.getUserIds();
 			long time1 = System.currentTimeMillis();
 			for (String userId : userIds) {
 				response = graphAPIFeignClient.deleteUser("Bearer " + token, userId);
+				if (response.status() != 204) {
+					isInValid = true;
+					break;
+				}
 			}
-			GrantingAuthority		grantingAuthorityById =gaRepository.findBygaId(gaNumber);
-			deleteGroup("Bearer " + token, grantingAuthorityById.getAzureGroupId());
-			log.info("{}:: Time taken to call Graph Api deleteUser is {}", loggingComponentName,
-					(System.currentTimeMillis() - time1));
 
-			if (response.status() == 204) {
-				status = response.status();
-			} else {
+			if (isInValid) {
 				throw new AccessManagementException(HttpStatus.valueOf(response.status()),
 						"unable to delete the user profile");
 			}
-			
-			
-			GrantingAuthority grantingAuthority = new GrantingAuthority(gaNumber, usersGroupRequest.getName(),
-					"SYSTEM", "SYSTEM", "Inactive", null, grantingAuthorityById.getAzureGroupName(),LocalDate.now(), LocalDate.now());
+			int groupResponse = deleteGroup( token, azGrpId);
+			if (groupResponse == 204) {
 
-			GrantingAuthority savedAwards = gaRepository.save(grantingAuthority);
-			log.info("End createGrantingAuthority ");
-
+				GrantingAuthority grantingAuthResp= gaRepository.findByAzureGroupId(azGrpId);
+				grantingAuthority = new GrantingAuthority(grantingAuthResp.getGaId(), grantingAuthResp.getGrantingAuthorityName(),
+						"SYSTEM", "SYSTEM", "Inactive", azGrpId,
+						grantingAuthResp.getAzureGroupName(),LocalDate.now(), LocalDate.now());
+				GrantingAuthority savedAwards = gaRepository.save(grantingAuthority);
+				log.info("{}:: GrantingAuthority saved successfully", loggingComponentName);
+			}
 			return grantingAuthority;
 
 		} catch (FeignException ex) {
-			log.error("{}:: Graph Api failed:: status code {} & message {}", loggingComponentName, ex.status(),
+			log.error("{}:: Graph Api failed:: status code {} & message {}",
+					loggingComponentName, ex.status(),
 					ex.getMessage());
-			throw new AccessManagementException(HttpStatus.valueOf(ex.status()), "Delete User Graph Api failed");
+			throw new AccessManagementException(HttpStatus.valueOf(ex.status()),
+					"Delete User Graph Api failed");
 		}
 		
 	}
 	
-	 public UserDetailsResponse getUserRolesByGrpId(String token, String groupId) {
+	 public UserDetailsResponse getUserDetailsByGrpId(String token, String groupId) {
 	        // Graph API call.
 	        UserDetailsResponse userDetailsResponse = null;
 	        Response response = null;
