@@ -1,5 +1,7 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.model;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,10 +9,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GrantingAuthorityRequest {
+public class UsersGroupRequest {
 
-	private String name;
+	private List<String> userId;
 	
-	private String az_group_name;
+	String name;
 
 }
