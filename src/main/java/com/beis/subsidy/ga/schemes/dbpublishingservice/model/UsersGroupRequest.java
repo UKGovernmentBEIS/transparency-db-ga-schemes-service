@@ -11,8 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UsersGroupRequest {
 
-	private List<String> userId;
-	
-	String name;
+	private List<String> userIds;
 
 }
