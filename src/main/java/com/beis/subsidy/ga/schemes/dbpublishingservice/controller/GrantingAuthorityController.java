@@ -44,6 +44,7 @@ public class GrantingAuthorityController {
 	    
 	    @Autowired
 	    Environment environment;
+	    
 	/**
 	 * To get Granting AUthority as input from UI and return Validation results based on input.
 	 * 
@@ -65,7 +66,7 @@ public class GrantingAuthorityController {
 			ValidationResult validationResult = new ValidationResult();
 			GrantingAuthority grantingAuthority = grantingAuthorityService.createGrantingAuthority(gaInputRequest,accessToken);
 			
-			validationResult.setMessage(grantingAuthority.getGaId()+ " created successfully");
+			validationResult.setMessage("created successfully : gaId: "+grantingAuthority.getGaId());
 
 			return ResponseEntity.status(HttpStatus.OK).body(validationResult);
 		} catch (Exception e) {
@@ -175,7 +176,7 @@ public class GrantingAuthorityController {
 	public String getBearerToken() throws AccessTokenException {
 
 		log.info("inside getBearerToken method::{}", environment);
-
+		
 		log.info("graph api scope::{}", environment.getProperty("graph-api-scope"));
 		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 
@@ -186,14 +187,18 @@ public class GrantingAuthorityController {
 
 		AccessTokenResponse openIdTokenResponse = graphAPILoginFeignClient
 				.getAccessIdToken(environment.getProperty("tenant-id"), map);
+		
+		//log.info("openIdTokenResponse  ::{}",openIdTokenResponse);
 
 		if (openIdTokenResponse == null) {
 			throw new AccessTokenException(HttpStatus.valueOf(500),
 					"Graph Api Service Failed while bearer token generate");
 		}
+		
 
 		log.warn(" after access token " + openIdTokenResponse.getAccessToken());
 		return openIdTokenResponse.getAccessToken();
+		
 	}
 	
 	/**
