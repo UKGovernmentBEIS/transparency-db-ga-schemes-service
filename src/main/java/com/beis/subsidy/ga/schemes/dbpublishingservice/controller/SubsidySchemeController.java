@@ -1,24 +1,32 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.controller;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.InvalidRequestException;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeDetailsRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeSearchInput;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchSubsidyResultsResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SubsidyMeasureResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.impl.SubsidySchemeService;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SearchUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-
-import java.util.Objects;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RequestMapping(path = "/scheme")
 @RestController
@@ -27,6 +35,8 @@ public class SubsidySchemeController {
 
     @Autowired
     private SubsidySchemeService subsidySchemeService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @GetMapping("/health")
     public ResponseEntity<String> getHealth() {
@@ -49,14 +59,19 @@ public class SubsidySchemeController {
     @PostMapping(
             value = "/add"
     )
-    public String addSchemeDetails(@Valid @RequestBody SchemeDetailsRequest scheme) {
+    public String addSchemeDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@Valid @RequestBody SchemeDetailsRequest scheme) {
+    	
+    	//check user role here
+    			SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"Add Subsidy Schema");
         return subsidySchemeService.addSubsidySchemeDetails(scheme);
     }
 
     @PostMapping(
             value = "/update"
     )
-    public String updateSchemeDetails(@Valid @RequestBody SchemeDetailsRequest scheme) {
+    public String updateSchemeDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@Valid @RequestBody SchemeDetailsRequest scheme) {
+    	//check user role here
+		SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"update Subsidy Schema");
         return subsidySchemeService.updateSubsidySchemeDetails(scheme);
     }
     @GetMapping(

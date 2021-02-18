@@ -68,15 +68,15 @@ public class GrantingAuthorityService {
 		
 			log.info("inside createGrantingAuthority ");
 
-			AddGroupRequest request = new AddGroupRequest(grantingAuthorityRequest.getAz_group_name(),
-					grantingAuthorityRequest.getAz_group_name(), false, grantingAuthorityRequest.getAz_group_name(), true);
+			AddGroupRequest request = new AddGroupRequest(grantingAuthorityRequest.getName(),
+					grantingAuthorityRequest.getName(), false, grantingAuthorityRequest.getName(), true);
 			GroupResponse response = addGroup(accessToken, request);
 			//
 			if(response==null || response.getId()==null) {
 				throw new AccessManagementException(HttpStatus.INTERNAL_SERVER_ERROR, "Create Group id is null");
 			}
 			GrantingAuthority grantingAuthority = new GrantingAuthority(null, grantingAuthorityRequest.getName(),
-					"SYSTEM", "SYSTEM", "Active", response.getId(),grantingAuthorityRequest.getAz_group_name(), LocalDate.now(),
+					"SYSTEM", "SYSTEM", "Active", response.getId(),grantingAuthorityRequest.getName(), LocalDate.now(),
 					LocalDate.now());
 
 			GrantingAuthority savedAwards = gaRepository.save(grantingAuthority);

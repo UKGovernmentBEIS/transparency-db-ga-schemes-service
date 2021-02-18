@@ -1,15 +1,25 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.controller;
 
+import java.util.Objects;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.beis.subsidy.ga.schemes.dbpublishingservice.controller.feign.GraphAPILoginFeignClient;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.AccessTokenException;
@@ -23,10 +33,10 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.response.UserDetailsRespo
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.ValidationResult;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.AccessTokenResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.GrantingAuthorityService;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SearchUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.Objects;
 
 @Slf4j
 @RestController
@@ -42,6 +52,8 @@ public class GrantingAuthorityController {
 	    
 	@Autowired
 	Environment environment;
+	 @Autowired
+	    private ObjectMapper objectMapper;
 	    
 	/**
 	 * To get Granting AUthority as input from UI and return Validation results based on input.
@@ -51,10 +63,12 @@ public class GrantingAuthorityController {
 	 * @return ResponseEntity - Return response status and description
 	 */
 	@PostMapping("grantingAuthority")
-	public ResponseEntity<ValidationResult> addGrantingAuthority(@Valid @RequestBody GrantingAuthorityRequest
-																			 gaInputRequest) {
-
-		try {
+	public ResponseEntity<ValidationResult> addGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@Valid @RequestBody GrantingAuthorityRequest
+															 gaInputRequest) {
+		try {		
+		//check user role here
+		SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"Add Granting Authority");
+		
 			log.info("Before calling add addGrantingAuthority::::");
 			if(gaInputRequest==null) {
 				throw new InvalidRequestException("Invalid Request");
@@ -88,11 +102,13 @@ public class GrantingAuthorityController {
 			value="grantingAuthority/{gaNumber}"
 		
 			)
-	public ResponseEntity<ValidationResult> updateGrantingAuthority(@Valid @RequestBody GrantingAuthorityRequest gaInputRequest
+	public ResponseEntity<ValidationResult> updateGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@Valid @RequestBody GrantingAuthorityRequest gaInputRequest
 			,@PathVariable("gaNumber") Long gaNumber) {
 
 		try {
 			log.info("{}::Before calling updateGrantingAuthority award");
+			//check user role here
+			SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"update Granting Authority");
 
 			if(gaInputRequest==null) {
 				throw new Exception("gaInputRequest is empty");
@@ -123,13 +139,15 @@ public class GrantingAuthorityController {
 	@GetMapping(
 			value="grantingAuthority/{azGrpId}"
 			)
-	public ResponseEntity<UserDetailsResponse> deActivateGrantingAuthority(@PathVariable("azGrpId") String azGrpId) {
+	public ResponseEntity<UserDetailsResponse> deActivateGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@PathVariable("azGrpId") String azGrpId) {
 
 		try {
 			log.info("Before calling deActivateGrantingAuthority::::");
 			if(azGrpId==null) {
 				throw new InvalidRequestException("deActivateGrantingAuthority request is empty");
 			}
+			//check user role here
+			SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"deActivate Granting Authority");
 			String accessToken=getBearerToken();
 			
 			UserDetailsResponse userDetailsResponse  = grantingAuthorityService
