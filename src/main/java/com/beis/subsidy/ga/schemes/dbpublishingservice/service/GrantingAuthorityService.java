@@ -67,9 +67,10 @@ public class GrantingAuthorityService {
 			String accessToken) {
 		
 			log.info("inside createGrantingAuthority ");
-
+			String mailNickname=grantingAuthorityRequest.getName();
+			mailNickname = mailNickname.replaceAll("\\s+", "");
 			AddGroupRequest request = new AddGroupRequest(grantingAuthorityRequest.getName(),
-					grantingAuthorityRequest.getName(), false, grantingAuthorityRequest.getName(), true);
+					grantingAuthorityRequest.getName(), false, mailNickname, true);
 			GroupResponse response = addGroup(accessToken, request);
 			//
 			if(response==null || response.getId()==null) {
