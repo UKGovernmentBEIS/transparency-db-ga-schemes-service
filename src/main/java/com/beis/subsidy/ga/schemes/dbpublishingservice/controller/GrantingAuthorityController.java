@@ -82,7 +82,7 @@ public class GrantingAuthorityController {
 			GAResponse response = new GAResponse();
 			GrantingAuthority grantingAuthority = grantingAuthorityService.createGrantingAuthority(gaInputRequest,accessToken);
 			
-			response.setId(grantingAuthority.getGaId());
+			response.setGaId(grantingAuthority.getGaId());
 			response.setMessage("Created successfully");
 
 			return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -123,7 +123,7 @@ public class GrantingAuthorityController {
 			
 			String accessToken=getBearerToken();
 			GrantingAuthority grantingAuthority = grantingAuthorityService.updateGrantingAuthority(gaInputRequest,gaNumber,accessToken);
-			response.setId(grantingAuthority.getGaId());
+			response.setGaId(grantingAuthority.getGaId());
 			response.setMessage(" updated successfully");
 
 			return ResponseEntity.status(HttpStatus.OK).body(response);

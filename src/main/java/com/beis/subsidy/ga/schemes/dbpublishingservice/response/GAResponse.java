@@ -13,7 +13,7 @@ import lombok.Setter;
 public class GAResponse {
 
     @JsonProperty
-    private Long id;
+    private Long gaId;
 
     @JsonProperty
     private String message;
