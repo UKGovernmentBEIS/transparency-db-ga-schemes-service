@@ -70,7 +70,7 @@ public class GrantingAuthorityController {
 			
 			
 		//check user role here
-		SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"Add Granting Authority");
+		//SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"Add Granting Authority");
 		
 			log.info("Before calling add addGrantingAuthority::::");
 			if(gaInputRequest==null) {
