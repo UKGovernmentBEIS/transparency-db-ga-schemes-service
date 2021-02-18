@@ -67,10 +67,10 @@ public class GrantingAuthorityService {
 			String accessToken) {
 		
 			log.info("inside createGrantingAuthority ");
-			String mailNickname=grantingAuthorityRequest.getName();
-			mailNickname = mailNickname.replaceAll("\\s+", "");
+			
+			String[] mailNickname = grantingAuthorityRequest.getName().split(" ");
 			AddGroupRequest request = new AddGroupRequest(grantingAuthorityRequest.getName(),
-					grantingAuthorityRequest.getName(), false, mailNickname, true);
+					grantingAuthorityRequest.getName(), false, mailNickname[0], true);
 			GroupResponse response = addGroup(accessToken, request);
 			//
 			if(response==null || response.getId()==null) {
@@ -271,11 +271,11 @@ public class GrantingAuthorityService {
 				ResponseEntity<Object> responseResponseEntity = toResponseEntity(response, clazz);
 				groupResponse = (GroupResponse) responseResponseEntity.getBody();
 				
-			} else if (response.status() == 400) {
-				throw new InvalidRequestException("create user request is invalid");
+			} else if (response.status() == 400 || response.status() == 407  ) {
+				throw new AccessManagementException(HttpStatus.valueOf(407),"create user request is invalid");
 			} else {
 				log.error("{}:: Graph Api failed:: status code {}", loggingComponentName, 500);
-				throw new AccessManagementException(HttpStatus.valueOf(500), "Create User Graph Api Failed");
+				throw new AccessManagementException(HttpStatus.valueOf(500), "Create group Graph Api Failed");
 			}
 
 		} catch (FeignException ex) {

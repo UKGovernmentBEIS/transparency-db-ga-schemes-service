@@ -28,6 +28,7 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthorityRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.UsersGroupRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SearchInput;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.GAResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchResults;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.UserDetailsResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.ValidationResult;
@@ -63,11 +64,13 @@ public class GrantingAuthorityController {
 	 * @return ResponseEntity - Return response status and description
 	 */
 	@PostMapping("grantingAuthority")
-	public ResponseEntity<ValidationResult> addGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@Valid @RequestBody GrantingAuthorityRequest
+	public ResponseEntity<GAResponse> addGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@Valid @RequestBody GrantingAuthorityRequest
 															 gaInputRequest) {
 		try {		
+			
+			
 		//check user role here
-		SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"Add Granting Authority");
+		SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"Add Granting Authority");
 		
 			log.info("Before calling add addGrantingAuthority::::");
 			if(gaInputRequest==null) {
@@ -75,18 +78,21 @@ public class GrantingAuthorityController {
 			}
 			String accessToken=getBearerToken();
 			log.info("after GrantingAuthority accessToken ::::");
-			ValidationResult validationResult = new ValidationResult();
+			
+			GAResponse response = new GAResponse();
 			GrantingAuthority grantingAuthority = grantingAuthorityService.createGrantingAuthority(gaInputRequest,accessToken);
 			
-			validationResult.setMessage("gaId: " + grantingAuthority.getGaId());
+			response.setId(grantingAuthority.getGaId());
+			response.setMessage("Created successfully");
 
-			return ResponseEntity.status(HttpStatus.OK).body(validationResult);
+			return ResponseEntity.status(HttpStatus.OK).body(response);
 		} catch (Exception e) {
 
 			// 2.0 - CatchException and return validation errors
-			ValidationResult validationResult = new ValidationResult();
+			GAResponse response = new GAResponse();
+			response.setMessage("failed to add Granting Authority");
 
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(validationResult);
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
 		}
 
 	}
@@ -102,30 +108,32 @@ public class GrantingAuthorityController {
 			value="grantingAuthority/{gaNumber}"
 		
 			)
-	public ResponseEntity<ValidationResult> updateGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@Valid @RequestBody GrantingAuthorityRequest gaInputRequest
+	public ResponseEntity<GAResponse> updateGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@Valid @RequestBody GrantingAuthorityRequest gaInputRequest
 			,@PathVariable("gaNumber") Long gaNumber) {
 
 		try {
 			log.info("{}::Before calling updateGrantingAuthority award");
 			//check user role here
-			SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"update Granting Authority");
+			SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"update Granting Authority");
 
 			if(gaInputRequest==null) {
 				throw new Exception("gaInputRequest is empty");
 			}
-			ValidationResult validationResult = new ValidationResult();
+			GAResponse response = new GAResponse();
+			
 			String accessToken=getBearerToken();
 			GrantingAuthority grantingAuthority = grantingAuthorityService.updateGrantingAuthority(gaInputRequest,gaNumber,accessToken);
-			
-			validationResult.setMessage(grantingAuthority.getGaId()+ " updated successfully");
+			response.setId(grantingAuthority.getGaId());
+			response.setMessage(" updated successfully");
 
-			return ResponseEntity.status(HttpStatus.OK).body(validationResult);
+			return ResponseEntity.status(HttpStatus.OK).body(response);
 		} catch (Exception e) {
 
 			// 2.0 - CatchException and return validation errors
-			ValidationResult validationResult = new ValidationResult();
+			GAResponse response = new GAResponse();
+			response.setMessage("failed to update Granting Authority");
 
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(validationResult);
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
 		}
 
 	}
@@ -147,7 +155,7 @@ public class GrantingAuthorityController {
 				throw new InvalidRequestException("deActivateGrantingAuthority request is empty");
 			}
 			//check user role here
-			SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"deActivate Granting Authority");
+			SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"deActivate Granting Authority");
 			String accessToken=getBearerToken();
 			
 			UserDetailsResponse userDetailsResponse  = grantingAuthorityService

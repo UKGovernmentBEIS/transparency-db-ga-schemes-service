@@ -135,13 +135,13 @@ public class SearchUtils {
 		return yearsStr.toString();
 	}
 	
-	public static  void beisAdminRoleValidation(ObjectMapper objectMapper,HttpHeaders userPrinciple) {
+	public static  void beisAdminRoleValidation(ObjectMapper objectMapper,HttpHeaders userPrinciple,String entity) {
 		UserPrinciple userPrincipleObj = null;
 		String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
 		try {
 			userPrincipleObj = objectMapper.readValue(userPrincipleStr, UserPrinciple.class);
 			if (!AccessManagementConstant.BEIS_ADMIN_ROLE.equals(userPrincipleObj.getRole())) {
-				throw new UnauthorisedAccessException("You are not authorised to access Admin Dashboard");
+				throw new UnauthorisedAccessException("You are not authorised to "+ entity);
 			}
 		} catch(JsonProcessingException exception){
 			throw new AccessManagementException(HttpStatus.BAD_REQUEST,"JSON parsing Exception");
