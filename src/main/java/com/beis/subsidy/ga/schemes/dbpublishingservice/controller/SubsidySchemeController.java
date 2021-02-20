@@ -5,6 +5,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeDetailsRequ
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeSearchInput;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchSubsidyResultsResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SubsidyMeasureResponse;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.service.impl.SubsidySchemeService;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.service.SubsidySchemeService;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SearchUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -37,6 +38,9 @@ public class SubsidySchemeController {
     private SubsidySchemeService subsidySchemeService;
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Value("${loggingComponentName}")
+    private String loggingComponentName;
 
     @GetMapping("/health")
     public ResponseEntity<String> getHealth() {
@@ -62,7 +66,7 @@ public class SubsidySchemeController {
     public String addSchemeDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@Valid @RequestBody SchemeDetailsRequest scheme) {
     	
     	//check user role here
-    			SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"Add Subsidy Schema");
+    	SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"Add Subsidy Schema");
         return subsidySchemeService.addSubsidySchemeDetails(scheme);
     }
 
@@ -78,8 +82,10 @@ public class SubsidySchemeController {
             value = "{scNumber}",
             produces = APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<SubsidyMeasureResponse> findSubsidyScheme(@PathVariable("scNumber") String scNumber) {
-        log.info("Before calling findSubsidyScheme::{}");
+    public ResponseEntity<SubsidyMeasureResponse> findSubsidyScheme(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+                                                                    @PathVariable("scNumber") String scNumber) {
+        log.info("{} ::Before calling findSubsidyScheme", loggingComponentName);
+        SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"find Subsidy Schema");
         if (StringUtils.isEmpty(scNumber)) {
             throw new InvalidRequestException("Bad Request SC Number is null");
         }
