@@ -4,7 +4,9 @@ import java.util.Objects;
 
 import javax.validation.Valid;
 
+import com.beis.subsidy.ga.schemes.dbpublishingservice.service.GrantingAuthorityService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -32,8 +34,7 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.response.GAResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchResults;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.UserDetailsResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.ValidationResult;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.service.AccessTokenResponse;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.service.GrantingAuthorityService;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.AccessTokenResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SearchUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -53,8 +54,12 @@ public class GrantingAuthorityController {
 	    
 	@Autowired
 	Environment environment;
+
 	 @Autowired
-	    private ObjectMapper objectMapper;
+	 private ObjectMapper objectMapper;
+
+	@Value("${loggingComponentName}")
+	private String loggingComponentName;
 	    
 	/**
 	 * To get Granting AUthority as input from UI and return Validation results based on input.
@@ -64,20 +69,20 @@ public class GrantingAuthorityController {
 	 * @return ResponseEntity - Return response status and description
 	 */
 	@PostMapping("grantingAuthority")
-	public ResponseEntity<GAResponse> addGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@Valid @RequestBody GrantingAuthorityRequest
+	public ResponseEntity<GAResponse> addGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+														   @Valid @RequestBody GrantingAuthorityRequest
 															 gaInputRequest) {
 		try {		
 			
-			
-		//check user role here
-		//SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"Add Granting Authority");
+		    //check user role here
+			SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"Add Granting Authority");
 		
-			log.info("Before calling add addGrantingAuthority::::");
+			log.info("{} ::Before calling add addGrantingAuthority",loggingComponentName);
 			if(gaInputRequest==null) {
 				throw new InvalidRequestException("Invalid Request");
 			}
 			String accessToken=getBearerToken();
-			log.info("after GrantingAuthority accessToken ::::");
+			log.info("{} ::after GrantingAuthority accessToken", loggingComponentName);
 			
 			GAResponse response = new GAResponse();
 			GrantingAuthority grantingAuthority = grantingAuthorityService.createGrantingAuthority(gaInputRequest,accessToken);
@@ -91,7 +96,6 @@ public class GrantingAuthorityController {
 			// 2.0 - CatchException and return validation errors
 			GAResponse response = new GAResponse();
 			response.setMessage("failed to add Granting Authority");
-
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
 		}
 
@@ -112,12 +116,12 @@ public class GrantingAuthorityController {
 			,@PathVariable("gaNumber") Long gaNumber) {
 
 		try {
-			log.info("{}::Before calling updateGrantingAuthority award");
+			log.info("{}::Before calling updateGrantingAuthority", loggingComponentName);
 			//check user role here
 			SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"update Granting Authority");
 
 			if(gaInputRequest==null) {
-				throw new Exception("gaInputRequest is empty");
+				throw new InvalidRequestException("gaInputRequest is empty");
 			}
 			GAResponse response = new GAResponse();
 			
@@ -150,7 +154,7 @@ public class GrantingAuthorityController {
 	public ResponseEntity<UserDetailsResponse> deActivateGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@PathVariable("azGrpId") String azGrpId) {
 
 		try {
-			log.info("Before calling deActivateGrantingAuthority::::");
+			log.info("{} ::Before calling deActivateGrantingAuthority", loggingComponentName);
 			if(azGrpId==null) {
 				throw new InvalidRequestException("deActivateGrantingAuthority request is empty");
 			}
@@ -180,14 +184,16 @@ public class GrantingAuthorityController {
 	 */
 	
 	@PostMapping("searchGrantingAuthority")
-	public ResponseEntity<SearchResults> findSearchResults(@Valid @RequestBody SearchInput searchInput) {
+	public ResponseEntity<SearchResults> findSearchResults(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+														   @Valid @RequestBody SearchInput searchInput) {
 
+		    SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"Search Results");
 			//Set Default Page records
 			if(searchInput.getTotalRecordsPerPage() == 0) {
 				searchInput.setTotalRecordsPerPage(10);
 			}
 			SearchResults searchResults = grantingAuthorityService.findMatchingGrantingAuthorities(searchInput);
-			
+
 			return new ResponseEntity<SearchResults>(searchResults, HttpStatus.OK);
 	}
 	/**
@@ -197,7 +203,7 @@ public class GrantingAuthorityController {
 	 */
 	public String getBearerToken() throws AccessTokenException {
 
-		log.info("inside getBearerToken method::{}", environment);
+		log.info("{} ::inside getBearerToken method", loggingComponentName);
 		
 		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 
@@ -214,7 +220,6 @@ public class GrantingAuthorityController {
 			throw new AccessTokenException(HttpStatus.valueOf(500),
 					"Graph Api Service Failed while bearer token generate");
 		}
-		log.warn(" after access token " + openIdTokenResponse.getAccessToken());
 		return openIdTokenResponse.getAccessToken();
 	}
 	
@@ -224,7 +229,7 @@ public class GrantingAuthorityController {
 												 @RequestBody UsersGroupRequest usersGroupRequest)
 	{
 		try {
-			log.info("before calling delete UsersGroup::::");
+			log.info("{} ::before calling delete UsersGroup", loggingComponentName);
 			if(Objects.isNull(usersGroupRequest)|| StringUtils.isEmpty(azGrpId)) {
 				throw new InvalidRequestException("usersGroupRequest is empty");
 			}

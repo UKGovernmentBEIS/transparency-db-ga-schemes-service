@@ -1,4 +1,4 @@
-package com.beis.subsidy.ga.schemes.dbpublishingservice.service;
+package com.beis.subsidy.ga.schemes.dbpublishingservice.response;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

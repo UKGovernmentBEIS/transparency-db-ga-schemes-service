@@ -1,7 +1,5 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.controller.feign;
 
-
-
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,17 +9,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.AddGroupRequest;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.request.AddUserRequest;
 
 import feign.Headers;
 import feign.RequestLine;
 import feign.Response;
 
-//@FeignClient(name = "GraphAPIFeignClient", url = "${graphApiUrl}")
-@FeignClient(name = "GraphAPIFeignClient", url = "https://graph.microsoft.com")
-
+@FeignClient(name = "GraphAPIFeignClient", url = "${graphApiUrl}")
 public interface GraphAPIFeignClient {
 
     @GetMapping(value = "/v1.0/groups")
@@ -49,14 +43,4 @@ public interface GraphAPIFeignClient {
     @Headers({"Authorization: {authorization}","Content-Type: application/json"})
     Response getUsersByGroupId(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                @PathVariable("groupId")  String groupId);
-    
-    @GetMapping(value = "/v1.0/users")
-    @RequestLine("GET v1.0/users")
-    @Headers({"Authorization: {authorization}","Content-Type: application/json"})
-    Response getAllUserProfiles(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation);
-
-    @PostMapping(value = "/v1.0/users")
-    @RequestLine("POST v1.0/users")
-    Response addUser(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                         @RequestBody AddUserRequest request);
 }

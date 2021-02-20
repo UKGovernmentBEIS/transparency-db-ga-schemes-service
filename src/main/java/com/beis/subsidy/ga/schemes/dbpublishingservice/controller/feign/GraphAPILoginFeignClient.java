@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.beis.subsidy.ga.schemes.dbpublishingservice.service.AccessTokenResponse;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.AccessTokenResponse;
 
 //@FeignClient(name = "GraphAPILoginFeignClient", url = "${graphApiLoginUrl}")
 @FeignClient(name = "GraphAPILoginFeignClient", url = "https://login.microsoftonline.com")
