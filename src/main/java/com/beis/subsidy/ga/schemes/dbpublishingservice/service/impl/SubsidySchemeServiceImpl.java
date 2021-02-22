@@ -78,8 +78,11 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
             pageAwards = subsidyMeasureRepository.
                     findAll(subsidyMeasureByGrantingAuthority(gaId),pagingSortSchemes);
             schemeResults = pageAwards.getContent();
-            totalSchemeList = schemeResults ;
-
+            if(!StringUtils.isEmpty(searchInput.getSearchName())){
+                totalSchemeList = subsidyMeasureRepository.findAll(schemeSpecifications);
+            } else {
+                totalSchemeList = schemeResults;
+            }
         }
 
         SearchSubsidyResultsResponse searchResults = null;
