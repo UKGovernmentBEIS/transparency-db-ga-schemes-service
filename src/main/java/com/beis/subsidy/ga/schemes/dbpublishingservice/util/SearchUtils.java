@@ -148,7 +148,7 @@ public class SearchUtils {
 		}
 	}
 	
-	public static  void isAllRolesValidation(ObjectMapper objectMapper,HttpHeaders userPrinciple,String entity) {
+	public static  UserPrinciple isAllRolesValidation(ObjectMapper objectMapper,HttpHeaders userPrinciple,String entity) {
 		 UserPrinciple userPrincipleObj = null;
 	        String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
 	        try {
@@ -159,6 +159,7 @@ public class SearchUtils {
 	        } catch(JsonProcessingException exception){
 	            throw new AccessManagementException(HttpStatus.BAD_REQUEST,"JSON parsing Exception");
 	        }
+	        return userPrincipleObj;
 	    }
 	
 }

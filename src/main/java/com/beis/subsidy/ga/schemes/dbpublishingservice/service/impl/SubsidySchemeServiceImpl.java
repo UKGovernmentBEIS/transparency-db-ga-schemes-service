@@ -2,6 +2,8 @@ package com.beis.subsidy.ga.schemes.dbpublishingservice.service.impl;
 
 
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.SearchResultNotFoundException;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.UnauthorisedAccessException;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.LegalBasis;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.GrantingAuthorityRepository;
@@ -14,6 +16,7 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.service.SubsidySchemeServ
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.AccessManagementConstant;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SchemeSpecificationUtils;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SearchUtils;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.util.UserPrinciple;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,31 +42,54 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
     private GrantingAuthorityRepository gaRepository;
 
     @Override
-    public SearchSubsidyResultsResponse findMatchingSubsidySchemeDetails(SchemeSearchInput searchInput) {
-        log.info("Inside findMatchingSubsidySchemeDetails searchName : "+searchInput.getSearchName());
+    public SearchSubsidyResultsResponse findMatchingSubsidySchemeDetails(SchemeSearchInput searchInput,  UserPrinciple userPriniciple) {
+        log.info("Inside findMatchingSubsidySchemeDetails searchName : " + searchInput.getSearchName());
+
         Specification<SubsidyMeasure> schemeSpecifications = getSpecificationSchemeDetails(searchInput);
         Specification<SubsidyMeasure> schemeSpecificationsWithout = getSpecificationSchemeDetailsWithoutStatus(searchInput);
         List<SubsidyMeasure> totalSchemeList = new ArrayList<>();
+        List<SubsidyMeasure> schemeResults = null;
+        Page<SubsidyMeasure> pageAwards = null;
         List<Sort.Order> orders = getOrderByCondition(searchInput.getSortBy());
 
-        Pageable pagingSortSchemes = PageRequest.of(searchInput.getPageNumber() - 1, searchInput.getTotalRecordsPerPage(), Sort.by(orders));
+        Pageable pagingSortSchemes = PageRequest.of(searchInput.getPageNumber() - 1,
+                searchInput.getTotalRecordsPerPage(), Sort.by(orders));
 
-        Page<SubsidyMeasure> pageAwards = subsidyMeasureRepository.findAll(schemeSpecifications, pagingSortSchemes);
 
-        List<SubsidyMeasure> schemeResults = pageAwards.getContent();
+        if (AccessManagementConstant.BEIS_ADMIN_ROLE.equals(userPriniciple.getRole().trim())) {
 
-        if(!StringUtils.isEmpty(searchInput.getSearchName())){
-            totalSchemeList = subsidyMeasureRepository.findAll(schemeSpecificationsWithout);
+            pageAwards = subsidyMeasureRepository.findAll(schemeSpecifications, pagingSortSchemes);
+
+            schemeResults = pageAwards.getContent();
+
+            if(!StringUtils.isEmpty(searchInput.getSearchName())){
+                totalSchemeList = subsidyMeasureRepository.findAll(schemeSpecificationsWithout);
+            } else {
+                totalSchemeList = subsidyMeasureRepository.findAll();
+            }
+
         } else {
-            totalSchemeList = subsidyMeasureRepository.findAll();
+
+            Long gaId = getGrantingAuthorityIdByName(userPriniciple.getGrantingAuthorityGroupName());
+            if(gaId == null || gaId <= 0){
+                throw new UnauthorisedAccessException("Invalid granting authority name");
+            }
+
+            pageAwards = subsidyMeasureRepository.
+                    findAll(subsidyMeasureByGrantingAuthority(gaId),pagingSortSchemes);
+            schemeResults = pageAwards.getContent();
+            totalSchemeList = schemeResults ;
+
         }
+
         SearchSubsidyResultsResponse searchResults = null;
 
         if (!schemeResults.isEmpty()) {
             searchResults = new SearchSubsidyResultsResponse(schemeResults, pageAwards.getTotalElements(),
                     pageAwards.getNumber() + 1, pageAwards.getTotalPages(), schemeCounts(totalSchemeList));
         } else {
-            searchResults = new SearchSubsidyResultsResponse(schemeCounts(schemeResults));
+            log.info("{}::Scheme results not found");
+            throw new SearchResultNotFoundException("Scheme Results NotFound");
         }
         return searchResults;
     }
@@ -135,7 +161,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
     @Override
     public String updateSubsidySchemeDetails(SchemeDetailsRequest scheme) {
-        log.info("Inside updateSubsidySchemeDetails method - sc number "+scheme.getScNumber());
+        log.info("Inside updateSubsidySchemeDetails method - sc number " + scheme.getScNumber());
         SubsidyMeasure schemeById = subsidyMeasureRepository.findById(scheme.getScNumber()).get();
         LegalBasis legalBasis = schemeById.getLegalBases();
         if (Objects.isNull(schemeById)) {
@@ -269,5 +295,21 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
             sortDir = Sort.Direction.DESC;
         }
         return sortDir;
+    }
+
+    private Long getGrantingAuthorityIdByName(String gaName){
+        GrantingAuthority gaObj = gaRepository.findByGrantingAuthorityName(gaName);
+        if(gaObj != null){
+            return gaObj.getGaId();
+        }
+        return null;
+    }
+
+    private Specification<SubsidyMeasure> subsidyMeasureByGrantingAuthority(Long gaId) {
+        return Specification.where(subsidyMeasureByGa(gaId));
+    }
+
+    public  Specification<SubsidyMeasure> subsidyMeasureByGa(Long gaId) {
+        return (root, query, builder) -> builder.equal(root.get("grantingAuthority").get("gaId"), gaId);
     }
 }

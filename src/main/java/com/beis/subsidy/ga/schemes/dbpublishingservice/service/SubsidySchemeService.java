@@ -4,10 +4,11 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeDetailsRequ
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeSearchInput;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchSubsidyResultsResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SubsidyMeasureResponse;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.util.UserPrinciple;
 
 public interface SubsidySchemeService {
 
-    SearchSubsidyResultsResponse findMatchingSubsidySchemeDetails(SchemeSearchInput searchInput);
+    SearchSubsidyResultsResponse findMatchingSubsidySchemeDetails(SchemeSearchInput searchInput, UserPrinciple userPrinicipleResp);
 
     String addSubsidySchemeDetails(SchemeDetailsRequest scheme);
 
