@@ -4,6 +4,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import javax.validation.Valid;
 
+import com.beis.subsidy.ga.schemes.dbpublishingservice.util.UserPrinciple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -50,16 +51,20 @@ public class SubsidySchemeController {
             value = "/search",
             produces = APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<SearchSubsidyResultsResponse> findSchemeDetails(@Valid @RequestBody SchemeSearchInput searchInput) {
+    public ResponseEntity<SearchSubsidyResultsResponse> findSchemeDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+                                                                          @Valid @RequestBody SchemeSearchInput searchInput) {
+
+        UserPrinciple userPrinicipleResp = SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"find Subsidy Schema");
         if(searchInput.getTotalRecordsPerPage() == null){
             searchInput.setTotalRecordsPerPage(10);
         }
         if(searchInput.getPageNumber() == null) {
             searchInput.setPageNumber(1);
         }
-        SearchSubsidyResultsResponse searchResults = subsidySchemeService.findMatchingSubsidySchemeDetails(searchInput);
+        SearchSubsidyResultsResponse searchResults = subsidySchemeService.findMatchingSubsidySchemeDetails(searchInput,userPrinicipleResp);
         return new ResponseEntity<SearchSubsidyResultsResponse>(searchResults, HttpStatus.OK);
     }
+
     @PostMapping(
             value = "/add"
     )
