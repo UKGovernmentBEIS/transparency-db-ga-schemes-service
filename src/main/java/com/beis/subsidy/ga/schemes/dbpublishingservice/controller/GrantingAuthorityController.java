@@ -72,8 +72,7 @@ public class GrantingAuthorityController {
 	public ResponseEntity<GAResponse> addGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
 														   @RequestBody GrantingAuthorityRequest
 															 gaInputRequest) {
-		try {		
-			
+				
 		    //check user role here
 			SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"Add Granting Authority");
 		
@@ -91,13 +90,7 @@ public class GrantingAuthorityController {
 			response.setMessage("Created successfully");
 
 			return ResponseEntity.status(HttpStatus.OK).body(response);
-		} catch (Exception e) {
-
-			// 2.0 - CatchException and return validation errors
-			GAResponse response = new GAResponse();
-			response.setMessage("failed to add Granting Authority");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
-		}
+		
 
 	}
 	
@@ -204,7 +197,7 @@ public class GrantingAuthorityController {
 	public String getBearerToken() throws AccessTokenException {
 
 		log.info("{} ::inside getBearerToken method", loggingComponentName);
-		
+
 		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 
 		map.add("grant_type", "client_credentials");
@@ -214,7 +207,6 @@ public class GrantingAuthorityController {
 
 		AccessTokenResponse openIdTokenResponse = graphAPILoginFeignClient
 				.getAccessIdToken(environment.getProperty("tenant-id"), map);
-
 
 		if (openIdTokenResponse == null) {
 			throw new AccessTokenException(HttpStatus.valueOf(500),
