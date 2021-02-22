@@ -1,4 +1,4 @@
-package com.beis.subsidy.control.accessmanagementservice.utils;
+package com.beis.subsidy.ga.schemes.dbpublishingservice.util;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;

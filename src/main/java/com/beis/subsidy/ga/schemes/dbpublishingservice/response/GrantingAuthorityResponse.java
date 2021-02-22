@@ -1,6 +1,7 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.response;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthority;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -29,10 +30,10 @@ public class GrantingAuthorityResponse {
 	private String approvedBy;
 
 	@JsonProperty
-	private LocalDate createdTimestamp;
+	private LocalDateTime createdTimestamp;
 
 	@JsonProperty
-	private LocalDate lastModifiedTimestamp;
+	private LocalDateTime lastModifiedTimestamp;
 
 	public GrantingAuthorityResponse(GrantingAuthority grantingAuthority, boolean flag) {
 
