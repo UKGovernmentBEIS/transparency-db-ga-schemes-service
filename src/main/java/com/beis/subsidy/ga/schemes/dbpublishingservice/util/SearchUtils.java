@@ -140,7 +140,7 @@ public class SearchUtils {
 		String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
 		try {
 			userPrincipleObj = objectMapper.readValue(userPrincipleStr, UserPrinciple.class);
-			if (!!Arrays.asList(AccessManagementConstant.ADMIN_ROLES).contains(userPrincipleObj.getRole())) {
+			if (!Arrays.asList(AccessManagementConstant.ADMIN_ROLES).contains(userPrincipleObj.getRole())) {
 				throw new UnauthorisedAccessException("You are not authorised to " + entity);
 			}
 		} catch(JsonProcessingException exception){

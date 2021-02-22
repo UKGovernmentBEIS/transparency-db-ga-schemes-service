@@ -70,7 +70,7 @@ public class GrantingAuthorityController {
 	 */
 	@PostMapping("grantingAuthority")
 	public ResponseEntity<GAResponse> addGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
-														   @Valid @RequestBody GrantingAuthorityRequest
+														   @RequestBody GrantingAuthorityRequest
 															 gaInputRequest) {
 		try {		
 			
