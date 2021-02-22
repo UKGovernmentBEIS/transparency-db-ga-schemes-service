@@ -1,6 +1,6 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.service.impl;
 
-import static com.beis.subsidy.control.accessmanagementservice.utils.JsonFeignResponseUtil.toResponseEntity;
+import static com.beis.subsidy.ga.schemes.dbpublishingservice.util.JsonFeignResponseUtil.toResponseEntity;
 
 import com.beis.subsidy.ga.schemes.dbpublishingservice.controller.feign.GraphAPIFeignClient;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.AccessManagementException;
@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +67,7 @@ public class GrantingAuthorityServiceImpl implements GrantingAuthorityService {
         }
         GrantingAuthority grantingAuthority = new GrantingAuthority(null, grantingAuthorityRequest.getName(),
                 "SYSTEM", "SYSTEM", "Active", response.getId(),grantingAuthorityRequest.getName()
-                , LocalDate.now(), LocalDate.now());
+                , LocalDateTime.now(), LocalDateTime.now());
 
         GrantingAuthority savedAwards = gaRepository.save(grantingAuthority);
         log.info("{}:: End of createGrantingAuthority ", loggingComponentName);
@@ -81,7 +82,7 @@ public class GrantingAuthorityServiceImpl implements GrantingAuthorityService {
 
             GrantingAuthority grantingAuthority = new GrantingAuthority(gaNumber, grantingAuthorityRequest.getName(),
                     "SYSTEM", "SYSTEM", "Active", null,
-                    grantingAuthorityRequest.getName(),LocalDate.now(), LocalDate.now());
+                    grantingAuthorityRequest.getName(),LocalDateTime.now(), LocalDateTime.now());
 
             GrantingAuthority savedAwards = gaRepository.save(grantingAuthority);
             log.info("{}::End of updateGrantingAuthority", loggingComponentName);
@@ -322,7 +323,7 @@ public class GrantingAuthorityServiceImpl implements GrantingAuthorityService {
                 GrantingAuthority grantingAuthResp= gaRepository.findByAzureGroupId(azGrpId);
                 grantingAuthority = new GrantingAuthority(grantingAuthResp.getGaId(), grantingAuthResp.getGrantingAuthorityName(),
                         "SYSTEM", "SYSTEM", "Inactive", azGrpId,
-                        grantingAuthResp.getAzureGroupName(),LocalDate.now(), LocalDate.now());
+                        grantingAuthResp.getAzureGroupName(),LocalDateTime.now(), LocalDateTime.now());
                 GrantingAuthority savedAwards = gaRepository.save(grantingAuthority);
                 log.info("{}:: GrantingAuthority saved successfully", loggingComponentName);
             }

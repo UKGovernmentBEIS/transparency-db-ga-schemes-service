@@ -1,6 +1,7 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -52,10 +53,10 @@ public class GrantingAuthority {
 	
 	@CreationTimestamp
 	@Column(name = "CREATED_TIMESTAMP")
-	private LocalDate createdTimestamp;
+	private LocalDateTime createdTimestamp;
 	
 	@UpdateTimestamp
 	@Column(name = "LAST_MODIFIED_TIMESTAMP")
-	private LocalDate lastModifiedTimestamp;
+	private LocalDateTime lastModifiedTimestamp;
 
 }
