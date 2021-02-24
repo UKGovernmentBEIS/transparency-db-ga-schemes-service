@@ -76,7 +76,7 @@ public class GrantingAuthorityController {
 				
 		log.info("{} ::Before calling add addGrantingAuthority header",userPrinciple);
 		    //check user role here
-			SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"Add Granting Authority");
+			SearchUtils.GAbeisAdminRoleValidation(objectMapper, userPrinciple,"Add Granting Authority");
 		
 			log.info("{} ::Before calling add addGrantingAuthority",loggingComponentName);
 			if(gaInputRequest==null) {
@@ -143,12 +143,12 @@ public class GrantingAuthorityController {
 	 * 
 	 * @return ResponseEntity - Return response status and description
 	 */
-	@GetMapping(
+	@DeleteMapping(
 			value="grantingAuthority/{azGrpId}"
 			)
 	public ResponseEntity<UserDetailsResponse> deActivateGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@PathVariable("azGrpId") String azGrpId) {
 
-		try {
+		
 			log.info("{} ::Before calling deActivateGrantingAuthority", loggingComponentName);
 			if(azGrpId==null) {
 				throw new InvalidRequestException("deActivateGrantingAuthority request is empty");
@@ -161,13 +161,7 @@ public class GrantingAuthorityController {
 					.deActivateGrantingAuthority(azGrpId,accessToken);
 			
 			return new ResponseEntity<UserDetailsResponse>(userDetailsResponse, HttpStatus.OK);
-		} catch (Exception e) {
-
-			// 2.0 - CatchException and return validation errors
-			ValidationResult validationResult = new ValidationResult();
-
-			return new ResponseEntity<UserDetailsResponse>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		
 
 	}
 	

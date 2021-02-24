@@ -149,6 +149,20 @@ public class SearchUtils {
 		}
 	}
 	
+	public static  void GAbeisAdminRoleValidation(ObjectMapper objectMapper,HttpHeaders userPrinciple,String entity) {
+		UserPrinciple userPrincipleObj = null;
+		String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
+		try {
+			
+			userPrincipleObj = objectMapper.readValue(userPrincipleStr, UserPrinciple.class);
+			if (!AccessManagementConstant.BEIS_ADMIN_ROLE.equalsIgnoreCase(userPrincipleObj.getRole())) {
+				throw new UnauthorisedAccessException("You are not authorised to " + entity);
+			}
+		} catch(JsonProcessingException exception){
+			throw new UnauthorisedAccessException("Unauthorised exception");
+		}
+	}
+	
 	public static  UserPrinciple isAllRolesValidation(ObjectMapper objectMapper,HttpHeaders userPrinciple,String entity) {
 		 UserPrinciple userPrincipleObj = null;
 	        String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
