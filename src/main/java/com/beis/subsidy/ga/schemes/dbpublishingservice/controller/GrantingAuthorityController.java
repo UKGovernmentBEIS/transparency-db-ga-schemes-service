@@ -69,14 +69,11 @@ public class GrantingAuthorityController {
 	 * @return ResponseEntity - Return response status and description
 	 */
 	@PostMapping("grantingAuthority")
-	public ResponseEntity<GAResponse> addGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
-														   @RequestBody GrantingAuthorityRequest
+	public ResponseEntity<GAResponse> addGrantingAuthority(@RequestBody GrantingAuthorityRequest
 	
 		gaInputRequest) {
 				
-		log.info("{} ::Before calling add addGrantingAuthority header",userPrinciple);
-		    //check user role here
-			SearchUtils.GAbeisAdminRoleValidation(objectMapper, userPrinciple,"Add Granting Authority");
+		
 		
 			log.info("{} ::Before calling add addGrantingAuthority",loggingComponentName);
 			if(gaInputRequest==null) {
