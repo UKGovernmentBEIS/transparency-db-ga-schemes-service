@@ -62,19 +62,18 @@ public class GrantingAuthorityController {
 	private String loggingComponentName;
 	    
 	/**
-	 * To get Granting AUthority as input from UI and return Validation results based on input.
+	 * To get Granting Authority as input from UI and return Validation results based on input.
 	 * 
 	 * @param gaInputRequest
 	 *            - Input as SearchInput object from front end
 	 * @return ResponseEntity - Return response status and description
 	 */
 	@PostMapping("grantingAuthority")
-	public ResponseEntity<GAResponse> addGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
-														   @RequestBody GrantingAuthorityRequest
-															 gaInputRequest) {
+	public ResponseEntity<GAResponse> addGrantingAuthority(@RequestBody GrantingAuthorityRequest
+	
+		gaInputRequest) {
 				
-		    //check user role here
-			SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"Add Granting Authority");
+		
 		
 			log.info("{} ::Before calling add addGrantingAuthority",loggingComponentName);
 			if(gaInputRequest==null) {
@@ -136,8 +135,8 @@ public class GrantingAuthorityController {
 	}
 	
 	/**
-	 * get the Granting Authority as input from UI and update the same in DBand
-	 * return Validation results based on input.
+	 * get the users associated to the GA
+	 * return list of users
 	 * 
 	 * @return ResponseEntity - Return response status and description
 	 */
@@ -146,7 +145,7 @@ public class GrantingAuthorityController {
 			)
 	public ResponseEntity<UserDetailsResponse> deActivateGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@PathVariable("azGrpId") String azGrpId) {
 
-		try {
+		
 			log.info("{} ::Before calling deActivateGrantingAuthority", loggingComponentName);
 			if(azGrpId==null) {
 				throw new InvalidRequestException("deActivateGrantingAuthority request is empty");
@@ -159,13 +158,7 @@ public class GrantingAuthorityController {
 					.deActivateGrantingAuthority(azGrpId,accessToken);
 			
 			return new ResponseEntity<UserDetailsResponse>(userDetailsResponse, HttpStatus.OK);
-		} catch (Exception e) {
-
-			// 2.0 - CatchException and return validation errors
-			ValidationResult validationResult = new ValidationResult();
-
-			return new ResponseEntity<UserDetailsResponse>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		
 
 	}
 	
@@ -207,6 +200,8 @@ public class GrantingAuthorityController {
 
 		AccessTokenResponse openIdTokenResponse = graphAPILoginFeignClient
 				.getAccessIdToken(environment.getProperty("tenant-id"), map);
+		
+		
 
 		if (openIdTokenResponse == null) {
 			throw new AccessTokenException(HttpStatus.valueOf(500),
@@ -214,7 +209,7 @@ public class GrantingAuthorityController {
 		}
 		return openIdTokenResponse.getAccessToken();
 	}
-	
+
 	@DeleteMapping(
 			value="group/{azGrpId}")
 	public ResponseEntity<ValidationResult> deleteUsersGroup(@PathVariable("azGrpId") String azGrpId,
