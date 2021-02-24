@@ -62,7 +62,7 @@ public class GrantingAuthorityController {
 	private String loggingComponentName;
 	    
 	/**
-	 * To get Granting AUthority as input from UI and return Validation results based on input.
+	 * To get Granting Authority as input from UI and return Validation results based on input.
 	 * 
 	 * @param gaInputRequest
 	 *            - Input as SearchInput object from front end
@@ -135,12 +135,12 @@ public class GrantingAuthorityController {
 	}
 	
 	/**
-	 * get the Granting Authority as input from UI and update the same in DBand
-	 * return Validation results based on input.
+	 * get the users associated to the GA
+	 * return list of users
 	 * 
 	 * @return ResponseEntity - Return response status and description
 	 */
-	@DeleteMapping(
+	@GetMapping(
 			value="grantingAuthority/{azGrpId}"
 			)
 	public ResponseEntity<UserDetailsResponse> deActivateGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@PathVariable("azGrpId") String azGrpId) {
@@ -209,7 +209,7 @@ public class GrantingAuthorityController {
 		}
 		return openIdTokenResponse.getAccessToken();
 	}
-	
+
 	@DeleteMapping(
 			value="group/{azGrpId}")
 	public ResponseEntity<ValidationResult> deleteUsersGroup(@PathVariable("azGrpId") String azGrpId,
