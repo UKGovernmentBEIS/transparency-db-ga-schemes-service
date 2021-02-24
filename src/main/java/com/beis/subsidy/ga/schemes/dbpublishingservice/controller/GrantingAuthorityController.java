@@ -71,8 +71,10 @@ public class GrantingAuthorityController {
 	@PostMapping("grantingAuthority")
 	public ResponseEntity<GAResponse> addGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
 														   @RequestBody GrantingAuthorityRequest
-															 gaInputRequest) {
+	
+		gaInputRequest) {
 				
+		log.info("{} ::Before calling add addGrantingAuthority header",userPrinciple);
 		    //check user role here
 			SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"Add Granting Authority");
 		
@@ -207,6 +209,8 @@ public class GrantingAuthorityController {
 
 		AccessTokenResponse openIdTokenResponse = graphAPILoginFeignClient
 				.getAccessIdToken(environment.getProperty("tenant-id"), map);
+		
+		
 
 		if (openIdTokenResponse == null) {
 			throw new AccessTokenException(HttpStatus.valueOf(500),
