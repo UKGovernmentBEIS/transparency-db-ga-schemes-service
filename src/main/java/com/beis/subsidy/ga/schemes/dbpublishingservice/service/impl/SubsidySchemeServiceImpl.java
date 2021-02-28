@@ -113,7 +113,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getBudget())){
             schemeToSave.setBudget(scheme.getBudget());
         }
-        if(scheme.getStartDate() != null && scheme.getEndDate() != null){
+        if(!scheme.isAdhoc() && scheme.getStartDate() != null && scheme.getEndDate() != null){
             schemeToSave.setDuration(getDuration(scheme.getStartDate(), scheme.getEndDate()));
         } else if(scheme.getStartDate() != null && scheme.isAdhoc()) {
             schemeToSave.setDuration(BigInteger.ONE);
