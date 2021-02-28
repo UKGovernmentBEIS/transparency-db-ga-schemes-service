@@ -80,7 +80,7 @@ public class SubsidySchemeController {
     )
     public String updateSchemeDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@Valid @RequestBody SchemeDetailsRequest scheme) {
     	//check user role here
-		SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"update Subsidy Schema");
+		SearchUtils.isSchmeRoleValidation(objectMapper, userPrinciple,"update Subsidy Schema");
         return subsidySchemeService.updateSubsidySchemeDetails(scheme);
     }
     @GetMapping(
