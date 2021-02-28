@@ -71,7 +71,7 @@ public class SubsidySchemeController {
     public String addSchemeDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@Valid @RequestBody SchemeDetailsRequest scheme) {
     	
     	//check user role here
-    	SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"Add Subsidy Schema");
+    	SearchUtils.isSchmeRoleValidation(objectMapper, userPrinciple,"Add Subsidy Schema");
         return subsidySchemeService.addSubsidySchemeDetails(scheme);
     }
 
@@ -80,7 +80,7 @@ public class SubsidySchemeController {
     )
     public String updateSchemeDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@Valid @RequestBody SchemeDetailsRequest scheme) {
     	//check user role here
-		SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"update Subsidy Schema");
+		SearchUtils.isSchmeRoleValidation(objectMapper, userPrinciple,"update Subsidy Schema");
         return subsidySchemeService.updateSubsidySchemeDetails(scheme);
     }
     @GetMapping(

@@ -177,4 +177,19 @@ public class SearchUtils {
 	        return userPrincipleObj;
 	    }
 	
+	
+	public static  void isSchmeRoleValidation(ObjectMapper objectMapper,HttpHeaders userPrinciple,String entity) {
+		UserPrinciple userPrincipleObj = null;
+		String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
+		try {
+			
+			userPrincipleObj = objectMapper.readValue(userPrincipleStr, UserPrinciple.class);
+			if (!Arrays.asList(AccessManagementConstant.ADMIN_ROLES).contains(userPrincipleObj.getRole()) && !AccessManagementConstant.GA_APPROVER_ROLE.equalsIgnoreCase(userPrincipleObj.getRole()) ) {
+				throw new UnauthorisedAccessException("You are not authorised to " + entity);
+			}
+		} catch(JsonProcessingException exception){
+			throw new UnauthorisedAccessException("Unauthorised exception");
+		}
+	}
+	
 }
