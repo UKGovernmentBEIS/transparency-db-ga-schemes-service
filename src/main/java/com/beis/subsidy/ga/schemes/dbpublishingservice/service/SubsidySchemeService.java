@@ -15,4 +15,8 @@ public interface SubsidySchemeService {
     String updateSubsidySchemeDetails(SchemeDetailsRequest scheme);
 
     SubsidyMeasureResponse findSubsidySchemeById(String scNumber);
+    
+    boolean findSubsidySchemeByName(String scName,String gaName);
+    
+    
 }

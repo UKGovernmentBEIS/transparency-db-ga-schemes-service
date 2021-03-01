@@ -1,8 +1,11 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.repository;
 
-import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
 
 /**
  * 
@@ -11,4 +14,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
  */
 public interface SubsidyMeasureRepository extends JpaRepository<SubsidyMeasure, String>, JpaSpecificationExecutor<SubsidyMeasure> {
 
+	List<SubsidyMeasure>findBySubsidyMeasureTitle(String subsidyMeasureTitle);
 }

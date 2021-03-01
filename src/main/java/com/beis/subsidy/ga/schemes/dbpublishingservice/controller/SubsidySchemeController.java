@@ -68,11 +68,16 @@ public class SubsidySchemeController {
     @PostMapping(
             value = "/add"
     )
-    public String addSchemeDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@Valid @RequestBody SchemeDetailsRequest scheme) {
+    public String addSchemeDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+    		@Valid @RequestBody SchemeDetailsRequest scheme) {
     	
     	//check user role here
     	SearchUtils.isSchmeRoleValidation(objectMapper, userPrinciple,"Add Subsidy Schema");
-        return subsidySchemeService.addSubsidySchemeDetails(scheme);
+    	if(!subsidySchemeService.findSubsidySchemeByName(scheme.getSubsidyMeasureTitle(), scheme.getGaName())) {
+    	    return subsidySchemeService.addSubsidySchemeDetails(scheme);
+    	}else {
+    		return "500";
+    	}
     }
 
     @PostMapping(

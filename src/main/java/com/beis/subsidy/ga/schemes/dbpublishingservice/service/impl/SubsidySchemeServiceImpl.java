@@ -227,6 +227,28 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         SubsidyMeasure subsidyMeasure = subsidyMeasureRepository.findById(scNumber).get();
         return new SubsidyMeasureResponse(subsidyMeasure);
     }
+    
+    @Override
+    public boolean findSubsidySchemeByName(String scName,String gaName) {
+    	log.info("inside findSubsidySchemeByName "+scName);
+    	SubsidyMeasure searchScheme = new SubsidyMeasure();
+    	searchScheme.setSubsidyMeasureTitle(scName);
+    	searchScheme.setStatus("Active");
+    	if(! StringUtils.isEmpty(gaName)){
+            Long gaId = gaRepository.findByGrantingAuthorityName(gaName).getGaId();
+            searchScheme.setGaId(gaId);
+        }
+        List<SubsidyMeasure> subsidyMeasuresList = subsidyMeasureRepository.findBySubsidyMeasureTitle(scName);
+       Optional<SubsidyMeasure> dbsubsidyMeasure=subsidyMeasuresList.stream().filter(subsidyMeasure->"Active".equalsIgnoreCase(subsidyMeasure.getStatus()) && searchScheme.getGaId()==subsidyMeasure.getGaId()).findAny();
+      
+        if(dbsubsidyMeasure.isPresent()) {
+        log.info(" subsidyMeasure from db,status "+dbsubsidyMeasure.get().getSubsidyMeasureTitle()+" : "+dbsubsidyMeasure.get().getStatus()+" : "+dbsubsidyMeasure.get().getGaId());
+        return true;
+        }else {
+        	return false;
+        }
+       
+    }
 
 
     private Map<String, Long> schemeCounts(List<SubsidyMeasure> schemeList) {
@@ -315,4 +337,5 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
     public  Specification<SubsidyMeasure> subsidyMeasureByGa(Long gaId) {
         return (root, query, builder) -> builder.equal(root.get("grantingAuthority").get("gaId"), gaId);
     }
-}
+    
+  }
