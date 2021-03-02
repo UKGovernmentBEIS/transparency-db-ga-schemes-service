@@ -76,7 +76,7 @@ public class SubsidySchemeController {
     	if(!subsidySchemeService.findSubsidySchemeByName(scheme.getSubsidyMeasureTitle(), scheme.getGaName())) {
     	    return subsidySchemeService.addSubsidySchemeDetails(scheme);
     	}else {
-    		return "500";
+    		return "417";
     	}
     }
 
