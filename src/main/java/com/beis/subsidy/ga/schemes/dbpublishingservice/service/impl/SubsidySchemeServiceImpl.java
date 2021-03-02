@@ -230,7 +230,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
     
     @Override
     public boolean findSubsidySchemeByName(String scName,String gaName) {
-    	log.info("inside findSubsidySchemeByName "+scName);
+    	log.info("inside findSubsidySchemeByName "+scName+ " :: "+gaName);
     	SubsidyMeasure searchScheme = new SubsidyMeasure();
     	searchScheme.setSubsidyMeasureTitle(scName);
     	searchScheme.setStatus("Active");
@@ -241,7 +241,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         List<SubsidyMeasure> subsidyMeasuresList = subsidyMeasureRepository.findBySubsidyMeasureTitle(scName);
        Optional<SubsidyMeasure> dbsubsidyMeasure=subsidyMeasuresList.stream().filter(subsidyMeasure->"Active".equalsIgnoreCase(subsidyMeasure.getStatus()) && searchScheme.getGaId()==subsidyMeasure.getGaId()).findAny();
        
-       log.warn("inside findSubsidySchemeByName "+scName);
+       log.warn("inside findSubsidySchemeByName "+dbsubsidyMeasure);
         if(dbsubsidyMeasure.isPresent()) {
         log.info(" subsidyMeasure from db,status "+dbsubsidyMeasure.get().getSubsidyMeasureTitle()+" : "+dbsubsidyMeasure.get().getStatus()+" : "+dbsubsidyMeasure.get().getGaId());
         return true;
