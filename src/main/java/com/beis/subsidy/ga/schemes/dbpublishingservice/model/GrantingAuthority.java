@@ -24,12 +24,12 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@SequenceGenerator(name = "granting_authority_seq", sequenceName = "granting_authority_seq",
+@SequenceGenerator(name = "granting_authority_read_seq", sequenceName = "granting_authority_read_seq",
 allocationSize = 1)
 public class GrantingAuthority {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "granting_authority_seq")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "granting_authority_read_seq")
 	@Column(name="GA_ID")
 	private Long gaId;
 	
