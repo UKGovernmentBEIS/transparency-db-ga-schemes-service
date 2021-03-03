@@ -230,7 +230,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
     
     @Override
     public boolean findSubsidySchemeByName(String scName,String gaName) {
-    	log.info("inside findSubsidySchemeByName "+scName+ " :: "+gaName);
+    	log.info("inside findSubsidySchemeByName* "+scName+ " :: "+gaName);
     	SubsidyMeasure searchScheme = new SubsidyMeasure();
     	searchScheme.setSubsidyMeasureTitle(scName);
     	searchScheme.setStatus("Active");
