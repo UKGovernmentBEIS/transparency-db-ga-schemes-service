@@ -15,7 +15,7 @@ public final class GrantingAuthSpecificationUtils {
 	/**
 	 * To define specification for subsidy measure title
 	 * 
-	 * @param subsidyMeasureTitle
+	 * @param gaId
 	 *            - Add subsidy measure title
 	 * @return Specification<Award> - Specification for Granting Authority
 	 */
@@ -27,8 +27,8 @@ public final class GrantingAuthSpecificationUtils {
 	/**
 	 * To define specification for beneficiary name
 	 * 
-	 * @param beneficiaryName
-	 *            -beneficiaryName
+	 * @param grantingAuthorityName
+	 *            -grantingAuthorityName
 	 * @return Specification<Award> - Specification for Granting Authority
 	 */
 	public static Specification<GrantingAuthority> grantingAuthorityName(String grantingAuthorityName) {

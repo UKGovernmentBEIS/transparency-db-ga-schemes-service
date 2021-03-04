@@ -33,7 +33,6 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SearchInput;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.GAResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchResults;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.UserDetailsResponse;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.ValidationResult;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.AccessTokenResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SearchUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -73,8 +72,8 @@ public class GrantingAuthorityController {
 	
 		gaInputRequest) {
 				
-		
-		
+
+
 			log.info("{} ::Before calling add addGrantingAuthority",loggingComponentName);
 			if(gaInputRequest==null) {
 				throw new InvalidRequestException("Invalid Request");
@@ -104,8 +103,8 @@ public class GrantingAuthorityController {
 			value="grantingAuthority/{gaNumber}"
 		
 			)
-	public ResponseEntity<GAResponse> updateGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@Valid @RequestBody GrantingAuthorityRequest gaInputRequest
-			,@PathVariable("gaNumber") Long gaNumber) {
+	public ResponseEntity<GAResponse> updateGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+			 @Valid @RequestBody GrantingAuthorityRequest gaInputRequest,@PathVariable("gaNumber") Long gaNumber) {
 
 		try {
 			log.info("{}::Before calling updateGrantingAuthority", loggingComponentName);
@@ -200,8 +199,6 @@ public class GrantingAuthorityController {
 
 		AccessTokenResponse openIdTokenResponse = graphAPILoginFeignClient
 				.getAccessIdToken(environment.getProperty("tenant-id"), map);
-		
-		
 
 		if (openIdTokenResponse == null) {
 			throw new AccessTokenException(HttpStatus.valueOf(500),
@@ -212,25 +209,22 @@ public class GrantingAuthorityController {
 
 	@DeleteMapping(
 			value="group/{azGrpId}")
-	public ResponseEntity<ValidationResult> deleteUsersGroup(@PathVariable("azGrpId") String azGrpId,
+	public ResponseEntity<GAResponse> deleteUsersGroup(@PathVariable("azGrpId") String azGrpId,
 												 @RequestBody UsersGroupRequest usersGroupRequest)
 	{
-		try {
 			log.info("{} ::before calling delete UsersGroup", loggingComponentName);
 			if(Objects.isNull(usersGroupRequest)|| StringUtils.isEmpty(azGrpId)) {
 				throw new InvalidRequestException("usersGroupRequest is empty");
 			}
-			ValidationResult validationResult = new ValidationResult();
+			GAResponse response = new GAResponse();
 			String accessToken=getBearerToken();
 			GrantingAuthority grantingAuthority = grantingAuthorityService.deleteUser(accessToken, usersGroupRequest, azGrpId);
-			
-			validationResult.setMessage(grantingAuthority.getGaId() + " deActivated  successfully");
-
-			return ResponseEntity.status(HttpStatus.OK).body(validationResult);
-		} catch (Exception e) {
-
-			ValidationResult validationResult = new ValidationResult();
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(validationResult);
-		}
+			if (Objects.nonNull(grantingAuthority)) {
+				response.setGaId(grantingAuthority.getGaId());
+				response.setMessage("deActivated  successfully");
+			} else {
+				response.setMessage(" status not updated deActive for GA");
+			}
+			return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }
