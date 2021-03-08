@@ -2,6 +2,8 @@ package com.beis.subsidy.ga.schemes.dbpublishingservice.controller;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import java.time.LocalDateTime;
+
 import javax.validation.Valid;
 
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.UserPrinciple;
@@ -20,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.InvalidRequestException;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.AuditLogs;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.AuditLogsRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeDetailsRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeSearchInput;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchSubsidyResultsResponse;
@@ -42,6 +46,9 @@ public class SubsidySchemeController {
 
     @Value("${loggingComponentName}")
     private String loggingComponentName;
+    
+    @Autowired
+    AuditLogsRepository auditLogsRepository;
 
     @GetMapping("/health")
     public ResponseEntity<String> getHealth() {
@@ -72,7 +79,23 @@ public class SubsidySchemeController {
     	
     	//check user role here
     	SearchUtils.isSchmeRoleValidation(objectMapper, userPrinciple,"Add Subsidy Schema");
-        return subsidySchemeService.addSubsidySchemeDetails(scheme);
+    	        
+        String scNumber = subsidySchemeService.addSubsidySchemeDetails(scheme);
+      //Audit entry
+   	 AuditLogs audit = new AuditLogs();
+        String userName= SearchUtils.getUserName(objectMapper, userPrinciple);
+        String gaName= SearchUtils.getGaName(objectMapper, userPrinciple);
+         audit.setUserName(userName);
+         audit.setEventType("create Schemes");
+         audit.setEventId(scNumber);
+         audit.setGaName(gaName);
+         audit.setEventMessage("Scheme "+scNumber +" addede by  "+userName);
+         audit.setCreatedTimestamp(LocalDateTime.now());
+         auditLogsRepository.save(audit);
+         log.info("audit entry created for addSchemeDetails "+userName);
+   	
+   	//
+        return scNumber;
     }
 
     @PostMapping(
@@ -81,7 +104,23 @@ public class SubsidySchemeController {
     public String updateSchemeDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@Valid @RequestBody SchemeDetailsRequest scheme) {
     	//check user role here
 		SearchUtils.isSchmeRoleValidation(objectMapper, userPrinciple,"update Subsidy Schema");
-        return subsidySchemeService.updateSubsidySchemeDetails(scheme);
+        String scNumber= subsidySchemeService.updateSubsidySchemeDetails(scheme);
+        
+        //Audit entry
+      	 AuditLogs audit = new AuditLogs();
+           String userName= SearchUtils.getUserName(objectMapper, userPrinciple);
+           String gaName= SearchUtils.getGaName(objectMapper, userPrinciple);
+            audit.setUserName(userName);
+            audit.setEventType("update Schemes");
+            audit.setEventId(scNumber);
+            audit.setGaName(gaName);
+            audit.setEventMessage("Scheme "+scNumber +" published");
+            audit.setCreatedTimestamp(LocalDateTime.now());
+            auditLogsRepository.save(audit);
+            log.info("audit entry created for updateSchemeDetails "+userName);
+      	
+            return scNumber;
+      	//
     }
     @GetMapping(
             value = "{scNumber}",

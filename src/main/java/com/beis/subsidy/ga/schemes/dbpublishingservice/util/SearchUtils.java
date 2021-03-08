@@ -192,4 +192,30 @@ public class SearchUtils {
 		}
 	}
 	
+	public static String getUserName(ObjectMapper objMapper,HttpHeaders userPrinciple) {
+		UserPrinciple userPrincipleObj = null;
+		String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
+		try {
+			userPrincipleObj = objMapper.readValue(userPrincipleStr, UserPrinciple.class);
+			return userPrincipleObj.getUserName();
+			
+		} catch(JsonProcessingException exception){
+			throw new AccessManagementException(HttpStatus.BAD_REQUEST,"JSON parsing Exception");
+		}
+		
+	}
+	
+	public static String getGaName(ObjectMapper objMapper,HttpHeaders userPrinciple) {
+		UserPrinciple userPrincipleObj = null;
+		String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
+		try {
+			userPrincipleObj = objMapper.readValue(userPrincipleStr, UserPrinciple.class);
+			return userPrincipleObj.getGrantingAuthorityGroupName();
+			
+		} catch(JsonProcessingException exception){
+			throw new AccessManagementException(HttpStatus.BAD_REQUEST,"JSON parsing Exception");
+		}
+		
+	}
+	
 }

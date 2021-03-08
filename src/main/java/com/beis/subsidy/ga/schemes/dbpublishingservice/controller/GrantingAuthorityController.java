@@ -1,5 +1,6 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.controller;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import javax.validation.Valid;
@@ -26,9 +27,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.controller.feign.GraphAPILoginFeignClient;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.AccessTokenException;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.InvalidRequestException;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.AuditLogs;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthorityRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.UsersGroupRequest;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.AuditLogsRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SearchInput;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.GAResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchResults;
@@ -54,6 +57,9 @@ public class GrantingAuthorityController {
 	    
 	@Autowired
 	Environment environment;
+	
+	@Autowired
+    AuditLogsRepository auditLogsRepository;
 
 	 @Autowired
 	 private ObjectMapper objectMapper;
@@ -76,7 +82,7 @@ public class GrantingAuthorityController {
 		
 		
 			log.info("{} ::Before calling add addGrantingAuthority",loggingComponentName);
-			if(gaInputRequest==null) {
+			if(gaInputRequest==null) {   
 				throw new InvalidRequestException("Invalid Request");
 			}
 			String accessToken=getBearerToken();
@@ -87,6 +93,20 @@ public class GrantingAuthorityController {
 			
 			response.setGaId(grantingAuthority.getGaId());
 			response.setMessage("Created successfully");
+			
+			  //Audit entry
+		   	 AuditLogs audit = new AuditLogs();
+		      
+		         audit.setUserName(gaInputRequest.getUserName());
+		         audit.setEventType("Create Granting Authority");
+		         audit.setEventId(String.valueOf(grantingAuthority.getGaId()));
+		         audit.setGaName(grantingAuthority.getAzureGroupName());
+		         audit.setEventMessage("Granting Authority  "+grantingAuthority.getAzureGroupName() +" added by " +gaInputRequest.getUserName() );
+		         audit.setCreatedTimestamp(LocalDateTime.now());
+		         auditLogsRepository.save(audit);
+		         log.info("audit entry created for user ");
+		   	
+		   	//
 
 			return ResponseEntity.status(HttpStatus.OK).body(response);
 		
@@ -121,7 +141,22 @@ public class GrantingAuthorityController {
 			GrantingAuthority grantingAuthority = grantingAuthorityService.updateGrantingAuthority(gaInputRequest,gaNumber,accessToken);
 			response.setGaId(grantingAuthority.getGaId());
 			response.setMessage(" updated successfully");
-
+			
+			//Audit entry
+		   	 AuditLogs audit = new AuditLogs();
+		        String userName= SearchUtils.getUserName(objectMapper, userPrinciple);
+		        String gaName= SearchUtils.getGaName(objectMapper, userPrinciple);
+		         audit.setUserName(userName);
+		         audit.setEventType("update Granting Authority");
+		         audit.setEventId(String.valueOf(grantingAuthority.getGaId()));
+		         audit.setGaName(gaName);
+		         audit.setEventMessage("Granting Authority "+grantingAuthority.getGrantingAuthorityName() +" updated by  "+userName);
+		         audit.setCreatedTimestamp(LocalDateTime.now());
+		         auditLogsRepository.save(audit);
+		         log.info("audit entry updateGrantingAuthority "+userName);
+		   	
+		   	//
+			
 			return ResponseEntity.status(HttpStatus.OK).body(response);
 		} catch (Exception e) {
 
@@ -156,6 +191,21 @@ public class GrantingAuthorityController {
 			
 			UserDetailsResponse userDetailsResponse  = grantingAuthorityService
 					.deActivateGrantingAuthority(azGrpId,accessToken);
+			
+			//Audit entry
+		   	 AuditLogs audit = new AuditLogs();
+		        String userName= SearchUtils.getUserName(objectMapper, userPrinciple);
+		        String gaName= SearchUtils.getGaName(objectMapper, userPrinciple);
+		         audit.setUserName(userName);
+		         audit.setEventType("update Granting Authority");
+		         audit.setEventId(String.valueOf(azGrpId));
+		         audit.setGaName(gaName);
+		         audit.setEventMessage("Granting Authority "+" deactivated by  "+userName);
+		         audit.setCreatedTimestamp(LocalDateTime.now());
+		         auditLogsRepository.save(audit);
+		         log.info("audit entry updateGrantingAuthority "+userName);
+		   	
+		   	//
 			
 			return new ResponseEntity<UserDetailsResponse>(userDetailsResponse, HttpStatus.OK);
 		

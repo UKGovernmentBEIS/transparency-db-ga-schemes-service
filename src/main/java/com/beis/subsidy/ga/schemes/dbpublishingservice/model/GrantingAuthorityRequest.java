@@ -10,5 +10,8 @@ import lombok.NoArgsConstructor;
 public class GrantingAuthorityRequest {
 
 	private String name;
+	private String userName;
+	
+	
 
 }
