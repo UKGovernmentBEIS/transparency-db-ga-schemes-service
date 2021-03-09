@@ -2,7 +2,8 @@ package com.beis.subsidy.ga.schemes.dbpublishingservice.controller;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+
 
 import javax.validation.Valid;
 
@@ -90,7 +91,7 @@ public class SubsidySchemeController {
          audit.setEventId(scNumber);
          audit.setGaName(gaName);
          audit.setEventMessage("Scheme "+scNumber +" addede by  "+userName);
-         audit.setCreatedTimestamp(LocalDateTime.now());
+         audit.setCreatedTimestamp(LocalDate.now());
          auditLogsRepository.save(audit);
          log.info("audit entry created for addSchemeDetails "+userName);
    	
@@ -115,7 +116,7 @@ public class SubsidySchemeController {
             audit.setEventId(scNumber);
             audit.setGaName(gaName);
             audit.setEventMessage("Scheme "+scNumber +" published");
-            audit.setCreatedTimestamp(LocalDateTime.now());
+            audit.setCreatedTimestamp(LocalDate.now());
             auditLogsRepository.save(audit);
             log.info("audit entry created for updateSchemeDetails "+userName);
       	

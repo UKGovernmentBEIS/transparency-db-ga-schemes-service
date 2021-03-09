@@ -1,5 +1,6 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.controller;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -102,7 +103,7 @@ public class GrantingAuthorityController {
 		         audit.setEventId(String.valueOf(grantingAuthority.getGaId()));
 		         audit.setGaName(grantingAuthority.getAzureGroupName());
 		         audit.setEventMessage("Granting Authority  "+grantingAuthority.getAzureGroupName() +" added by " +gaInputRequest.getUserName() );
-		         audit.setCreatedTimestamp(LocalDateTime.now());
+		         audit.setCreatedTimestamp(LocalDate.now());
 		         auditLogsRepository.save(audit);
 		         log.info("audit entry created for user ");
 		   	
@@ -151,7 +152,7 @@ public class GrantingAuthorityController {
 		         audit.setEventId(String.valueOf(grantingAuthority.getGaId()));
 		         audit.setGaName(gaName);
 		         audit.setEventMessage("Granting Authority "+grantingAuthority.getGrantingAuthorityName() +" updated by  "+userName);
-		         audit.setCreatedTimestamp(LocalDateTime.now());
+		         audit.setCreatedTimestamp(LocalDate.now());
 		         auditLogsRepository.save(audit);
 		         log.info("audit entry updateGrantingAuthority "+userName);
 		   	
@@ -201,7 +202,7 @@ public class GrantingAuthorityController {
 		         audit.setEventId(String.valueOf(azGrpId));
 		         audit.setGaName(gaName);
 		         audit.setEventMessage("Granting Authority "+" deactivated by  "+userName);
-		         audit.setCreatedTimestamp(LocalDateTime.now());
+		         audit.setCreatedTimestamp(LocalDate.now());
 		         auditLogsRepository.save(audit);
 		         log.info("audit entry updateGrantingAuthority "+userName);
 		   	
