@@ -14,6 +14,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +31,8 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SearchUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Objects;
 
 @RequestMapping(path = "/scheme")
 @RestController
@@ -88,23 +91,30 @@ public class SubsidySchemeController {
    	    return scNumber;
     }
 
-    @PostMapping(
-            value = "/update"
+    @PutMapping(
+            value="update/{scNumber}"
     )
     public String updateSchemeDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
-                                      @Valid @RequestBody SchemeDetailsRequest scheme) {
+                                      @RequestBody SchemeDetailsRequest schemeReq,
+                                      @PathVariable("scNumber") String scNumber) {
+
         log.info("{} ::Before calling updateSchemeDetails", loggingComponentName);
+        if(Objects.isNull(schemeReq)|| StringUtils.isEmpty(scNumber)) {
+            throw new InvalidRequestException("schemeReq is empty or scNumber");
+        }
     	//check user role here
 		UserPrinciple userPrincipleObj = SearchUtils.isSchemeRoleValidation(objectMapper, userPrinciple,"update Subsidy Schema");
-        String scNumber= subsidySchemeService.updateSubsidySchemeDetails(scheme);
+        String scNumberRes= subsidySchemeService.updateSubsidySchemeDetails(schemeReq,scNumber);
 
-        StringBuilder eventMsg = new StringBuilder("Scheme ").append(scNumber).append("Inactive and Updated by")
+        StringBuilder eventMsg = new StringBuilder("Scheme ").append(scNumber).append(" is Inactive and Updated by")
                 .append(userPrincipleObj.getUserName());
-        SearchUtils.saveAuditLog(userPrincipleObj,"Update Schemes", scNumber,eventMsg.toString(),auditLogsRepository);
-        log.info("{} ::end of calling updateSchemeDetails", loggingComponentName);
-        return scNumber;
 
+        SearchUtils.saveAuditLog(userPrincipleObj,"Update Schemes", scNumberRes,eventMsg.toString(),auditLogsRepository);
+        log.info("{} ::end of calling updateSchemeDetails", loggingComponentName);
+
+        return scNumber;
     }
+
     @GetMapping(
             value = "{scNumber}",
             produces = APPLICATION_JSON_VALUE

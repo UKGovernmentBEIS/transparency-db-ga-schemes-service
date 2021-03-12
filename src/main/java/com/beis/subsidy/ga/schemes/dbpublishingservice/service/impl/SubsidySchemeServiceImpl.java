@@ -163,9 +163,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
     }
 
     @Override
-    public String updateSubsidySchemeDetails(SchemeDetailsRequest scheme) {
+    public String updateSubsidySchemeDetails(SchemeDetailsRequest scheme, String scNumber) {
         log.info("Inside updateSubsidySchemeDetails method - sc number " + scheme.getScNumber());
-        SubsidyMeasure schemeById = subsidyMeasureRepository.findById(scheme.getScNumber()).get();
+        SubsidyMeasure schemeById = subsidyMeasureRepository.findById(scNumber).get();
         LegalBasis legalBasis = schemeById.getLegalBases();
         if (Objects.isNull(schemeById)) {
             throw new SearchResultNotFoundException("Scheme details not found::" + scheme.getScNumber());
