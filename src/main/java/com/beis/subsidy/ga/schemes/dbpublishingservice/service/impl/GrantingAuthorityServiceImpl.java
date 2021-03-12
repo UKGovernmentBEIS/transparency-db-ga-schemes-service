@@ -249,15 +249,17 @@ public class GrantingAuthorityServiceImpl implements GrantingAuthorityService {
                 ResponseEntity<Object> responseResponseEntity = toResponseEntity(response, clazz);
                 groupResponse = (GroupResponse) responseResponseEntity.getBody();
 
-            } else if (response.status() == 400 || response.status() == 407  ) {
-                throw new AccessManagementException(HttpStatus.valueOf(407),"create group request is invalid or group already exist");
+            } else if (response.status() == 400 || response.status() == 417  ) {
+                throw new AccessManagementException(HttpStatus.valueOf(response.status()),
+                        "create group request is invalid or group already exist");
             } else {
                 log.error("{}:: Graph Api failed:: status code {}", loggingComponentName, 500);
                 throw new AccessManagementException(HttpStatus.valueOf(500), "Create group Graph Api Failed");
             }
 
         } catch (FeignException ex) {
-            log.error("{}:: Graph Api failed:: status code {} & message {}", loggingComponentName, ex.status(),
+            log.error("{}:: Graph Api failed:: status code {} & message {}",
+                    loggingComponentName, ex.status(),
                     ex.getMessage());
             throw new AccessManagementException(HttpStatus.valueOf(ex.status()), "Graph Api failed");
         }
@@ -299,17 +301,17 @@ public class GrantingAuthorityServiceImpl implements GrantingAuthorityService {
 
     public GrantingAuthority deleteUser(String token, UsersGroupRequest usersGroupRequest, String azGrpId) {
         Response response = null;
-        int status = 0;
         boolean isInValid = false;
         GrantingAuthority grantingAuthority = null;
         try {
             List<String> userIds=usersGroupRequest.getUserIds();
-            long time1 = System.currentTimeMillis();
-            for (String userId : userIds) {
-                response = graphAPIFeignClient.deleteUser("Bearer " + token, userId);
-                if (response.status() != 204) {
-                    isInValid = true;
-                    break;
+            if (userIds.size() > 0) {
+                for (String userId : userIds) {
+                    response = graphAPIFeignClient.deleteUser("Bearer " + token, userId);
+                    if (response.status() != 204) {
+                        isInValid = true;
+                        break;
+                    }
                 }
             }
 
