@@ -48,6 +48,9 @@ public class SubsidyMeasureResponse {
     @JsonProperty
     private String legalBasisText;
 
+    @JsonProperty
+    private String status;
+
     public SubsidyMeasureResponse(SubsidyMeasure subsidyMeasure) {
         this.scNumber = subsidyMeasure.getScNumber();
         this.subsidyMeasureTitle  = subsidyMeasure.getSubsidyMeasureTitle();
@@ -57,6 +60,7 @@ public class SubsidyMeasureResponse {
         this.budget = subsidyMeasure.getBudget();
         this.gaName = subsidyMeasure.getGrantingAuthority().getGrantingAuthorityName();
         this.adhoc = ""+subsidyMeasure.isAdhoc();
+        this.status = subsidyMeasure.getStatus();
         this.gaSubsidyWebLink = subsidyMeasure.getGaSubsidyWebLink();
         this.gaSubsidyWebLinkDescription = subsidyMeasure.getGaSubsidyWebLinkDescription();
         this.legalBasisText = subsidyMeasure.getLegalBases().getLegalBasisText();
