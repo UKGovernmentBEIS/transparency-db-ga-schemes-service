@@ -5,6 +5,7 @@ import java.util.Objects;
 import javax.validation.Valid;
 
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.GrantingAuthorityService;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.util.UserPrinciple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -29,6 +30,7 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.InvalidRequestE
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthorityRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.UsersGroupRequest;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.AuditLogsRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SearchInput;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.GAResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchResults;
@@ -53,6 +55,9 @@ public class GrantingAuthorityController {
 	    
 	@Autowired
 	Environment environment;
+	
+	@Autowired
+    AuditLogsRepository auditLogsRepository;
 
 	 @Autowired
 	 private ObjectMapper objectMapper;
@@ -68,28 +73,28 @@ public class GrantingAuthorityController {
 	 * @return ResponseEntity - Return response status and description
 	 */
 	@PostMapping("grantingAuthority")
-	public ResponseEntity<GAResponse> addGrantingAuthority(@RequestBody GrantingAuthorityRequest
-	
-		gaInputRequest) {
-				
+	public ResponseEntity<GAResponse> addGrantingAuthority(@RequestBody
+							 GrantingAuthorityRequest gaInputRequest) {
 
-
-			log.info("{} ::Before calling add addGrantingAuthority",loggingComponentName);
-			if(gaInputRequest==null) {
+		log.info("{} ::Before calling add addGrantingAuthority",loggingComponentName);
+		if(gaInputRequest==null) {
 				throw new InvalidRequestException("Invalid Request");
-			}
-			String accessToken=getBearerToken();
-			log.info("{} ::after GrantingAuthority accessToken", loggingComponentName);
+		}
+		String accessToken=getBearerToken();
+		log.info("{} ::after GrantingAuthority accessToken", loggingComponentName);
 			
-			GAResponse response = new GAResponse();
-			GrantingAuthority grantingAuthority = grantingAuthorityService.createGrantingAuthority(gaInputRequest,accessToken);
+		GAResponse response = new GAResponse();
+		GrantingAuthority grantingAuthority = grantingAuthorityService
+					.createGrantingAuthority(gaInputRequest,accessToken);
 			
-			response.setGaId(grantingAuthority.getGaId());
-			response.setMessage("Created successfully");
+		response.setGaId(grantingAuthority.getGaId());
+		response.setMessage("Created successfully");
 
-			return ResponseEntity.status(HttpStatus.OK).body(response);
-		
-
+		StringBuilder eventMsg = new StringBuilder("Granting Authority ").append(grantingAuthority.getAzureGroupName())
+				.append(" added by " ).append(gaInputRequest.getUserName());
+		SearchUtils.saveAuditLog(null,"Create Granting Authority", grantingAuthority.getGaId().toString(),
+				eventMsg.toString(),auditLogsRepository);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 	
 	/**
@@ -101,15 +106,14 @@ public class GrantingAuthorityController {
 	 */
 	@PutMapping(
 			value="grantingAuthority/{gaNumber}"
-		
-			)
+	)
 	public ResponseEntity<GAResponse> updateGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
-			 @Valid @RequestBody GrantingAuthorityRequest gaInputRequest,@PathVariable("gaNumber") Long gaNumber) {
-
+			@Valid @RequestBody GrantingAuthorityRequest gaInputRequest,@PathVariable("gaNumber") Long gaNumber) {
+		UserPrinciple userPrincipleObj= null;
 		try {
-			log.info("{}::Before calling updateGrantingAuthority", loggingComponentName);
+			log.info("{}::Inside  updateGrantingAuthority", loggingComponentName);
 			//check user role here
-			SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"update Granting Authority");
+			userPrincipleObj = SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"update Granting Authority");
 
 			if(gaInputRequest==null) {
 				throw new InvalidRequestException("gaInputRequest is empty");
@@ -119,14 +123,26 @@ public class GrantingAuthorityController {
 			String accessToken=getBearerToken();
 			GrantingAuthority grantingAuthority = grantingAuthorityService.updateGrantingAuthority(gaInputRequest,gaNumber,accessToken);
 			response.setGaId(grantingAuthority.getGaId());
-			response.setMessage(" updated successfully");
+			response.setMessage("updated successfully");
 
+			//Audit entry
+			StringBuilder eventMsg = new StringBuilder("Granting Authority ").append(grantingAuthority.getAzureGroupName())
+					.append("updated by " ).append(gaInputRequest.getUserName());
+			SearchUtils.saveAuditLog(userPrincipleObj,"Update Granting Authority", grantingAuthority.getGaId().toString(),
+					eventMsg.toString(),auditLogsRepository);
+
+			log.info("{}::after calling updateGrantingAuthority", loggingComponentName);
 			return ResponseEntity.status(HttpStatus.OK).body(response);
 		} catch (Exception e) {
-
+			log.info("{}::In catch block of updateGrantingAuthority", loggingComponentName, e);
 			// 2.0 - CatchException and return validation errors
 			GAResponse response = new GAResponse();
 			response.setMessage("failed to update Granting Authority");
+
+			StringBuilder eventMsg = new StringBuilder("failed to update Granting Authority")
+					.append("by " ).append(gaInputRequest.getUserName());
+			SearchUtils.saveAuditLog(userPrincipleObj,"Update Granting Authority",gaNumber.toString() ,
+					eventMsg.toString(),auditLogsRepository);
 
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
 		}
@@ -142,23 +158,24 @@ public class GrantingAuthorityController {
 	@GetMapping(
 			value="grantingAuthority/{azGrpId}"
 			)
-	public ResponseEntity<UserDetailsResponse> deActivateGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@PathVariable("azGrpId") String azGrpId) {
+	public ResponseEntity<UserDetailsResponse> deActivateGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple
+			,@PathVariable("azGrpId") String azGrpId) {
 
 		
-			log.info("{} ::Before calling deActivateGrantingAuthority", loggingComponentName);
-			if(azGrpId==null) {
-				throw new InvalidRequestException("deActivateGrantingAuthority request is empty");
-			}
-			//check user role here
-			SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"deActivate Granting Authority");
-			String accessToken=getBearerToken();
+		log.info("{} ::Before calling deActivateGrantingAuthority", loggingComponentName);
+		if(azGrpId==null) {
+			throw new InvalidRequestException("deActivateGrantingAuthority request is empty");
+		}
+		//check user role here
+		SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,
+					"DeActivate Granting Authority");
+		String accessToken=getBearerToken();
 			
-			UserDetailsResponse userDetailsResponse  = grantingAuthorityService
+		UserDetailsResponse userDetailsResponse  = grantingAuthorityService
 					.deActivateGrantingAuthority(azGrpId,accessToken);
-			
-			return new ResponseEntity<UserDetailsResponse>(userDetailsResponse, HttpStatus.OK);
-		
 
+		log.info("{} ::After calling deActivateGrantingAuthority", loggingComponentName);
+		return new ResponseEntity<UserDetailsResponse>(userDetailsResponse, HttpStatus.OK);
 	}
 	
 	/**
@@ -199,6 +216,8 @@ public class GrantingAuthorityController {
 
 		AccessTokenResponse openIdTokenResponse = graphAPILoginFeignClient
 				.getAccessIdToken(environment.getProperty("tenant-id"), map);
+		
+		
 
 		if (openIdTokenResponse == null) {
 			throw new AccessTokenException(HttpStatus.valueOf(500),
@@ -209,22 +228,31 @@ public class GrantingAuthorityController {
 
 	@DeleteMapping(
 			value="group/{azGrpId}")
-	public ResponseEntity<GAResponse> deleteUsersGroup(@PathVariable("azGrpId") String azGrpId,
-												 @RequestBody UsersGroupRequest usersGroupRequest)
+	public ResponseEntity<GAResponse> deleteUsersGroup(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+							@PathVariable("azGrpId") String azGrpId,@RequestBody UsersGroupRequest usersGroupRequest)
 	{
-			log.info("{} ::before calling delete UsersGroup", loggingComponentName);
-			if(Objects.isNull(usersGroupRequest)|| StringUtils.isEmpty(azGrpId)) {
-				throw new InvalidRequestException("usersGroupRequest is empty");
-			}
-			GAResponse response = new GAResponse();
-			String accessToken=getBearerToken();
-			GrantingAuthority grantingAuthority = grantingAuthorityService.deleteUser(accessToken, usersGroupRequest, azGrpId);
-			if (Objects.nonNull(grantingAuthority)) {
-				response.setGaId(grantingAuthority.getGaId());
-				response.setMessage("deActivated  successfully");
-			} else {
-				response.setMessage(" status not updated deActive for GA");
-			}
-			return ResponseEntity.status(HttpStatus.OK).body(response);
+		log.info("{} ::before calling delete UsersGroup", loggingComponentName);
+		if(Objects.isNull(usersGroupRequest)|| StringUtils.isEmpty(azGrpId)) {
+			throw new InvalidRequestException("usersGroupRequest is empty");
+		}
+
+		UserPrinciple userPrincipleObj = SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,
+					"DeActive Granting Authority and Users");
+
+		GAResponse response = new GAResponse();
+		String accessToken=getBearerToken();
+		GrantingAuthority grantingAuthority = grantingAuthorityService.deleteUser(accessToken, usersGroupRequest, azGrpId);
+		if (Objects.nonNull(grantingAuthority)) {
+			response.setGaId(grantingAuthority.getGaId());
+			response.setMessage("deActivated  successfully");
+		} else {
+			response.setMessage(" status not updated deActive for GA");
+		}
+		//Audit entry
+		StringBuilder eventMsg = new StringBuilder("Granting Authority ").append("DeActivate by " )
+					.append(userPrincipleObj.getUserName());
+		SearchUtils.saveAuditLog(userPrincipleObj,"Deactivated Granting Authority", azGrpId.toString(),
+					eventMsg.toString(),auditLogsRepository);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }
