@@ -1,11 +1,10 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.util;
 
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.AuditLogs;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.AuditLogsRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-
-import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.AccessManagementException;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.UnauthorisedAccessException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -135,7 +134,7 @@ public class SearchUtils {
 		return yearsStr.toString();
 	}
 	
-	public static  void beisAdminRoleValidation(ObjectMapper objectMapper,HttpHeaders userPrinciple,String entity) {
+	public static  UserPrinciple beisAdminRoleValidation(ObjectMapper objectMapper,HttpHeaders userPrinciple,String entity) {
 		UserPrinciple userPrincipleObj = null;
 		String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
 		try {
@@ -147,20 +146,7 @@ public class SearchUtils {
 		} catch(JsonProcessingException exception){
 			throw new UnauthorisedAccessException("Unauthorised exception");
 		}
-	}
-	
-	public static  void GAbeisAdminRoleValidation(ObjectMapper objectMapper,HttpHeaders userPrinciple,String entity) {
-		UserPrinciple userPrincipleObj = null;
-		String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
-		try {
-			
-			userPrincipleObj = objectMapper.readValue(userPrincipleStr, UserPrinciple.class);
-			if (!AccessManagementConstant.BEIS_ADMIN_ROLE.equalsIgnoreCase(userPrincipleObj.getRole())) {
-				throw new UnauthorisedAccessException("You are not authorised to " + entity);
-			}
-		} catch(JsonProcessingException exception){
-			throw new UnauthorisedAccessException("Unauthorised exception");
-		}
+		return userPrincipleObj;
 	}
 	
 	public static  UserPrinciple isAllRolesValidation(ObjectMapper objectMapper,HttpHeaders userPrinciple,String entity) {
@@ -178,7 +164,7 @@ public class SearchUtils {
 	    }
 	
 	
-	public static  void isSchmeRoleValidation(ObjectMapper objectMapper,HttpHeaders userPrinciple,String entity) {
+	public static  UserPrinciple isSchemeRoleValidation(ObjectMapper objectMapper,HttpHeaders userPrinciple,String entity) {
 		UserPrinciple userPrincipleObj = null;
 		String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
 		try {
@@ -190,32 +176,24 @@ public class SearchUtils {
 		} catch(JsonProcessingException exception){
 			throw new UnauthorisedAccessException("Unauthorised exception");
 		}
+		return userPrincipleObj;
 	}
-	
-	public static String getUserName(ObjectMapper objMapper,HttpHeaders userPrinciple) {
-		UserPrinciple userPrincipleObj = null;
-		String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
+
+	public static void saveAuditLog(UserPrinciple userPrinciple, String action,String scOrGaId,
+									String eventMsg,AuditLogsRepository auditLogsRepository) {
+		AuditLogs audit = new AuditLogs();
 		try {
-			userPrincipleObj = objMapper.readValue(userPrincipleStr, UserPrinciple.class);
-			return userPrincipleObj.getUserName();
-			
-		} catch(JsonProcessingException exception){
-			throw new AccessManagementException(HttpStatus.BAD_REQUEST,"JSON parsing Exception");
+			String userName = userPrinciple.getUserName();
+			audit.setUserName(userName);
+			audit.setEventType(action);
+			audit.setEventId(scOrGaId);
+			audit.setEventMessage(eventMsg);
+			audit.setGaName(userPrinciple.getGrantingAuthorityGroupName());
+			audit.setCreatedTimestamp(LocalDate.now());
+			auditLogsRepository.save(audit);
+		} catch(Exception e) {
+			log.error("{} :: saveAuditLog failed to perform action", e);
 		}
-		
+
 	}
-	
-	public static String getGaName(ObjectMapper objMapper,HttpHeaders userPrinciple) {
-		UserPrinciple userPrincipleObj = null;
-		String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
-		try {
-			userPrincipleObj = objMapper.readValue(userPrincipleStr, UserPrinciple.class);
-			return userPrincipleObj.getGrantingAuthorityGroupName();
-			
-		} catch(JsonProcessingException exception){
-			throw new AccessManagementException(HttpStatus.BAD_REQUEST,"JSON parsing Exception");
-		}
-		
-	}
-	
 }

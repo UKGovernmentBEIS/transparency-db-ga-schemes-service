@@ -218,7 +218,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         legalBasis.setSubsidyMeasure(schemeById);
 
         SubsidyMeasure updatedScheme = subsidyMeasureRepository.save(schemeById);
-        log.info("Updated successfully : "+schemeById.getScNumber());
+        log.info("Updated successfully : ");
         return updatedScheme.getScNumber();
     }
 

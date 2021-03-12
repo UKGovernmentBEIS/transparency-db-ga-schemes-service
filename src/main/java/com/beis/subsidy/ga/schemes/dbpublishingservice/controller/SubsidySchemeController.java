@@ -2,9 +2,6 @@ package com.beis.subsidy.ga.schemes.dbpublishingservice.controller;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import java.time.LocalDate;
-
-
 import javax.validation.Valid;
 
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.UserPrinciple;
@@ -23,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.InvalidRequestException;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.model.AuditLogs;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.AuditLogsRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeDetailsRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeSearchInput;
@@ -76,52 +72,38 @@ public class SubsidySchemeController {
     @PostMapping(
             value = "/add"
     )
-    public String addSchemeDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@Valid @RequestBody SchemeDetailsRequest scheme) {
-    	
-    	//check user role here
-    	SearchUtils.isSchmeRoleValidation(objectMapper, userPrinciple,"Add Subsidy Schema");
+    public String addSchemeDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+                                   @Valid @RequestBody SchemeDetailsRequest scheme) {
+
+        log.info("{} :: inside addSchemeDetails method",loggingComponentName);
+        //check user role here
+    	UserPrinciple userPrincipleObj = SearchUtils.isSchemeRoleValidation(objectMapper, userPrinciple,"Add Subsidy Schema");
     	        
         String scNumber = subsidySchemeService.addSubsidySchemeDetails(scheme);
-      //Audit entry
-   	 AuditLogs audit = new AuditLogs();
-        String userName= SearchUtils.getUserName(objectMapper, userPrinciple);
-        String gaName= SearchUtils.getGaName(objectMapper, userPrinciple);
-         audit.setUserName(userName);
-         audit.setEventType("create Schemes");
-         audit.setEventId(scNumber);
-         audit.setGaName(gaName);
-         audit.setEventMessage("Scheme "+scNumber +" addede by  "+userName);
-         audit.setCreatedTimestamp(LocalDate.now());
-         auditLogsRepository.save(audit);
-         log.info("audit entry created for addSchemeDetails "+userName);
-   	
-   	//
-        return scNumber;
+        //Audit entry
+        StringBuilder eventMsg = new StringBuilder("Scheme ").append(scNumber).append("added by")
+                .append(userPrincipleObj.getUserName());
+        SearchUtils.saveAuditLog(userPrincipleObj,"create Schemes", scNumber,eventMsg.toString(),auditLogsRepository);
+        log.info("{} :: End of  addSchemeDetails method",loggingComponentName);
+   	    return scNumber;
     }
 
     @PostMapping(
             value = "/update"
     )
-    public String updateSchemeDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,@Valid @RequestBody SchemeDetailsRequest scheme) {
+    public String updateSchemeDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+                                      @Valid @RequestBody SchemeDetailsRequest scheme) {
+        log.info("{} ::Before calling updateSchemeDetails", loggingComponentName);
     	//check user role here
-		SearchUtils.isSchmeRoleValidation(objectMapper, userPrinciple,"update Subsidy Schema");
+		UserPrinciple userPrincipleObj = SearchUtils.isSchemeRoleValidation(objectMapper, userPrinciple,"update Subsidy Schema");
         String scNumber= subsidySchemeService.updateSubsidySchemeDetails(scheme);
-        
-        //Audit entry
-      	 AuditLogs audit = new AuditLogs();
-           String userName= SearchUtils.getUserName(objectMapper, userPrinciple);
-           String gaName= SearchUtils.getGaName(objectMapper, userPrinciple);
-            audit.setUserName(userName);
-            audit.setEventType("update Schemes");
-            audit.setEventId(scNumber);
-            audit.setGaName(gaName);
-            audit.setEventMessage("Scheme "+scNumber +" published");
-            audit.setCreatedTimestamp(LocalDate.now());
-            auditLogsRepository.save(audit);
-            log.info("audit entry created for updateSchemeDetails "+userName);
-      	
-            return scNumber;
-      	//
+
+        StringBuilder eventMsg = new StringBuilder("Scheme ").append(scNumber).append("Inactive and Updated by")
+                .append(userPrincipleObj.getUserName());
+        SearchUtils.saveAuditLog(userPrincipleObj,"Update Schemes", scNumber,eventMsg.toString(),auditLogsRepository);
+        log.info("{} ::end of calling updateSchemeDetails", loggingComponentName);
+        return scNumber;
+
     }
     @GetMapping(
             value = "{scNumber}",
