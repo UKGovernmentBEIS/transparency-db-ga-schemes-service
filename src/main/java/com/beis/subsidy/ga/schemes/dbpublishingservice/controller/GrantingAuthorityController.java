@@ -127,7 +127,7 @@ public class GrantingAuthorityController {
 
 			//Audit entry
 			StringBuilder eventMsg = new StringBuilder("Granting Authority ").append(grantingAuthority.getAzureGroupName())
-					.append("updated by " ).append(gaInputRequest.getUserName());
+					.append(" updated by " ).append(gaInputRequest.getUserName());
 			SearchUtils.saveAuditLog(userPrincipleObj,"Update Granting Authority", grantingAuthority.getGaId().toString(),
 					eventMsg.toString(),auditLogsRepository);
 
