@@ -179,6 +179,22 @@ public class SearchUtils {
 		return userPrincipleObj;
 	}
 
+	public static void saveAuditLogForCreateGA(String userName, String action,String scOrGaId,
+									String groupName,String eventMsg,AuditLogsRepository auditLogsRepository) {
+		AuditLogs audit = new AuditLogs();
+		try {
+			audit.setUserName(userName);
+			audit.setEventType(action);
+			audit.setEventId(scOrGaId);
+			audit.setEventMessage(eventMsg);
+			audit.setGaName(groupName);
+			audit.setCreatedTimestamp(LocalDate.now());
+			auditLogsRepository.save(audit);
+		} catch(Exception e) {
+			log.error("{} :: saveAuditLogForCreateGA failed to perform action", e);
+		}
+	}
+
 	public static void saveAuditLog(UserPrinciple userPrinciple, String action,String scOrGaId,
 									String eventMsg,AuditLogsRepository auditLogsRepository) {
 		AuditLogs audit = new AuditLogs();

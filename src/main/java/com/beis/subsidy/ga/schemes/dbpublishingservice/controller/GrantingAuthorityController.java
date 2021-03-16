@@ -92,8 +92,8 @@ public class GrantingAuthorityController {
 
 		StringBuilder eventMsg = new StringBuilder("Granting Authority ").append(grantingAuthority.getAzureGroupName())
 				.append(" added by " ).append(gaInputRequest.getUserName());
-		SearchUtils.saveAuditLog(null,"Create Granting Authority", grantingAuthority.getGaId().toString(),
-				eventMsg.toString(),auditLogsRepository);
+		SearchUtils.saveAuditLogForCreateGA(gaInputRequest.getUserName(),"Create Granting Authority",
+				grantingAuthority.getGaId().toString(),grantingAuthority.getAzureGroupName(),eventMsg.toString(),auditLogsRepository);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 	
@@ -216,10 +216,9 @@ public class GrantingAuthorityController {
 
 		AccessTokenResponse openIdTokenResponse = graphAPILoginFeignClient
 				.getAccessIdToken(environment.getProperty("tenant-id"), map);
-		
-		
 
 		if (openIdTokenResponse == null) {
+			log.error("{} ::Graph Api Service Failed while bearer token generate in getBearerToken", loggingComponentName);
 			throw new AccessTokenException(HttpStatus.valueOf(500),
 					"Graph Api Service Failed while bearer token generate");
 		}
