@@ -70,21 +70,15 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
         } else {
 
-            if(!StringUtils.isEmpty(searchInput.getSearchName()) || !StringUtils.isEmpty(searchInput.getStatus())){
-                pageAwards = subsidyMeasureRepository.findAll(schemeSpecifications, pagingSortSchemes);
-
-            } else {
                 Long gaId = getGrantingAuthorityIdByName(userPriniciple.getGrantingAuthorityGroupName());
                 if(gaId == null || gaId <= 0){
                     throw new UnauthorisedAccessException("Invalid granting authority name");
                 }
                 pageAwards = subsidyMeasureRepository.
                         findAll(subsidyMeasureByGrantingAuthority(gaId),pagingSortSchemes);
-            }
-            schemeResults = pageAwards.getContent();
-            totalSchemeList = schemeResults;
-    }
-
+                schemeResults = pageAwards.getContent();
+                totalSchemeList = schemeResults;
+        }
     SearchSubsidyResultsResponse searchResults = null;
 
     if (!schemeResults.isEmpty()) {
