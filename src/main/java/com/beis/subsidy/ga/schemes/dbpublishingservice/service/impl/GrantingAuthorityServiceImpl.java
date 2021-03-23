@@ -212,18 +212,15 @@ public class GrantingAuthorityServiceImpl implements GrantingAuthorityService {
         Specification<GrantingAuthority> awardSpecifications = Specification
 
                 // getGrantingAuthorityID from input parameter
-                .where(searchinput.getGrantingAuthorityID() == null || searchinput.getGrantingAuthorityID().isEmpty()
-                        ? null
+                .where(StringUtils.isEmpty(searchinput.getGrantingAuthorityID())  ? null
                         : GrantingAuthSpecificationUtils
                         .grantingAuthorityId(Long.valueOf(searchinput.getGrantingAuthorityID())))
 
                 // getGrantingAuthorityName from input parameter
-                .and(searchinput.getGrantingAuthorityName() == null || searchinput.getGrantingAuthorityName().isEmpty()
-                        ? null
+                .and(StringUtils.isEmpty(searchinput.getGrantingAuthorityName()) ? null
                         : GrantingAuthSpecificationUtils.grantingAuthorityName(searchinput.getGrantingAuthorityName()))
 
-                .and(searchinput.getStatus() == null || searchinput.getStatus().isEmpty()
-                        ? null
+                .and(StringUtils.isEmpty(searchinput.getStatus()) ? null
                         : GrantingAuthSpecificationUtils.status(searchinput.getStatus()));
 
         return awardSpecifications;

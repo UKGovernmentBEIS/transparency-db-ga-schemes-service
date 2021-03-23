@@ -70,20 +70,22 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
         } else {
 
-            Long gaId = getGrantingAuthorityIdByName(userPriniciple.getGrantingAuthorityGroupName());
-            if(gaId == null || gaId <= 0){
-                throw new UnauthorisedAccessException("Invalid granting authority name");
-            }
-
-            pageAwards = subsidyMeasureRepository.
-                    findAll(subsidyMeasureByGrantingAuthority(gaId),pagingSortSchemes);
-            schemeResults = pageAwards.getContent();
-            if(!StringUtils.isEmpty(searchInput.getSearchName())){
-                totalSchemeList = subsidyMeasureRepository.findAll(schemeSpecifications);
+            if(!StringUtils.isEmpty(searchInput.getSearchName()) || !StringUtils.isEmpty(searchInput.getStatus())){
+                pageAwards = subsidyMeasureRepository.findAll(schemeSpecifications, pagingSortSchemes);
+                schemeResults = pageAwards.getContent();
+                totalSchemeList = subsidyMeasureRepository.findAll(schemeSpecificationsWithout);
             } else {
-                totalSchemeList = schemeResults;
+                Long gaId = getGrantingAuthorityIdByName(userPriniciple.getGrantingAuthorityGroupName());
+                if(gaId == null || gaId <= 0){
+                    throw new UnauthorisedAccessException("Invalid granting authority name");
+                }
+
+                pageAwards = subsidyMeasureRepository.
+                        findAll(subsidyMeasureByGrantingAuthority(gaId),pagingSortSchemes);
+                schemeResults = pageAwards.getContent();
+                totalSchemeList = subsidyMeasureRepository.findAll(schemeSpecificationsWithout);
             }
-        }
+    }
 
         SearchSubsidyResultsResponse searchResults = null;
 
