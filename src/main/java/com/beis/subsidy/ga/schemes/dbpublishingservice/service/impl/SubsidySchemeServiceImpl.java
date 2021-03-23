@@ -72,38 +72,38 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
             if(!StringUtils.isEmpty(searchInput.getSearchName()) || !StringUtils.isEmpty(searchInput.getStatus())){
                 pageAwards = subsidyMeasureRepository.findAll(schemeSpecifications, pagingSortSchemes);
-                schemeResults = pageAwards.getContent();
-                totalSchemeList = subsidyMeasureRepository.findAll(schemeSpecificationsWithout);
+
             } else {
                 Long gaId = getGrantingAuthorityIdByName(userPriniciple.getGrantingAuthorityGroupName());
                 if(gaId == null || gaId <= 0){
                     throw new UnauthorisedAccessException("Invalid granting authority name");
                 }
-
                 pageAwards = subsidyMeasureRepository.
                         findAll(subsidyMeasureByGrantingAuthority(gaId),pagingSortSchemes);
-                schemeResults = pageAwards.getContent();
-                totalSchemeList = subsidyMeasureRepository.findAll(schemeSpecificationsWithout);
             }
+            schemeResults = pageAwards.getContent();
+            totalSchemeList = schemeResults;
     }
 
-        SearchSubsidyResultsResponse searchResults = null;
+    SearchSubsidyResultsResponse searchResults = null;
 
-        if (!schemeResults.isEmpty()) {
-            searchResults = new SearchSubsidyResultsResponse(schemeResults, pageAwards.getTotalElements(),
+    if (!schemeResults.isEmpty()) {
+         searchResults = new SearchSubsidyResultsResponse(schemeResults, pageAwards.getTotalElements(),
                     pageAwards.getNumber() + 1, pageAwards.getTotalPages(), schemeCounts(totalSchemeList));
-        } else {
-            log.info("{}::Scheme results not found");
-            throw new SearchResultNotFoundException("Scheme Results NotFound");
-        }
-        return searchResults;
+    } else {
+        log.info("{}::Scheme results not found");
+        throw new SearchResultNotFoundException("Scheme Results NotFound");
     }
-    public BigInteger getDuration(LocalDate startDate, LocalDate endDate){
+      return searchResults;
+  }
+
+  public BigInteger getDuration(LocalDate startDate, LocalDate endDate) {
         long noOfDaysBetween = ChronoUnit.DAYS.between(startDate, endDate);
         return BigInteger.valueOf(noOfDaysBetween);
-    }
-    @Override
-    public String addSubsidySchemeDetails(SchemeDetailsRequest scheme) {
+  }
+
+  @Override
+  public String addSubsidySchemeDetails(SchemeDetailsRequest scheme) {
         log.info("Inside addSubsidySchemeDetails method :");
         SubsidyMeasure schemeToSave = new SubsidyMeasure();
         LegalBasis legalBasis = new LegalBasis();
@@ -162,10 +162,10 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         SubsidyMeasure savedScheme = subsidyMeasureRepository.save(schemeToSave);
         log.info("Scheme added successfully with Id : "+savedScheme.getScNumber());
         return savedScheme.getScNumber();
-    }
+  }
 
-    @Override
-    public String updateSubsidySchemeDetails(SchemeDetailsRequest scheme, String scNumber) {
+   @Override
+   public String updateSubsidySchemeDetails(SchemeDetailsRequest scheme, String scNumber) {
         log.info("Inside updateSubsidySchemeDetails method - sc number " + scheme.getScNumber());
         SubsidyMeasure schemeById = subsidyMeasureRepository.findById(scNumber).get();
         LegalBasis legalBasis = schemeById.getLegalBases();
