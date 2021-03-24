@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @NoArgsConstructor
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -57,7 +59,8 @@ public class SubsidyMeasureResponse {
         this.startDate =  SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getStartDate());
         this.endDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getEndDate());
         this.duration = SearchUtils.getDurationInYears(subsidyMeasure.getDuration());
-        this.budget = subsidyMeasure.getBudget();
+        this.budget = subsidyMeasure.getBudget().contains(",") ? subsidyMeasure.getBudget():
+                SearchUtils.decimalNumberFormat(new BigDecimal(subsidyMeasure.getBudget()));
         this.gaName = subsidyMeasure.getGrantingAuthority().getGrantingAuthorityName();
         this.adhoc = ""+subsidyMeasure.isAdhoc();
         this.status = subsidyMeasure.getStatus();

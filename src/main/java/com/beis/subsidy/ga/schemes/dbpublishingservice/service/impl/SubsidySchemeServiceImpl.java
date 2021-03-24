@@ -69,6 +69,15 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
             }
 
         } else {
+            if (!StringUtils.isEmpty(searchInput.getSearchName())
+               || !StringUtils.isEmpty(searchInput.getStatus())) {
+
+                pageAwards = subsidyMeasureRepository.findAll(schemeSpecifications, pagingSortSchemes);
+
+                schemeResults = pageAwards.getContent();
+                totalSchemeList = schemeResults;
+
+            } else {
 
                 Long gaId = getGrantingAuthorityIdByName(userPriniciple.getGrantingAuthorityGroupName());
                 if(gaId == null || gaId <= 0){
@@ -78,6 +87,10 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
                         findAll(subsidyMeasureByGrantingAuthority(gaId),pagingSortSchemes);
                 schemeResults = pageAwards.getContent();
                 totalSchemeList = schemeResults;
+
+            }
+
+
         }
     SearchSubsidyResultsResponse searchResults = null;
 
