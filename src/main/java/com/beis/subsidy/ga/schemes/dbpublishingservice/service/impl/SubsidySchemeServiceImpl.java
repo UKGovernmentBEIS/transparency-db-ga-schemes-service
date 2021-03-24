@@ -75,7 +75,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
                 pageAwards = subsidyMeasureRepository.findAll(schemeSpecifications, pagingSortSchemes);
 
                 schemeResults = pageAwards.getContent();
-                totalSchemeList = schemeResults;
+                totalSchemeList = subsidyMeasureRepository.findAll(schemeSpecificationsWithout);
 
             } else {
 
