@@ -72,10 +72,11 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
             if (!StringUtils.isEmpty(searchInput.getSearchName())
                || !StringUtils.isEmpty(searchInput.getStatus())) {
 
+                schemeSpecifications = getSpecificationSchemeDetailsForGARoles(searchInput,userPriniciple.getGrantingAuthorityGroupName());
                 pageAwards = subsidyMeasureRepository.findAll(schemeSpecifications, pagingSortSchemes);
 
                 schemeResults = pageAwards.getContent();
-                totalSchemeList = subsidyMeasureRepository.findAll(schemeSpecificationsWithout);
+                totalSchemeList = subsidyMeasureRepository.findAll(schemeSpecifications);
 
             } else {
 
@@ -86,7 +87,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
                 pageAwards = subsidyMeasureRepository.
                         findAll(subsidyMeasureByGrantingAuthority(gaId),pagingSortSchemes);
                 schemeResults = pageAwards.getContent();
-                totalSchemeList = schemeResults;
+                totalSchemeList = subsidyMeasureRepository.findAll(subsidyMeasureByGrantingAuthority(gaId));
 
             }
 
@@ -288,6 +289,24 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
                 );
         return schemeSpecifications;
     }
+
+    public Specification<SubsidyMeasure>  getSpecificationSchemeDetailsForGARoles(SchemeSearchInput searchInput, String gaName) {
+        String searchName = searchInput.getSearchName();
+        Specification<SubsidyMeasure> schemeSpecifications = Specification
+                .where(
+                        SearchUtils.checkNullOrEmptyString(searchName)
+                                ? null : SchemeSpecificationUtils.subsidySchemeName(searchName.trim())
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                        ? null : SchemeSpecificationUtils.subsidyNumber(searchName.trim()))
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                 ? null :SchemeSpecificationUtils.grantingAuthorityName(searchName.trim()))
+
+                )
+                .and(SearchUtils.checkNullOrEmptyString(gaName)
+                        ? null :SchemeSpecificationUtils.grantingAuthorityName(gaName.trim()));
+        return schemeSpecifications;
+    }
+
     private List<Sort.Order> getOrderByCondition(String[] sortBy) {
         List<Sort.Order> orders = new ArrayList<Sort.Order>();
         if (sortBy != null && sortBy.length > 0 && sortBy[0].contains(",")) {
