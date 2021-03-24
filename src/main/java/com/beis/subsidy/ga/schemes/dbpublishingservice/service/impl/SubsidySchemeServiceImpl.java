@@ -303,7 +303,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
                 )
                 .and(SearchUtils.checkNullOrEmptyString(gaName)
-                        ? null :SchemeSpecificationUtils.grantingAuthorityName(gaName.trim()));
+                        ? null :SchemeSpecificationUtils.grantingAuthorityName(gaName.trim()))
+                .and(SearchUtils.checkNullOrEmptyString(searchInput.getStatus())
+                        ? null :SchemeSpecificationUtils.schemeByStatus(searchInput.getStatus().trim()));
         return schemeSpecifications;
     }
 
