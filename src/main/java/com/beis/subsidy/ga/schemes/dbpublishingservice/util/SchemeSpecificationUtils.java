@@ -27,7 +27,8 @@ public final class SchemeSpecificationUtils {
 	 * @return Specification<Award> - Specification for Award
 	 */
 	public static Specification<SubsidyMeasure> subsidySchemeName(String subsidySchemeName) {
-		return (root, query, builder) -> builder.like(root.get("subsidyMeasureTitle"), contains(subsidySchemeName));
+		return (root, query, builder) -> builder.like(builder.lower(root.get("subsidyMeasureTitle")),
+				builder.lower(builder.literal("%" + subsidySchemeName.trim() + "%")));
 	}
 
 	/**
@@ -52,7 +53,7 @@ public final class SchemeSpecificationUtils {
 
 	public static Specification<SubsidyMeasure> grantingAuthorityName(String searchName) {
 
-		return (root, query, builder) -> builder.like(root.get("grantingAuthority").get("grantingAuthorityName"),
-				contains(searchName));
+		return (root, query, builder) -> builder.like(builder.lower(root.get("grantingAuthority").get("grantingAuthorityName")),
+				builder.lower(builder.literal("%" + searchName.trim() + "%")));
 	}
 }
