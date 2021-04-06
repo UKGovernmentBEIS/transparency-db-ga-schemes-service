@@ -91,7 +91,7 @@ public class GrantingAuthorityController {
 		response.setMessage("Created successfully");
 
 		StringBuilder eventMsg = new StringBuilder("Granting Authority ").append(grantingAuthority.getAzureGroupName())
-				.append(" added by " ).append(gaInputRequest.getUserName());
+				.append(" added");
 		SearchUtils.saveAuditLogForCreateGA(gaInputRequest.getUserName(),"Create Granting Authority",
 				grantingAuthority.getGaId().toString(),grantingAuthority.getAzureGroupName(),eventMsg.toString(),auditLogsRepository);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -127,7 +127,7 @@ public class GrantingAuthorityController {
 
 			//Audit entry
 			StringBuilder eventMsg = new StringBuilder("Granting Authority ").append(grantingAuthority.getAzureGroupName())
-					.append(" updated by " ).append(gaInputRequest.getUserName());
+					.append(" updated " );
 			SearchUtils.saveAuditLog(userPrincipleObj,"Update Granting Authority", grantingAuthority.getGaId().toString(),
 					eventMsg.toString(),auditLogsRepository);
 
@@ -139,10 +139,9 @@ public class GrantingAuthorityController {
 			GAResponse response = new GAResponse();
 			response.setMessage("failed to update Granting Authority");
 
-			StringBuilder eventMsg = new StringBuilder("failed to update Granting Authority")
-					.append("by " ).append(gaInputRequest.getUserName());
+			String eventMsg = "failed to update Granting Authority";
 			SearchUtils.saveAuditLog(userPrincipleObj,"Update Granting Authority",gaNumber.toString() ,
-					eventMsg.toString(),auditLogsRepository);
+					eventMsg,auditLogsRepository);
 
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
 		}
@@ -248,8 +247,7 @@ public class GrantingAuthorityController {
 			response.setMessage(" status not updated deActive for GA");
 		}
 		//Audit entry
-		StringBuilder eventMsg = new StringBuilder("Granting Authority ").append("DeActivate by " )
-					.append(userPrincipleObj.getUserName());
+		StringBuilder eventMsg = new StringBuilder("Granting Authority ").append("DeActivated " );
 		SearchUtils.saveAuditLog(userPrincipleObj,"Deactivated Granting Authority", azGrpId.toString(),
 					eventMsg.toString(),auditLogsRepository);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
