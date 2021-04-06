@@ -302,7 +302,7 @@ public class GrantingAuthorityServiceImpl implements GrantingAuthorityService {
         GrantingAuthority grantingAuthority = null;
         try {
             List<String> userIds=usersGroupRequest.getUserIds();
-            if (userIds.size() > 0) {
+            if (userIds != null && userIds.size() > 0) {
                 for (String userId : userIds) {
                     response = graphAPIFeignClient.deleteUser("Bearer " + token, userId);
                     if (response.status() != 204) {
