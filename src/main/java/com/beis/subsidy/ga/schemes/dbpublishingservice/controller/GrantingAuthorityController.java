@@ -226,7 +226,7 @@ public class GrantingAuthorityController {
 
 	@DeleteMapping(
 			value="group/{azGrpId}")
-	public ResponseEntity<GAResponse> deleteUsersGroup(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+	public ResponseEntity<GAResponse> deleteUsersGroup(
 							@PathVariable("azGrpId") String azGrpId,@RequestBody UsersGroupRequest usersGroupRequest)
 	{
 		log.info("{} ::before calling delete UsersGroup", loggingComponentName);
@@ -234,8 +234,8 @@ public class GrantingAuthorityController {
 			throw new InvalidRequestException("usersGroupRequest is empty");
 		}
 
-		UserPrinciple userPrincipleObj = SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,
-					"DeActive Granting Authority and Users");
+		/*UserPrinciple userPrincipleObj = SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,
+					"DeActive Granting Authority and Users");*/
 
 		GAResponse response = new GAResponse();
 		String accessToken=getBearerToken();
@@ -248,8 +248,8 @@ public class GrantingAuthorityController {
 		}
 		//Audit entry
 		StringBuilder eventMsg = new StringBuilder("Granting Authority ").append("DeActivated " );
-		SearchUtils.saveAuditLog(userPrincipleObj,"Deactivated Granting Authority", azGrpId.toString(),
-					eventMsg.toString(),auditLogsRepository);
+		/*SearchUtils.saveAuditLog(userPrincipleObj,"Deactivated Granting Authority", azGrpId.toString(),
+					eventMsg.toString(),auditLogsRepository);*/
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }
