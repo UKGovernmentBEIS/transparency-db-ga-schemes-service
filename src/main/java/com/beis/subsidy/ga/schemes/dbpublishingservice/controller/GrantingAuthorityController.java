@@ -110,29 +110,36 @@ public class GrantingAuthorityController {
 	public ResponseEntity<GAResponse> updateGrantingAuthority(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
 			@Valid @RequestBody GrantingAuthorityRequest gaInputRequest,@PathVariable("gaNumber") Long gaNumber) {
 		UserPrinciple userPrincipleObj= null;
+		HttpStatus status  = HttpStatus.OK;
 		try {
 			log.info("{}::Inside  updateGrantingAuthority", loggingComponentName);
 			//check user role here
 			userPrincipleObj = SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,"update Granting Authority");
 
-			if(gaInputRequest==null) {
+			if(gaInputRequest==null || gaNumber == 0) {
 				throw new InvalidRequestException("gaInputRequest is empty");
 			}
-			GAResponse response = new GAResponse();
-			
+
 			String accessToken=getBearerToken();
 			GrantingAuthority grantingAuthority = grantingAuthorityService.updateGrantingAuthority(gaInputRequest,gaNumber,accessToken);
-			response.setGaId(grantingAuthority.getGaId());
-			response.setMessage("updated successfully");
+			GAResponse response = new GAResponse();
+			if (Objects.nonNull(grantingAuthority)) {
 
-			//Audit entry
-			StringBuilder eventMsg = new StringBuilder("Granting Authority ").append(grantingAuthority.getAzureGroupName())
-					.append(" updated " );
-			SearchUtils.saveAuditLog(userPrincipleObj,"Update Granting Authority", grantingAuthority.getGaId().toString(),
-					eventMsg.toString(),auditLogsRepository);
+				response.setGaId(grantingAuthority.getGaId());
+				response.setMessage("updated successfully");
 
+				//Audit entry
+				StringBuilder eventMsg = new StringBuilder("Granting Authority ").append(grantingAuthority.getAzureGroupName())
+						.append(" updated " );
+				SearchUtils.saveAuditLog(userPrincipleObj,"Update Granting Authority", grantingAuthority.getGaId().toString(),
+						eventMsg.toString(),auditLogsRepository);
+			} else {
+				status = HttpStatus.EXPECTATION_FAILED;
+				log.error("{}::Failed the updateGrantingAuthority operation", loggingComponentName);
+				response.setMessage("failed");
+			}
 			log.info("{}::after calling updateGrantingAuthority", loggingComponentName);
-			return ResponseEntity.status(HttpStatus.OK).body(response);
+			return ResponseEntity.status(status).body(response);
 		} catch (Exception e) {
 			log.info("{}::In catch block of updateGrantingAuthority", loggingComponentName, e);
 			// 2.0 - CatchException and return validation errors
@@ -206,7 +213,7 @@ public class GrantingAuthorityController {
 
 		log.info("{} ::inside getBearerToken method", loggingComponentName);
 
-		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+	   MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 
 		map.add("grant_type", "client_credentials");
 		map.add("client_id", environment.getProperty("client-Id"));

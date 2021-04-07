@@ -1,13 +1,9 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.controller.feign;
 
+import com.beis.subsidy.ga.schemes.dbpublishingservice.request.UpdateGroupRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.*;
 
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.AddGroupRequest;
 
@@ -43,4 +39,11 @@ public interface GraphAPIFeignClient {
     @Headers({"Authorization: {authorization}","Content-Type: application/json"})
     Response getUsersByGroupId(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                @PathVariable("groupId")  String groupId);
-}
+
+
+    @PatchMapping(value = "v1.0/groups/{id}")
+    @RequestLine("PATCH v1.0/groups")
+    Response updateGroup(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                         @PathVariable("id") String groupId, @RequestBody UpdateGroupRequest request);
+
+ }

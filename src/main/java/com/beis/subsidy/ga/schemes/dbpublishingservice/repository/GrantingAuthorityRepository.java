@@ -8,7 +8,7 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthority;
 public interface GrantingAuthorityRepository
 		extends JpaRepository<GrantingAuthority, Long>, JpaSpecificationExecutor<GrantingAuthority> {
 
-	GrantingAuthority findBygaId(Long gaId);
+	GrantingAuthority findByGaId(Long gaId);
 	
 	GrantingAuthority findByAzureGroupId(String azGrpId);
 

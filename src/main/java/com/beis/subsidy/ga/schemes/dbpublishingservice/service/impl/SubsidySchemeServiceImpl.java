@@ -31,6 +31,7 @@ import java.time.temporal.ChronoUnit;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -50,11 +51,19 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         List<SubsidyMeasure> totalSchemeList = new ArrayList<>();
         List<SubsidyMeasure> schemeResults = null;
         Page<SubsidyMeasure> pageAwards = null;
+        Pageable pagingSortSchemes = null;
         List<Sort.Order> orders = getOrderByCondition(searchInput.getSortBy());
 
-        Pageable pagingSortSchemes = PageRequest.of(searchInput.getPageNumber() - 1,
-                searchInput.getTotalRecordsPerPage(), Sort.by(orders));
+        if (searchInput.getSortBy() != null && searchInput.getSortBy().length > 0
+                && (searchInput.getSortBy()[0].equalsIgnoreCase("budget,asc") ||
+                searchInput.getSortBy()[0].equalsIgnoreCase("budget,desc"))) {
 
+            pagingSortSchemes = PageRequest.of(searchInput.getPageNumber() - 1,
+                    searchInput.getTotalRecordsPerPage());
+        } else {
+            pagingSortSchemes = PageRequest.of(searchInput.getPageNumber() - 1,
+                    searchInput.getTotalRecordsPerPage(), Sort.by(orders));
+        }
 
         if (AccessManagementConstant.BEIS_ADMIN_ROLE.equals(userPriniciple.getRole().trim())) {
 
@@ -96,14 +105,42 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
     SearchSubsidyResultsResponse searchResults = null;
 
     if (!schemeResults.isEmpty()) {
+       // List<SubsidyMeasure> sortedRecords = null;
+        if (searchInput.getSortBy() != null && searchInput.getSortBy().length > 0
+                && searchInput.getSortBy()[0].equalsIgnoreCase("budget,asc")) {
+            schemeResults = sortSubsidyMeasureByAsc(schemeResults,"Asc");
+           // schemeResults = sortedRecords;
+        } else if (searchInput.getSortBy() != null && searchInput.getSortBy().length > 0
+                && searchInput.getSortBy()[0].equalsIgnoreCase("budget,desc"))  {
+            schemeResults = sortSubsidyMeasureByAsc(schemeResults,"Desc");
+            //schemeResults = sortedRecords;
+        }
          searchResults = new SearchSubsidyResultsResponse(schemeResults, pageAwards.getTotalElements(),
                     pageAwards.getNumber() + 1, pageAwards.getTotalPages(), schemeCounts(totalSchemeList));
     } else {
+
         log.info("{}::Scheme results not found");
         throw new SearchResultNotFoundException("Scheme Results NotFound");
     }
       return searchResults;
   }
+
+
+  private  List<SubsidyMeasure> sortSubsidyMeasureByAsc(List<SubsidyMeasure> subsidyMeasures, String value) {
+        List<SubsidyMeasure> sortedSubsidyMeasures = null;
+        if(subsidyMeasures != null && subsidyMeasures.size() > 0
+                && "Asc".equals(value)) {
+            sortedSubsidyMeasures = subsidyMeasures.stream()
+                    .sorted(Comparator.comparing(SubsidyMeasure::getBudget))
+                    .collect(Collectors.toList());
+        } else if(subsidyMeasures != null && subsidyMeasures.size() > 0
+                && "Desc".equals(value)) {
+            sortedSubsidyMeasures = subsidyMeasures.stream()
+                    .sorted(Comparator.comparing(SubsidyMeasure::getBudget).reversed())
+                    .collect(Collectors.toList());
+        }
+        return sortedSubsidyMeasures;
+    }
 
   public BigInteger getDuration(LocalDate startDate, LocalDate endDate) {
         long noOfDaysBetween = ChronoUnit.DAYS.between(startDate, endDate);
