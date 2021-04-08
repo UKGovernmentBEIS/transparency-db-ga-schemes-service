@@ -134,9 +134,9 @@ public class GrantingAuthorityController {
 				SearchUtils.saveAuditLog(userPrincipleObj,"Update Granting Authority", grantingAuthority.getGaId().toString(),
 						eventMsg.toString(),auditLogsRepository);
 			} else {
-				status = HttpStatus.EXPECTATION_FAILED;
+				status = HttpStatus.BAD_REQUEST;
 				log.error("{}::Failed the updateGrantingAuthority operation", loggingComponentName);
-				response.setMessage("failed");
+				response.setMessage("failed with gaId");
 			}
 			log.info("{}::after calling updateGrantingAuthority", loggingComponentName);
 			return ResponseEntity.status(status).body(response);
@@ -254,7 +254,7 @@ public class GrantingAuthorityController {
 			response.setMessage(" status not updated deActive for GA");
 		}
 		//Audit entry
-		StringBuilder eventMsg = new StringBuilder("Granting Authority ").append("DeActivated " );
+		StringBuilder eventMsg = new StringBuilder("Granting Authority ").append(azGrpId).append(" DeActivated " );
 		SearchUtils.saveAuditLog(userPrincipleObj,"Deactivated Granting Authority", azGrpId.toString(),
 					eventMsg.toString(),auditLogsRepository);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
