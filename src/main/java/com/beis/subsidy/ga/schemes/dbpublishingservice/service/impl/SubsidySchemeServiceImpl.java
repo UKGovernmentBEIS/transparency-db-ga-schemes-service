@@ -1,6 +1,7 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.service.impl;
 
 
+import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.InvalidRequestException;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.SearchResultNotFoundException;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.UnauthorisedAccessException;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthority;
@@ -149,6 +150,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
   @Override
   public String addSubsidySchemeDetails(SchemeDetailsRequest scheme) {
+
         log.info("Inside addSubsidySchemeDetails method :");
         SubsidyMeasure schemeToSave = new SubsidyMeasure();
         LegalBasis legalBasis = new LegalBasis();
@@ -186,8 +188,14 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
             schemeToSave.setStatus(scheme.getStatus());
         }
         if(! StringUtils.isEmpty(scheme.getGaName())){
-            Long gaId = gaRepository.findByGrantingAuthorityName(scheme.getGaName()).getGaId();
-            schemeToSave.setGaId(gaId);
+            GrantingAuthority grantingAuthority = gaRepository.findByGrantingAuthorityName(scheme.getGaName());
+            if (Objects.isNull(grantingAuthority) ||
+                    "Inactive".equals(grantingAuthority.getStatus())) {
+
+                log.error("{} :: Granting Authority is Inactive for the scheme");
+               throw new InvalidRequestException("Granting Authority is Inactive");
+            }
+            schemeToSave.setGaId(grantingAuthority.getGaId());
         }
         schemeToSave.setPublishedMeasureDate(LocalDate.now());
 
