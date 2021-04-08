@@ -11,6 +11,7 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.model.UsersGroupRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.GrantingAuthorityRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.AddGroupRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SearchInput;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.request.UpdateGroupRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.GrantingAuthorityResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.GroupResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchResults;
@@ -77,16 +78,44 @@ public class GrantingAuthorityServiceImpl implements GrantingAuthorityService {
     }
 
     @Transactional
-    public GrantingAuthority updateGrantingAuthority(GrantingAuthorityRequest grantingAuthorityRequest, Long gaNumber,String accessToken) {
-            log.info("{}::inside updateGrantingAuthority", loggingComponentName);
+    public GrantingAuthority updateGrantingAuthority(GrantingAuthorityRequest grantingAuthorityRequest, Long gaNumber,
+                                                     String accessToken) {
 
-            GrantingAuthority grantingAuthority = new GrantingAuthority(gaNumber, grantingAuthorityRequest.getName(),
-                    "SYSTEM", "SYSTEM", "Active", null,
-                    grantingAuthorityRequest.getName(),LocalDateTime.now(), LocalDateTime.now());
+        log.info("{}::inside updateGrantingAuthority", loggingComponentName);
+        Response response = null;
+        GroupResponse groupResponse;
+        Object clazz;
+        int status;
+        GrantingAuthority savedAwards = null;
+        GrantingAuthority grantingAuthorityResp =  gaRepository.findByGaId(gaNumber);
+        String azGrpId = grantingAuthorityResp.getAzureGroupId();
+        UpdateGroupRequest request = new UpdateGroupRequest(grantingAuthorityRequest.getName(),grantingAuthorityRequest.getName());
+        //graph api call
+        try {
+            response = graphAPIFeignClient.updateGroup("Bearer " + accessToken,azGrpId,request);
+            log.info("{}:: Graph Api updateGroup status  {}", loggingComponentName, response.status());
 
-            GrantingAuthority savedAwards = gaRepository.save(grantingAuthority);
-            log.info("{}::End of updateGrantingAuthority", loggingComponentName);
-            return savedAwards;
+            if (response.status() == 204) {
+
+                GrantingAuthority grantingAuthority = new GrantingAuthority(gaNumber, grantingAuthorityRequest.getName(),
+                        "SYSTEM", "SYSTEM", "Active",azGrpId.trim() ,
+                        grantingAuthorityRequest.getName(),LocalDateTime.now(), LocalDateTime.now());
+
+                savedAwards = gaRepository.save(grantingAuthority);
+                log.info("{}::End of updateGrantingAuthority", loggingComponentName);
+            } else {
+
+                log.info("{}:: Graph Api failed:: status code {}", loggingComponentName, response.status());
+
+            }
+
+        } catch (FeignException ex) {
+            log.error("{}:: UpdateGroup  Graph Api failed:: status code {} & message {}",
+                    loggingComponentName, ex.status(),
+                    ex.getMessage());
+            throw new AccessManagementException(HttpStatus.valueOf(ex.status()), "UpdateGroup group Graph Api failed");
+        }
+       return savedAwards;
     }
 
     @Transactional
@@ -161,7 +190,7 @@ public class GrantingAuthorityServiceImpl implements GrantingAuthorityService {
 
     public GrantingAuthorityResponse findByGrantingAuthorityId(Long gaId) {
 
-        GrantingAuthority grantingAuthority = gaRepository.findBygaId(gaId);
+        GrantingAuthority grantingAuthority = gaRepository.findByGaId(gaId);
         if (grantingAuthority == null) {
             throw new SearchResultNotFoundException("grantingAuthority Results NotFound");
         }
@@ -302,7 +331,7 @@ public class GrantingAuthorityServiceImpl implements GrantingAuthorityService {
         GrantingAuthority grantingAuthority = null;
         try {
             List<String> userIds=usersGroupRequest.getUserIds();
-            if (userIds.size() > 0) {
+            if (userIds != null && userIds.size() > 0) {
                 for (String userId : userIds) {
                     response = graphAPIFeignClient.deleteUser("Bearer " + token, userId);
                     if (response.status() != 204) {
