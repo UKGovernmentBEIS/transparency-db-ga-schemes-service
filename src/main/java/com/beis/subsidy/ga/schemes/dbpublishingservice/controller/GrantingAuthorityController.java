@@ -91,9 +91,9 @@ public class GrantingAuthorityController {
 		response.setMessage("Created successfully");
 
 		StringBuilder eventMsg = new StringBuilder("Granting Authority ").append(grantingAuthority.getAzureGroupName())
-				.append(" added");
+				.append(" is added");
 		SearchUtils.saveAuditLogForCreateGA(gaInputRequest.getUserName(),"Create Granting Authority",
-				grantingAuthority.getGaId().toString(),grantingAuthority.getAzureGroupName(),eventMsg.toString(),auditLogsRepository);
+				grantingAuthority.getGaId().toString(),grantingAuthority.getGrantingAuthorityName(),eventMsg.toString(),auditLogsRepository);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 	
@@ -130,7 +130,7 @@ public class GrantingAuthorityController {
 
 				//Audit entry
 				StringBuilder eventMsg = new StringBuilder("Granting Authority ").append(grantingAuthority.getAzureGroupName())
-						.append(" updated " );
+						.append(" is updated" );
 				SearchUtils.saveAuditLog(userPrincipleObj,"Update Granting Authority", grantingAuthority.getGaId().toString(),
 						eventMsg.toString(),auditLogsRepository);
 			} else {
@@ -254,7 +254,7 @@ public class GrantingAuthorityController {
 			response.setMessage(" status not updated deActive for GA");
 		}
 		//Audit entry
-		StringBuilder eventMsg = new StringBuilder("Granting Authority ").append(azGrpId).append(" DeActivated " );
+		StringBuilder eventMsg = new StringBuilder("Granting Authority ").append(azGrpId).append(" is Deactivated" );
 		SearchUtils.saveAuditLog(userPrincipleObj,"Deactivated Granting Authority", azGrpId.toString(),
 					eventMsg.toString(),auditLogsRepository);
 		return ResponseEntity.status(HttpStatus.OK).body(response);

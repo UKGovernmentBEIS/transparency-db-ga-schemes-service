@@ -84,7 +84,7 @@ public class SubsidySchemeController {
     	        
         String scNumber = subsidySchemeService.addSubsidySchemeDetails(scheme);
         //Audit entry
-        StringBuilder eventMsg = new StringBuilder("Scheme ").append(scNumber).append(" added");
+        StringBuilder eventMsg = new StringBuilder("Scheme ").append(scNumber).append(" is added");
         SearchUtils.saveAuditLog(userPrincipleObj,"create Schemes", scNumber,eventMsg.toString(),auditLogsRepository);
         log.info("{} :: End of  addSchemeDetails method",loggingComponentName);
    	    return scNumber;
@@ -105,8 +105,8 @@ public class SubsidySchemeController {
 		UserPrinciple userPrincipleObj = SearchUtils.isSchemeRoleValidation(objectMapper, userPrinciple,"update Subsidy Schema");
         String scNumberRes= subsidySchemeService.updateSubsidySchemeDetails(schemeReq,scNumber);
 
-        StringBuilder eventMsg = new StringBuilder("Scheme ").append(scNumber).append(" is ")
-                .append(schemeReq.getStatus());
+        StringBuilder eventMsg = new StringBuilder("Scheme ").append(scNumber).append(" is updated");
+
 
         SearchUtils.saveAuditLog(userPrincipleObj,"Update Schemes", scNumberRes,eventMsg.toString(),auditLogsRepository);
         log.info("{} ::end of calling updateSchemeDetails", loggingComponentName);
