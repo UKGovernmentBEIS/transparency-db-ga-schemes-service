@@ -30,9 +30,13 @@ import org.springframework.stereotype.Service;
 import java.time.temporal.ChronoUnit;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -52,19 +56,11 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         List<SubsidyMeasure> totalSchemeList = new ArrayList<>();
         List<SubsidyMeasure> schemeResults = null;
         Page<SubsidyMeasure> pageAwards = null;
-        Pageable pagingSortSchemes = null;
         List<Sort.Order> orders = getOrderByCondition(searchInput.getSortBy());
 
-        if (searchInput.getSortBy() != null && searchInput.getSortBy().length > 0
-                && (searchInput.getSortBy()[0].equalsIgnoreCase("budget,asc") ||
-                searchInput.getSortBy()[0].equalsIgnoreCase("budget,desc"))) {
+        Pageable pagingSortSchemes = PageRequest.of(searchInput.getPageNumber() - 1,
+                searchInput.getTotalRecordsPerPage(), Sort.by(orders));
 
-            pagingSortSchemes = PageRequest.of(searchInput.getPageNumber() - 1,
-                    searchInput.getTotalRecordsPerPage());
-        } else {
-            pagingSortSchemes = PageRequest.of(searchInput.getPageNumber() - 1,
-                    searchInput.getTotalRecordsPerPage(), Sort.by(orders));
-        }
 
         if (AccessManagementConstant.BEIS_ADMIN_ROLE.equals(userPriniciple.getRole().trim())) {
 
@@ -80,7 +76,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
         } else {
             if (!StringUtils.isEmpty(searchInput.getSearchName())
-               || !StringUtils.isEmpty(searchInput.getStatus())) {
+                    || !StringUtils.isEmpty(searchInput.getStatus())) {
 
                 schemeSpecifications = getSpecificationSchemeDetailsForGARoles(searchInput,userPriniciple.getGrantingAuthorityGroupName());
                 pageAwards = subsidyMeasureRepository.findAll(schemeSpecifications, pagingSortSchemes);
@@ -100,48 +96,20 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
                 totalSchemeList = subsidyMeasureRepository.findAll(subsidyMeasureByGrantingAuthority(gaId));
 
             }
-
-
         }
-    SearchSubsidyResultsResponse searchResults = null;
 
-    if (!schemeResults.isEmpty()) {
-       // List<SubsidyMeasure> sortedRecords = null;
-        if (searchInput.getSortBy() != null && searchInput.getSortBy().length > 0
-                && searchInput.getSortBy()[0].equalsIgnoreCase("budget,asc")) {
-            schemeResults = sortSubsidyMeasureByAsc(schemeResults,"Asc");
-           // schemeResults = sortedRecords;
-        } else if (searchInput.getSortBy() != null && searchInput.getSortBy().length > 0
-                && searchInput.getSortBy()[0].equalsIgnoreCase("budget,desc"))  {
-            schemeResults = sortSubsidyMeasureByAsc(schemeResults,"Desc");
-            //schemeResults = sortedRecords;
-        }
-         searchResults = new SearchSubsidyResultsResponse(schemeResults, pageAwards.getTotalElements(),
+        SearchSubsidyResultsResponse searchResults = null;
+
+        if (!schemeResults.isEmpty()) {
+            searchResults = new SearchSubsidyResultsResponse(schemeResults, pageAwards.getTotalElements(),
                     pageAwards.getNumber() + 1, pageAwards.getTotalPages(), schemeCounts(totalSchemeList));
-    } else {
-
-        log.info("{}::Scheme results not found");
-        throw new SearchResultNotFoundException("Scheme Results NotFound");
-    }
-      return searchResults;
-  }
-
-
-  private  List<SubsidyMeasure> sortSubsidyMeasureByAsc(List<SubsidyMeasure> subsidyMeasures, String value) {
-        List<SubsidyMeasure> sortedSubsidyMeasures = null;
-        if(subsidyMeasures != null && subsidyMeasures.size() > 0
-                && "Asc".equals(value)) {
-            sortedSubsidyMeasures = subsidyMeasures.stream()
-                    .sorted(Comparator.comparing(SubsidyMeasure::getBudget))
-                    .collect(Collectors.toList());
-        } else if(subsidyMeasures != null && subsidyMeasures.size() > 0
-                && "Desc".equals(value)) {
-            sortedSubsidyMeasures = subsidyMeasures.stream()
-                    .sorted(Comparator.comparing(SubsidyMeasure::getBudget).reversed())
-                    .collect(Collectors.toList());
+        } else {
+            log.info("{}::Scheme results not found");
+            throw new SearchResultNotFoundException("Scheme Results NotFound");
         }
-        return sortedSubsidyMeasures;
+        return searchResults;
     }
+
 
   public BigInteger getDuration(LocalDate startDate, LocalDate endDate) {
         long noOfDaysBetween = ChronoUnit.DAYS.between(startDate, endDate);
