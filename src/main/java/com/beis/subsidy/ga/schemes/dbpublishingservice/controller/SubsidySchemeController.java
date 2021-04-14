@@ -105,7 +105,8 @@ public class SubsidySchemeController {
 		UserPrinciple userPrincipleObj = SearchUtils.isSchemeRoleValidation(objectMapper, userPrinciple,"update Subsidy Schema");
         String scNumberRes= subsidySchemeService.updateSubsidySchemeDetails(schemeReq,scNumber);
 
-        StringBuilder eventMsg = new StringBuilder("Scheme ").append(scNumber).append(" is updated");
+        StringBuilder eventMsg = new StringBuilder("Scheme ").append(scNumber).append(" is updated to ")
+                .append(schemeReq.getStatus());
 
 
         SearchUtils.saveAuditLog(userPrincipleObj,"Update Schemes", scNumberRes,eventMsg.toString(),auditLogsRepository);
