@@ -155,12 +155,15 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getStatus())){
             schemeToSave.setStatus(scheme.getStatus());
         }
-        if(! StringUtils.isEmpty(scheme.getGaName())){
-            GrantingAuthority grantingAuthority = gaRepository.findByGrantingAuthorityName(scheme.getGaName());
+
+        if(!StringUtils.isEmpty(scheme.getGaName())){
+            GrantingAuthority grantingAuthority = gaRepository.findByGrantingAuthorityName(scheme.getGaName().trim());
+
+            log.error("{} :: Granting Authority and GAName ::{}", grantingAuthority,scheme.getGaName());
+
             if (Objects.isNull(grantingAuthority) ||
                     "Inactive".equals(grantingAuthority.getStatus())) {
-
-                log.error("{} :: Granting Authority is Inactive for the scheme");
+               log.error("{} :: Granting Authority is Inactive for the scheme");
                throw new InvalidRequestException("Granting Authority is Inactive");
             }
             schemeToSave.setGaId(grantingAuthority.getGaId());
