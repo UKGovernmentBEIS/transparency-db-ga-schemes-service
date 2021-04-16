@@ -163,6 +163,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
             if (Objects.isNull(grantingAuthority) ||
                     "Inactive".equals(grantingAuthority.getStatus())) {
+
                log.error("{} :: Granting Authority is Inactive for the scheme");
                throw new InvalidRequestException("Granting Authority is Inactive");
             }
