@@ -60,7 +60,7 @@ public class SubsidyMeasureResponse {
         this.endDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getEndDate());
         this.duration = SearchUtils.getDurationInYears(subsidyMeasure.getDuration());
         this.budget = subsidyMeasure.getBudget().contains(",") ? subsidyMeasure.getBudget():
-                SearchUtils.decimalNumberFormat(new BigDecimal(subsidyMeasure.getBudget()));
+                SearchUtils.decimalNumberFormat(new BigDecimal(subsidyMeasure.getBudget().trim()));
         this.gaName = subsidyMeasure.getGrantingAuthority().getGrantingAuthorityName();
         this.adhoc = ""+subsidyMeasure.isAdhoc();
         this.status = subsidyMeasure.getStatus();
