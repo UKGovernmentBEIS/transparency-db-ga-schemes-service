@@ -90,7 +90,7 @@ public class GrantingAuthorityController {
 		response.setGaId(grantingAuthority.getGaId());
 		response.setMessage("Created successfully");
 
-		StringBuilder eventMsg = new StringBuilder("Granting Authority ").append(gaInputRequest.getName())
+		StringBuilder eventMsg = new StringBuilder("Granting Authority ").append("Business Energy And Industrial Strategy")
 				.append(" is added");
 		SearchUtils.saveAuditLogForCreateGA(gaInputRequest.getUserName(),"Create Granting Authority",
 				grantingAuthority.getGaId().toString(),grantingAuthority.getGrantingAuthorityName(),eventMsg.toString(),auditLogsRepository);
