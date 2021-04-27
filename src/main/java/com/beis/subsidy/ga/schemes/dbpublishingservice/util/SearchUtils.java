@@ -187,7 +187,7 @@ public class SearchUtils {
 			audit.setEventType(action);
 			audit.setEventId(scOrGaId);
 			audit.setEventMessage(eventMsg);
-			audit.setGaName(groupName);
+			audit.setGaName("Business Energy And Industrial Strategy");
 			audit.setCreatedTimestamp(LocalDate.now());
 			auditLogsRepository.save(audit);
 		} catch(Exception e) {
