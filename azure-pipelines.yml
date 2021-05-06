@@ -9,12 +9,6 @@ trigger:
 
 variables:
 
-  # Azure Resource Manager connection created during pipeline creation
-  azureSubscription: '8e9969b3-7574-441c-a10f-7114dc3314f7'
-
-  # Web app name
-  webAppName: 'dev-transparency-db-ga-schemes-service'
-
   # Agent VM image name
   vmImageName: 'ubuntu-20.04'
 
@@ -43,13 +37,12 @@ stages:
               sonarQubeRunAnalysis: false
               goals: 'package spring-boot:repackage'
           - task: CopyFiles@2
-            displayName: 'Copy Filess to artifact staging directory'
+            displayName: 'Copy Files to artifact staging directory'
             inputs:
-              SourceFolder: '$(System.DefaultWorkingDirectory)'
-              Contents: '**/target/*.?(war|jar)'
+              SourceFolder: '$(System.DefaultWorkingDirectory)/target'
+              Contents: '*.?(war|jar)'
               TargetFolder: $(Build.ArtifactStagingDirectory)
-
-          - task: PublishPipelineArtifact@0
+          - task: PublishPipelineArtifact@1
             displayName: 'Publish pipeline artifacts'
             inputs:
               targetPath: $(Build.ArtifactStagingDirectory)
@@ -61,14 +54,21 @@ stages:
     jobs:
       - deployment: DeployLinuxWebApp
         displayName: Deploy Linux Web App
-        environment: 'development'
+        environment: 'dev'
         pool:
           vmImage: $(vmImageName)
         strategy:
           runOnce:
             deploy:
               steps:
-                - task: DownloadPipelineArtifact@1
-                  displayName: 'Download Pipeline Artifact'
+                - task: Bash@3
                   inputs:
-                    buildType: 'current'
+                    targetType: 'inline'
+                    script: ls -R $(Pipeline.Workspace)
+                - task: AzureRmWebAppDeployment@4
+                  inputs:
+                    ConnectionType: 'AzureRM'
+                    azureSubscription: 'CGI-AzureDevOps-BEIS'
+                    appType: 'webAppLinux'
+                    WebAppName: 'dev-transparency-db-ga-schemes-service'
+                    packageForLinux: '$(Pipeline.Workspace)/**/*.?(war|jar)'
