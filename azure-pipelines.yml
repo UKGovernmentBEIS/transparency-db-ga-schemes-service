@@ -16,7 +16,7 @@ stages:
   - stage: Build
     displayName: Build stage
     jobs:
-      - job: MavenPackageAndPublishArtifacts
+      - job: MavenBuild
         displayName: Maven Package and Publish Artifacts
         pool:
           vmImage: $(vmImageName)
@@ -64,11 +64,11 @@ stages:
                 - task: Bash@3
                   inputs:
                     targetType: 'inline'
-                    script: ls -R $(Pipeline.Workspace)
+                    script: 'mv $(Pipeline.Workspace)/Build.MavenBuild/*.jar $(Pipeline.Workspace)/app.jar'
                 - task: AzureRmWebAppDeployment@4
                   inputs:
                     ConnectionType: 'AzureRM'
                     azureSubscription: 'CGI-AzureDevOps-BEIS'
                     appType: 'webAppLinux'
                     WebAppName: 'dev-transparency-db-ga-schemes-service'
-                    packageForLinux: '$(Pipeline.Workspace)/**/*.?(war|jar)'
+                    packageForLinux: '$(Pipeline.Workspace)/app.jar'
