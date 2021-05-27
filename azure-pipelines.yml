@@ -52,8 +52,8 @@ stages:
     dependsOn: Build
     condition: succeeded()
     jobs:
-      - deployment: DeployLinuxWebApp
-        displayName: Deploy Linux Web App
+      - deployment: DeployLinuxWebAppDev
+        displayName: Deploy Linux Web App - TestDev
         environment: 'dev'
         pool:
           vmImage: $(vmImageName)
@@ -71,4 +71,24 @@ stages:
                     azureSubscription: 'BEIS-Subsidy-Control-TestDev'
                     appType: 'webAppLinux'
                     WebAppName: 'dev-transparency-db-ga-schemes-service'
+                    packageForLinux: '$(Pipeline.Workspace)/app.jar'
+      - deployment: DeployLinuxWebAppStg
+        displayName: Deploy Linux Web App - Staging
+        environment: 'dev'
+        pool:
+          vmImage: $(vmImageName)
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: Bash@3
+                  inputs:
+                    targetType: 'inline'
+                    script: 'mv $(Pipeline.Workspace)/Build.MavenBuild/*.jar $(Pipeline.Workspace)/app.jar'
+                - task: AzureRmWebAppDeployment@4
+                  inputs:
+                    ConnectionType: 'AzureRM'
+                    azureSubscription: 'BEIS-Subsidy-Control-Staging'
+                    appType: 'webAppLinux'
+                    WebAppName: 'stg-transparency-db-ga-schemes-service'
                     packageForLinux: '$(Pipeline.Workspace)/app.jar'
