@@ -47,7 +47,7 @@ stages:
             inputs:
               targetPath: $(Build.ArtifactStagingDirectory)
 
-- stage:
+  - stage:
     displayName: Deploy to dev/test environment
     dependsOn: Build
     condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
