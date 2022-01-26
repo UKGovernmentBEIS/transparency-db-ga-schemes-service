@@ -27,6 +27,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import java.math.BigInteger;
@@ -233,6 +235,10 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         }
         if(!StringUtils.isEmpty(scheme.getStatus())){
             schemeById.setStatus(scheme.getStatus());
+            if(scheme.getStatus().equals("Deleted")){
+                schemeById.setDeletedBy("Testing Deletion"); //Change this to be the current user
+                schemeById.setDeletedTimestamp(LocalDateTime.now());
+            }
         }
         if(!StringUtils.isEmpty(scheme.getLegalBasisText())){
             legalBasis.setLegalBasisText(scheme.getLegalBasisText());
