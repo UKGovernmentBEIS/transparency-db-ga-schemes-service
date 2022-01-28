@@ -192,7 +192,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
   }
 
    @Override
-   public String updateSubsidySchemeDetails(SchemeDetailsRequest scheme, String scNumber) {
+   public String updateSubsidySchemeDetails(SchemeDetailsRequest scheme, String scNumber, UserPrinciple userPrinciple) {
         log.info("Inside updateSubsidySchemeDetails method - sc number " + scheme.getScNumber());
         SubsidyMeasure schemeById = subsidyMeasureRepository.findById(scNumber).get();
         LegalBasis legalBasis = schemeById.getLegalBases();
@@ -236,7 +236,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getStatus())){
             schemeById.setStatus(scheme.getStatus());
             if(scheme.getStatus().equals("Deleted")){
-                schemeById.setDeletedBy("Testing Deletion"); //Change this to be the current user
+                schemeById.setDeletedBy(userPrinciple.getUserName());
                 schemeById.setDeletedTimestamp(LocalDateTime.now());
             }
         }

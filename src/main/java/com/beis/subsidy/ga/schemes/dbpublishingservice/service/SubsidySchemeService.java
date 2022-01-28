@@ -12,7 +12,7 @@ public interface SubsidySchemeService {
 
     String addSubsidySchemeDetails(SchemeDetailsRequest scheme);
 
-    String updateSubsidySchemeDetails(SchemeDetailsRequest schemeReq, String scNumber);
+    String updateSubsidySchemeDetails(SchemeDetailsRequest schemeReq, String scNumber, UserPrinciple userPrinciple);
 
     SubsidyMeasureResponse findSubsidySchemeById(String scNumber);
 }

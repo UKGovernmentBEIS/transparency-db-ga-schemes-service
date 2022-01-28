@@ -103,7 +103,7 @@ public class SubsidySchemeController {
         }
     	//check user role here
 		UserPrinciple userPrincipleObj = SearchUtils.isSchemeRoleValidation(objectMapper, userPrinciple,"update Subsidy Schema");
-        String scNumberRes= subsidySchemeService.updateSubsidySchemeDetails(schemeReq,scNumber);
+        String scNumberRes= subsidySchemeService.updateSubsidySchemeDetails(schemeReq,scNumber, userPrincipleObj);
 
         StringBuilder eventMsg = new StringBuilder("Scheme ").append(scNumber).append(" is updated to ")
                 .append(schemeReq.getStatus());
