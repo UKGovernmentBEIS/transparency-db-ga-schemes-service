@@ -266,6 +266,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         long allScheme = schemeList.size();
         long activeScheme = 0;
         long inactiveScheme = 0;
+        long deletedScheme = 0;
 
         if(schemeList != null && schemeList.size() > 0){
             for(SubsidyMeasure sm : schemeList){
@@ -275,12 +276,16 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
                 if(sm.getStatus().equalsIgnoreCase(AccessManagementConstant.SM_INACTIVE)){
                     inactiveScheme++;
                 }
+                if(sm.getStatus().equalsIgnoreCase(AccessManagementConstant.SM_DELETED)){
+                    deletedScheme++;
+                }
             }
         }
         Map<String, Long> smUserActivityCount = new HashMap<>();
         smUserActivityCount.put("allScheme",allScheme);
         smUserActivityCount.put("activeScheme",activeScheme);
         smUserActivityCount.put("inactiveScheme",inactiveScheme);
+        smUserActivityCount.put("deletedScheme",deletedScheme);
         return smUserActivityCount;
     }
 
