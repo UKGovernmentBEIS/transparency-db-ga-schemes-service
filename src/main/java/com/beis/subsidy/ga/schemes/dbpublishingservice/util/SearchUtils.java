@@ -63,7 +63,7 @@ public class SearchUtils {
 	 */
 	public static String dateTimeToFullMonthNameInDate(LocalDateTime inputDateTime) {
 		log.info("input Date ::{}", inputDateTime);
-		DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy H:m:ss");
+		DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm:ss");
 		return dateFormat.format(inputDateTime);
 	}
 
