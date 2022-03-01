@@ -6,6 +6,9 @@
 		<version>2.3.5.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
+  <scm>
+    <developerConnection>scm:git:https://github.com/UKGovernmentBEIS/transparency-db-ga-schemes-service/</developerConnection>
+  </scm>
   <groupId>transparency-db-ga-schemes-service</groupId>
   <artifactId>transparency-db-ga-schemes-service</artifactId>
   <version>0.0.1-SNAPSHOT</version>
