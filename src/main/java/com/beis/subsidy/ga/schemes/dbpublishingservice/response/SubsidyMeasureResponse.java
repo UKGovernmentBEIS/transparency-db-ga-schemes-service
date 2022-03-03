@@ -53,6 +53,15 @@ public class SubsidyMeasureResponse {
     @JsonProperty
     private String status;
 
+    @JsonProperty
+    private String publishedMeasureDate;
+
+    @JsonProperty
+    private String deletedBy;
+
+    @JsonProperty
+    private String deletedTimestamp;
+
     public SubsidyMeasureResponse(SubsidyMeasure subsidyMeasure) {
         this.scNumber = subsidyMeasure.getScNumber();
         this.subsidyMeasureTitle  = subsidyMeasure.getSubsidyMeasureTitle();
@@ -68,6 +77,13 @@ public class SubsidyMeasureResponse {
         this.gaSubsidyWebLinkDescription = subsidyMeasure.getGaSubsidyWebLinkDescription();
         this.legalBasisText = subsidyMeasure.getLegalBases().getLegalBasisText();
         this.lastModifiedDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getLastModifiedTimestamp());
+        this.publishedMeasureDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getPublishedMeasureDate());
+        if(subsidyMeasure.getDeletedBy() != null) {
+            this.deletedBy = subsidyMeasure.getDeletedBy();
+        }
+        if(subsidyMeasure.getDeletedTimestamp() != null) {
+            this.deletedTimestamp = SearchUtils.dateTimeToFullMonthNameInDate(subsidyMeasure.getDeletedTimestamp());
+        }
     }
 
 }

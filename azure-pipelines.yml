@@ -6,6 +6,7 @@
 
 pr:
   - master
+  - cr*
 
 variables:
 
@@ -52,19 +53,9 @@ stages:
     dependsOn: Build
     condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
     jobs:
-      - job: waitForValidation
-        displayName: Confirm dev/test deployment
-        pool: server    
-        timeoutInMinutes: 4320 # job times out in 3 days
-        steps:   
-        - task: ManualValidation@0
-          timeoutInMinutes: 1440 # task times out in 1 day
-          inputs:
-              instructions: 'Please confirm deployment to dev/test'
       - deployment: DeployLinuxWebAppDev
         displayName: Deploy Linux Web App - TestDev
         environment: 'dev'
-        dependsOn: waitForValidation
         pool:
           vmImage: $(vmImageName)
         strategy:
