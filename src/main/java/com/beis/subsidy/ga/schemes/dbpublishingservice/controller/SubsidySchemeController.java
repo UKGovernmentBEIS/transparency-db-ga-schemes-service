@@ -4,12 +4,18 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import javax.validation.Valid;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.util.AccessManagementConstant;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.UserPrinciple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,6 +38,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Base64;
+import java.util.List;
 import java.util.Objects;
 
 @RequestMapping(path = "/scheme")
@@ -103,6 +111,15 @@ public class SubsidySchemeController {
         }
     	//check user role here
 		UserPrinciple userPrincipleObj = SearchUtils.isSchemeRoleValidation(objectMapper, userPrinciple,"update Subsidy Schema");
+
+        // if user not BEIS Admin then;
+        if (!AccessManagementConstant.BEIS_ADMIN_ROLE.equals(userPrincipleObj.getRole().trim())) {
+            if(!subsidySchemeService.canEditScheme(userPrinciple, scNumber)){
+                throw new AccessDeniedException("User " + userPrincipleObj.getUserName() + " does not have the rights to update scheme: " + scNumber);
+            }
+        }
+
+
         String scNumberRes= subsidySchemeService.updateSubsidySchemeDetails(schemeReq,scNumber, userPrincipleObj);
 
         StringBuilder eventMsg = new StringBuilder("Scheme ").append(scNumber).append(" is updated to ")
