@@ -17,6 +17,7 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.response.GroupResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchResults;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.UserDetailsResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.GrantingAuthorityService;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.util.AccessManagementConstant;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.GrantingAuthSpecificationUtils;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SearchUtils;
 import feign.FeignException;
@@ -272,13 +273,17 @@ public class GrantingAuthorityServiceImpl implements GrantingAuthorityService {
         Object clazz;
         try {
             int groupCount = getGroupCountByName(token, request);
+            if (groupCount > 0) {
+                int status = AccessManagementConstant.GA_ALREADY_EXISTS; //491 group already exists
+                String message = "group with this name already exist. Group count: " + groupCount;
+                log.error("{}:: Group count >0:: status code {} & message {}",
+                        loggingComponentName, status,
+                        message);
+                throw new AccessManagementException(HttpStatus.valueOf(status),
+                        message);
+            }
             response = graphAPIFeignClient.addGroup("Bearer " + token, request);
             log.info("{}::  Graph Api status  {}", loggingComponentName, response.status());
-
-            if (groupCount > 0) {
-                throw new AccessManagementException(HttpStatus.valueOf(response.status()),
-                        "create group request is invalid or group with this name already exist");
-            }
 
             if (response.status() == 201) {
                 clazz = GroupResponse.class;
