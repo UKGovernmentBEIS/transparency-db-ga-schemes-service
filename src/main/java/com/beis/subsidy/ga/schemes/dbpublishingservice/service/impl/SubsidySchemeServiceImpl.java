@@ -1,6 +1,9 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.service.impl;
 
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.InvalidRequestException;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.SearchResultNotFoundException;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.UnauthorisedAccessException;
@@ -26,6 +29,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -259,6 +263,36 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
     public SubsidyMeasureResponse findSubsidySchemeById(String scNumber) {
         SubsidyMeasure subsidyMeasure = subsidyMeasureRepository.findById(scNumber).get();
         return new SubsidyMeasureResponse(subsidyMeasure);
+    }
+
+    @Override
+    public Boolean canEditScheme(HttpHeaders userPrinciple, String scNumber) {
+        String jwtString;
+        try{
+            jwtString = userPrinciple.get("x-ms-token-aad-id-token").get(0);
+        }catch(Exception e){
+            throw new InvalidRequestException("No x-ms-token-aad-id-token present");
+        }
+
+        if (jwtString != null){
+            DecodedJWT jwt;
+            try {
+                jwt = JWT.decode(jwtString);
+            } catch (JWTDecodeException exception){
+                throw new JWTDecodeException("Invalid JWT Token given: " + jwtString);
+            }
+            List<String> rolesFromJwt = jwt.getClaim("roles").asList(String.class);
+
+            SubsidyMeasure scheme = subsidyMeasureRepository.findById(scNumber).get();
+            String schemeGaID = scheme.getGrantingAuthority().getAzureGroupId();
+
+            if (rolesFromJwt.contains(schemeGaID)){
+                return true;
+            }
+        }else{
+            throw new InvalidRequestException("No x-ms-token-aad-id-token present");
+        }
+        return false;
     }
 
 
