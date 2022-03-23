@@ -19,6 +19,14 @@ public interface GraphAPIFeignClient {
     @Headers({"Authorization: {authorization}","Content-Type: application/json"})
     Response getGroups(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation);
 
+    @GetMapping(value = "/v1.0/groups/$count?$filter=displayName eq '{groupName}'")
+    @RequestLine("GET /v1.0/groups/$count?$filter=displayName eq '{groupName}'")
+    @Headers({"Authorization: {authorization}","Content-Type: application/json"})
+    Response getGroupCountByName(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                               @PathVariable("groupName")  String groupName,
+                                 @RequestHeader("consistencyLevel") String consistencyLevel);
+
+
     @PostMapping(value = "/v1.0/groups")
     @RequestLine("POST v1.0/groups")
      Response addGroup(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
