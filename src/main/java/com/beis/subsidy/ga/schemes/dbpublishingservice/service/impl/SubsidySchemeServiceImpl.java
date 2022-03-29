@@ -286,13 +286,11 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
             SubsidyMeasure scheme = subsidyMeasureRepository.findById(scNumber).get();
             String schemeGaID = scheme.getGrantingAuthority().getAzureGroupId();
 
-            if (rolesFromJwt.contains(schemeGaID)){
-                return true;
-            }
+            return rolesFromJwt.contains(schemeGaID);
         }else{
+            log.error("No x-ms-token-aad-id-token present");
             throw new InvalidRequestException("No x-ms-token-aad-id-token present");
         }
-        return false;
     }
 
 
