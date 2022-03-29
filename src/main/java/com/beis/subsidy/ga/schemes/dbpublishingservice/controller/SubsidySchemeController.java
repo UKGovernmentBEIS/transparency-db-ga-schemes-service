@@ -2,6 +2,7 @@ package com.beis.subsidy.ga.schemes.dbpublishingservice.controller;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.auth0.jwt.JWT;
@@ -103,7 +104,8 @@ public class SubsidySchemeController {
     )
     public String updateSchemeDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
                                       @RequestBody SchemeDetailsRequest schemeReq,
-                                      @PathVariable("scNumber") String scNumber) {
+                                      @PathVariable("scNumber") String scNumber,
+                                      HttpServletResponse response) {
 
         log.info("{} ::Before calling updateSchemeDetails", loggingComponentName);
         if(Objects.isNull(schemeReq)|| StringUtils.isEmpty(scNumber)) {
@@ -115,7 +117,9 @@ public class SubsidySchemeController {
         // if user not BEIS Admin then;
         if (!AccessManagementConstant.BEIS_ADMIN_ROLE.equals(userPrincipleObj.getRole().trim())) {
             if(!subsidySchemeService.canEditScheme(userPrinciple, scNumber)){
-                throw new AccessDeniedException("User " + userPrincipleObj.getUserName() + " does not have the rights to update scheme: " + scNumber);
+                response.setStatus(403);
+                log.error("User " + userPrincipleObj.getUserName() + " does not have the rights to update scheme: " + scNumber);
+                return null;
             }
         }
 
