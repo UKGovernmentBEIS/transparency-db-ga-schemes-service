@@ -267,11 +267,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
     @Override
     public Boolean canEditScheme(HttpHeaders userPrinciple, String scNumber) {
-        String jwtString;
-        try{
-            jwtString = userPrinciple.get("x-ms-token-aad-id-token").get(0);
-        }catch(Exception e){
-            throw new InvalidRequestException("No x-ms-token-aad-id-token present");
+        String jwtString = null;
+        if (!userPrinciple.getOrEmpty("x-ms-token-aad-id-token").isEmpty()){
+            jwtString = Objects.requireNonNull(userPrinciple.get("x-ms-token-aad-id-token")).get(0);
         }
 
         if (jwtString != null){
