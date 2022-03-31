@@ -1,9 +1,6 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.service.impl;
 
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.exceptions.JWTDecodeException;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.InvalidRequestException;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.SearchResultNotFoundException;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.UnauthorisedAccessException;
@@ -29,7 +26,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -264,33 +260,6 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         SubsidyMeasure subsidyMeasure = subsidyMeasureRepository.findById(scNumber).get();
         return new SubsidyMeasureResponse(subsidyMeasure);
     }
-
-    @Override
-    public Boolean canEditScheme(HttpHeaders userPrinciple, String scNumber) {
-        String jwtString = null;
-        if (!userPrinciple.getOrEmpty("x-ms-token-aad-id-token").isEmpty()){
-            jwtString = Objects.requireNonNull(userPrinciple.get("x-ms-token-aad-id-token")).get(0);
-        }
-
-        if (jwtString != null){
-            DecodedJWT jwt;
-            try {
-                jwt = JWT.decode(jwtString);
-            } catch (JWTDecodeException exception){
-                throw new JWTDecodeException("Invalid JWT Token given: " + jwtString);
-            }
-            List<String> rolesFromJwt = jwt.getClaim("roles").asList(String.class);
-
-            SubsidyMeasure scheme = subsidyMeasureRepository.findById(scNumber).get();
-            String schemeGaID = scheme.getGrantingAuthority().getAzureGroupId();
-
-            return rolesFromJwt.contains(schemeGaID);
-        }else{
-            log.error("No x-ms-token-aad-id-token present");
-            throw new InvalidRequestException("No x-ms-token-aad-id-token present");
-        }
-    }
-
 
     private Map<String, Long> schemeCounts(List<SubsidyMeasure> schemeList) {
         long allScheme = schemeList.size();

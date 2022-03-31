@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.AccessManagementConstant;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.util.PermissionUtils;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.UserPrinciple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,6 +52,8 @@ public class SubsidySchemeController {
     
     @Autowired
     AuditLogsRepository auditLogsRepository;
+
+    private PermissionUtils permissionUtils;
 
     @GetMapping("/health")
     public ResponseEntity<String> getHealth() {
@@ -109,7 +112,7 @@ public class SubsidySchemeController {
 
         // if user not BEIS Admin then;
         if (!AccessManagementConstant.BEIS_ADMIN_ROLE.equals(userPrincipleObj.getRole().trim())) {
-            if(!subsidySchemeService.canEditScheme(userPrinciple, scNumber)){
+            if(!permissionUtils.ownsScheme(userPrinciple, scNumber)){
                 response.setStatus(403);
                 log.error("User " + userPrincipleObj.getUserName() + " does not have the rights to update scheme: " + scNumber);
                 return null;
