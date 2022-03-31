@@ -5,6 +5,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.SubsidyMeasureRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.AccessManagementConstant;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.PermissionUtils;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.UserPrinciple;
@@ -53,7 +55,8 @@ public class SubsidySchemeController {
     @Autowired
     AuditLogsRepository auditLogsRepository;
 
-    private PermissionUtils permissionUtils;
+    @Autowired
+    private SubsidyMeasureRepository subsidyMeasureRepository;
 
     @GetMapping("/health")
     public ResponseEntity<String> getHealth() {
@@ -111,8 +114,9 @@ public class SubsidySchemeController {
 		UserPrinciple userPrincipleObj = SearchUtils.isSchemeRoleValidation(objectMapper, userPrinciple,"update Subsidy Schema");
 
         // if user not BEIS Admin then;
-        if (!AccessManagementConstant.BEIS_ADMIN_ROLE.equals(userPrincipleObj.getRole().trim())) {
-            if(!permissionUtils.ownsScheme(userPrinciple, scNumber)){
+        if (!PermissionUtils.userHasRole(userPrincipleObj, AccessManagementConstant.BEIS_ADMIN_ROLE)) {
+            SubsidyMeasure scheme = subsidyMeasureRepository.findById(scNumber).get();
+            if(!PermissionUtils.ownsScheme(userPrinciple, scheme.getGrantingAuthority().getAzureGroupId())){
                 response.setStatus(403);
                 log.error("User " + userPrincipleObj.getUserName() + " does not have the rights to update scheme: " + scNumber);
                 return null;
