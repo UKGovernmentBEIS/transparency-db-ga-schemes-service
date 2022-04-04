@@ -141,21 +141,19 @@ public class SubsidySchemeController {
             produces = APPLICATION_JSON_VALUE
     )
     public ResponseEntity<SubsidyMeasureResponse> findSubsidyScheme(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
-                                                                    @PathVariable("scNumber") String scNumber,
-                                                                    HttpServletResponse response) {
+                                                                    @PathVariable("scNumber") String scNumber) {
         log.info("{} ::Before calling findSubsidyScheme", loggingComponentName);
         UserPrinciple userPrincipleObj = SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"find Subsidy Schema");
         if (StringUtils.isEmpty(scNumber)) {
             throw new InvalidRequestException("Bad Request SC Number is null");
         }
         SubsidyMeasureResponse subsidySchemeById = subsidySchemeService.findSubsidySchemeById(scNumber);
+        subsidySchemeById.setCanEdit(true);
         // if user not BEIS Admin then;
         if (!PermissionUtils.userHasRole(userPrincipleObj, AccessManagementConstant.BEIS_ADMIN_ROLE)) {
             SubsidyMeasure scheme = subsidyMeasureRepository.findById(scNumber).get();
-            if(!PermissionUtils.ownsScheme(userPrinciple, scheme.getGrantingAuthority().getAzureGroupId())){
-                response.setStatus(403);
-                log.error("User " + userPrincipleObj.getUserName() + " does not have the rights to view scheme: " + scNumber);
-                return null;
+            if (!PermissionUtils.ownsScheme(userPrinciple, scheme.getGrantingAuthority().getAzureGroupId())) {
+                subsidySchemeById.setCanEdit(false);
             }
         }
         return new ResponseEntity<SubsidyMeasureResponse>(subsidySchemeById, HttpStatus.OK);

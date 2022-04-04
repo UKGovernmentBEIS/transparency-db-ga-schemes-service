@@ -6,11 +6,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @NoArgsConstructor
 @Getter
+@Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SubsidyMeasureResponse {
 
@@ -62,6 +64,9 @@ public class SubsidyMeasureResponse {
     @JsonProperty
     private String deletedTimestamp;
 
+    @JsonProperty
+    private Boolean canEdit;
+
     public SubsidyMeasureResponse(SubsidyMeasure subsidyMeasure) {
         this.scNumber = subsidyMeasure.getScNumber();
         this.subsidyMeasureTitle  = subsidyMeasure.getSubsidyMeasureTitle();
@@ -84,6 +89,7 @@ public class SubsidyMeasureResponse {
         if(subsidyMeasure.getDeletedTimestamp() != null) {
             this.deletedTimestamp = SearchUtils.dateTimeToFullMonthNameInDate(subsidyMeasure.getDeletedTimestamp());
         }
+        this.canEdit = true;
     }
 
 }
