@@ -116,7 +116,7 @@ public class SubsidySchemeController {
         // if user not BEIS Admin then;
         if (!PermissionUtils.userHasRole(userPrincipleObj, AccessManagementConstant.BEIS_ADMIN_ROLE)) {
             SubsidyMeasure scheme = subsidyMeasureRepository.findById(scNumber).get();
-            if(!PermissionUtils.ownsScheme(userPrinciple, scheme.getGrantingAuthority().getAzureGroupId())){
+            if(!PermissionUtils.userPrincipleContainsId(userPrinciple, scheme.getGrantingAuthority().getAzureGroupId())){
                 response.setStatus(403);
                 log.error("User " + userPrincipleObj.getUserName() + " does not have the rights to update scheme: " + scNumber);
                 return null;
@@ -152,7 +152,7 @@ public class SubsidySchemeController {
         // if user not BEIS Admin then;
         if (!PermissionUtils.userHasRole(userPrincipleObj, AccessManagementConstant.BEIS_ADMIN_ROLE)) {
             SubsidyMeasure scheme = subsidyMeasureRepository.findById(scNumber).get();
-            if (!PermissionUtils.ownsScheme(userPrinciple, scheme.getGrantingAuthority().getAzureGroupId())) {
+            if (!PermissionUtils.userPrincipleContainsId(userPrinciple, scheme.getGrantingAuthority().getAzureGroupId())) {
                 subsidySchemeById.setCanEdit(false);
             }
         }

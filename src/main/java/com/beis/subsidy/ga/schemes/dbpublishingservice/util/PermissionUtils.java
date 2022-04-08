@@ -40,11 +40,11 @@ public class PermissionUtils {
         }
     }
 
-    public static Boolean ownsScheme(HttpHeaders userPrinciple, String schemeGaID) {
+    public static Boolean userPrincipleContainsId(HttpHeaders userPrinciple, String gaId) {
         String jwtString = getJwtStringFromHeaders(userPrinciple);
         DecodedJWT jwt = decodeJwt(jwtString);
 
-        return getRoleFromJwt(jwt).contains(schemeGaID);
+        return getRoleFromJwt(jwt).contains(gaId);
     }
 
     public static Boolean userHasRole(UserPrinciple userPrincipleObj, String role) {
