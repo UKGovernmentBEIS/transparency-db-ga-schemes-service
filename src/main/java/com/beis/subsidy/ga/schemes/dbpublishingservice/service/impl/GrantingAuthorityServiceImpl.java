@@ -58,17 +58,17 @@ public class GrantingAuthorityServiceImpl implements GrantingAuthorityService {
 
         log.info("{}::inside createGrantingAuthority", loggingComponentName);
 
-        String trimmedName = grantingAuthorityRequest.getName().trim();
-        String[] mailNickname = trimmedName.split(" ");
-        AddGroupRequest request = new AddGroupRequest(trimmedName,
-                trimmedName, false, mailNickname[0], true);
+        String trimmedGaName = grantingAuthorityRequest.getName().trim();
+        String[] mailNickname = trimmedGaName.split(" ");
+        AddGroupRequest request = new AddGroupRequest(trimmedGaName,
+                trimmedGaName, false, mailNickname[0], true);
         GroupResponse response = addGroup(accessToken, request);
         //
         if(response==null || response.getId()==null) {
             throw new AccessManagementException(HttpStatus.INTERNAL_SERVER_ERROR, "Create Group id is null");
         }
-        GrantingAuthority grantingAuthority = new GrantingAuthority(null, trimmedName,
-        		grantingAuthorityRequest.getUserName(), "SYSTEM", "Active", response.getId(),trimmedName
+        GrantingAuthority grantingAuthority = new GrantingAuthority(null, trimmedGaName,
+        		grantingAuthorityRequest.getUserName(), "SYSTEM", "Active", response.getId(),trimmedGaName
                 , LocalDateTime.now(), LocalDateTime.now());
 
         GrantingAuthority savedAwards = gaRepository.save(grantingAuthority);
