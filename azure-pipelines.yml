@@ -76,7 +76,7 @@ stages:
   - stage:
     displayName: Deploy to staging environment
     dependsOn: Build
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
     jobs:
       - deployment: DeployLinuxWebAppStg
         displayName: Deploy Linux Web App - Staging

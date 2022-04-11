@@ -27,6 +27,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import java.math.BigInteger;
@@ -190,7 +192,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
   }
 
    @Override
-   public String updateSubsidySchemeDetails(SchemeDetailsRequest scheme, String scNumber) {
+   public String updateSubsidySchemeDetails(SchemeDetailsRequest scheme, String scNumber, UserPrinciple userPrinciple) {
         log.info("Inside updateSubsidySchemeDetails method - sc number " + scheme.getScNumber());
         SubsidyMeasure schemeById = subsidyMeasureRepository.findById(scNumber).get();
         LegalBasis legalBasis = schemeById.getLegalBases();
@@ -233,6 +235,10 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         }
         if(!StringUtils.isEmpty(scheme.getStatus())){
             schemeById.setStatus(scheme.getStatus());
+            if(scheme.getStatus().equals("Deleted")){
+                schemeById.setDeletedBy(userPrinciple.getUserName());
+                schemeById.setDeletedTimestamp(LocalDateTime.now());
+            }
         }
         if(!StringUtils.isEmpty(scheme.getLegalBasisText())){
             legalBasis.setLegalBasisText(scheme.getLegalBasisText());
@@ -260,6 +266,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         long allScheme = schemeList.size();
         long activeScheme = 0;
         long inactiveScheme = 0;
+        long deletedScheme = 0;
 
         if(schemeList != null && schemeList.size() > 0){
             for(SubsidyMeasure sm : schemeList){
@@ -269,12 +276,16 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
                 if(sm.getStatus().equalsIgnoreCase(AccessManagementConstant.SM_INACTIVE)){
                     inactiveScheme++;
                 }
+                if(sm.getStatus().equalsIgnoreCase(AccessManagementConstant.SM_DELETED)){
+                    deletedScheme++;
+                }
             }
         }
         Map<String, Long> smUserActivityCount = new HashMap<>();
         smUserActivityCount.put("allScheme",allScheme);
         smUserActivityCount.put("activeScheme",activeScheme);
         smUserActivityCount.put("inactiveScheme",inactiveScheme);
+        smUserActivityCount.put("deletedScheme",deletedScheme);
         return smUserActivityCount;
     }
 
