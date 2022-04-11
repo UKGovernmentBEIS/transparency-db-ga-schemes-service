@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 public class SearchSubsidyResultsResponse {
 	private long activeScheme;
 	private long inactiveScheme;
+	private long deletedScheme;
 	private long allScheme;
 
 	public long totalSearchResults;
@@ -42,11 +43,13 @@ public class SearchSubsidyResultsResponse {
 		this.totalPages = totalPages;
 		this.activeScheme = schemeCount.get("activeScheme");
 		this.inactiveScheme = schemeCount.get("inactiveScheme");
+		this.deletedScheme = schemeCount.get("deletedScheme");
 		this.allScheme = schemeCount.get("allScheme");
 	}
 	public SearchSubsidyResultsResponse(Map<String, Long> schemeCount) {
 		this.activeScheme = schemeCount.get("activeScheme");
 		this.inactiveScheme = schemeCount.get("inactiveScheme");
+		this.deletedScheme = schemeCount.get("deletedScheme");
 		this.allScheme = schemeCount.get("allScheme");
 	}
 }
