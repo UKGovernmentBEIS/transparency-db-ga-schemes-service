@@ -67,8 +67,8 @@ public class GrantingAuthorityServiceImpl implements GrantingAuthorityService {
         if(response==null || response.getId()==null) {
             throw new AccessManagementException(HttpStatus.INTERNAL_SERVER_ERROR, "Create Group id is null");
         }
-        GrantingAuthority grantingAuthority = new GrantingAuthority(null, grantingAuthorityRequest.getName(),
-        		grantingAuthorityRequest.getUserName(), "SYSTEM", "Active", response.getId(),grantingAuthorityRequest.getName()
+        GrantingAuthority grantingAuthority = new GrantingAuthority(null, trimmedName,
+        		grantingAuthorityRequest.getUserName(), "SYSTEM", "Active", response.getId(),trimmedName
                 , LocalDateTime.now(), LocalDateTime.now());
 
         GrantingAuthority savedAwards = gaRepository.save(grantingAuthority);
