@@ -14,6 +14,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.math.BigInteger;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * 
@@ -94,4 +95,10 @@ public class SubsidyMeasure {
 	@UpdateTimestamp
 	@Column(name = "LAST_MODIFIED_TIMESTAMP")
 	private LocalDate lastModifiedTimestamp;
+
+	@Column(name = "DELETED_BY")
+	private String deletedBy;
+
+	@Column(name = "DELETED_TIMESTAMP", columnDefinition = "TIMESTAMP")
+	private LocalDateTime deletedTimestamp;
 }
