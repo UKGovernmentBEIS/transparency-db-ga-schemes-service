@@ -58,9 +58,10 @@ public class GrantingAuthorityServiceImpl implements GrantingAuthorityService {
 
         log.info("{}::inside createGrantingAuthority", loggingComponentName);
 
-        String[] mailNickname = grantingAuthorityRequest.getName().trim().split(" ");
-        AddGroupRequest request = new AddGroupRequest(grantingAuthorityRequest.getName().trim(),
-                grantingAuthorityRequest.getName().trim(), false, mailNickname[0], true);
+        String trimmedName = grantingAuthorityRequest.getName().trim();
+        String[] mailNickname = trimmedName.split(" ");
+        AddGroupRequest request = new AddGroupRequest(trimmedName,
+                trimmedName, false, mailNickname[0], true);
         GroupResponse response = addGroup(accessToken, request);
         //
         if(response==null || response.getId()==null) {
