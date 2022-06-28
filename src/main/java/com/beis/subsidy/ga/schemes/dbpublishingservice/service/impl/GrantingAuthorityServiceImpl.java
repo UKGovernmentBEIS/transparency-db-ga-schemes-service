@@ -17,9 +17,12 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.response.GroupResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchResults;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.UserDetailsResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.GrantingAuthorityService;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.util.AccessManagementConstant;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.GrantingAuthSpecificationUtils;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SearchUtils;
 import feign.FeignException;
 import feign.Response;
+import feign.Util;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +37,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -267,6 +272,16 @@ public class GrantingAuthorityServiceImpl implements GrantingAuthorityService {
         GroupResponse groupResponse;
         Object clazz;
         try {
+            int groupCount = getGroupCountByName(token, request);
+            if (groupCount > 0) {
+                int status = AccessManagementConstant.GA_ALREADY_EXISTS; //491 group already exists
+                String message = "group with this name already exist. Group count: " + groupCount;
+                log.error("{}:: Group count >0:: status code {} & message {}",
+                        loggingComponentName, status,
+                        message);
+                throw new AccessManagementException(HttpStatus.valueOf(status),
+                        message);
+            }
             response = graphAPIFeignClient.addGroup("Bearer " + token, request);
             log.info("{}::  Graph Api status  {}", loggingComponentName, response.status());
 
@@ -397,5 +412,22 @@ public class GrantingAuthorityServiceImpl implements GrantingAuthorityService {
         }
         return userDetailsResponse;
     }
+    public int getGroupCountByName(String token, AddGroupRequest request){
+        Response groupCountResponse = graphAPIFeignClient.getGroupCountByName("Bearer " + token, request.getDisplayName(),"eventual");
+        int groupCount = -1;
+        if (groupCountResponse.status() == 200) {
+            try {
+                String body = Util.toString(groupCountResponse.body().asReader(Charset.defaultCharset()));
+                if (SearchUtils.isNumeric(body)) {
+                    groupCount = Integer.parseInt(body);
+                }
+            } catch (IOException ex) {
+                log.error("{}:: IO Exception in getGroupUserCount:: message {}",
+                        loggingComponentName, ex.getMessage());
+            }
+        }
+        return groupCount;
+    }
 
 }
+

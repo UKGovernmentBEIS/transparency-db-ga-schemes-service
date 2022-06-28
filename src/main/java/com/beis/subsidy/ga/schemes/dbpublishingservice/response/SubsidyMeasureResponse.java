@@ -7,13 +7,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
+import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;
 
 @NoArgsConstructor
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Slf4j
 public class SubsidyMeasureResponse {
 
     @JsonProperty
@@ -73,8 +74,13 @@ public class SubsidyMeasureResponse {
         this.startDate =  SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getStartDate());
         this.endDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getEndDate());
         this.duration = SearchUtils.getDurationInYears(subsidyMeasure.getDuration());
-        this.budget = subsidyMeasure.getBudget().contains(",") ? subsidyMeasure.getBudget():
-                SearchUtils.decimalNumberFormat(new BigDecimal(subsidyMeasure.getBudget().trim()));
+        if(SearchUtils.isNumeric(subsidyMeasure.getBudget())){
+            this.budget = subsidyMeasure.getBudget().contains(",") ? subsidyMeasure.getBudget():
+                    SearchUtils.decimalNumberFormat(new BigDecimal(subsidyMeasure.getBudget().trim()));
+        }else{
+            log.error("Budget for scheme {} is not numeric, Budget is {}",subsidyMeasure.getScNumber(),subsidyMeasure.getBudget());
+            this.budget = subsidyMeasure.getBudget();
+        }
         this.gaName = subsidyMeasure.getGrantingAuthority().getGrantingAuthorityName();
         this.adhoc = ""+subsidyMeasure.isAdhoc();
         this.status = subsidyMeasure.getStatus();
