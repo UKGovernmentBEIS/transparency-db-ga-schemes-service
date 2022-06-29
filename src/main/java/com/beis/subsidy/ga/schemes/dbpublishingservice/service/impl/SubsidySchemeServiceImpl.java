@@ -261,7 +261,6 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         return new SubsidyMeasureResponse(subsidyMeasure);
     }
 
-
     private Map<String, Long> schemeCounts(List<SubsidyMeasure> schemeList) {
         long allScheme = schemeList.size();
         long activeScheme = 0;

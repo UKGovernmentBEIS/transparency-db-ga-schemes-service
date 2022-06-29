@@ -2,8 +2,13 @@ package com.beis.subsidy.ga.schemes.dbpublishingservice.controller;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.SubsidyMeasureRepository;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.util.AccessManagementConstant;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.util.PermissionUtils;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.UserPrinciple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,6 +55,9 @@ public class SubsidySchemeController {
     @Autowired
     AuditLogsRepository auditLogsRepository;
 
+    @Autowired
+    private SubsidyMeasureRepository subsidyMeasureRepository;
+
     @GetMapping("/health")
     public ResponseEntity<String> getHealth() {
         return new ResponseEntity<>("Successful health check - GA Scheme API", HttpStatus.OK);
@@ -95,7 +103,8 @@ public class SubsidySchemeController {
     )
     public String updateSchemeDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
                                       @RequestBody SchemeDetailsRequest schemeReq,
-                                      @PathVariable("scNumber") String scNumber) {
+                                      @PathVariable("scNumber") String scNumber,
+                                      HttpServletResponse response) {
 
         log.info("{} ::Before calling updateSchemeDetails", loggingComponentName);
         if(Objects.isNull(schemeReq)|| StringUtils.isEmpty(scNumber)) {
@@ -103,6 +112,18 @@ public class SubsidySchemeController {
         }
     	//check user role here
 		UserPrinciple userPrincipleObj = SearchUtils.isSchemeRoleValidation(objectMapper, userPrinciple,"update Subsidy Schema");
+
+        // if user not BEIS Admin then;
+        if (!PermissionUtils.userHasRole(userPrincipleObj, AccessManagementConstant.BEIS_ADMIN_ROLE)) {
+            SubsidyMeasure scheme = subsidyMeasureRepository.findById(scNumber).get();
+            if(!PermissionUtils.userPrincipleContainsId(userPrinciple, scheme.getGrantingAuthority().getAzureGroupId())){
+                response.setStatus(403);
+                log.error("User " + userPrincipleObj.getUserName() + " does not have the rights to update scheme: " + scNumber);
+                return null;
+            }
+        }
+
+
         String scNumberRes= subsidySchemeService.updateSubsidySchemeDetails(schemeReq,scNumber, userPrincipleObj);
 
         StringBuilder eventMsg = new StringBuilder("Scheme ").append(scNumber).append(" is updated to ")
@@ -122,11 +143,19 @@ public class SubsidySchemeController {
     public ResponseEntity<SubsidyMeasureResponse> findSubsidyScheme(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
                                                                     @PathVariable("scNumber") String scNumber) {
         log.info("{} ::Before calling findSubsidyScheme", loggingComponentName);
-        SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"find Subsidy Schema");
+        UserPrinciple userPrincipleObj = SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"find Subsidy Schema");
         if (StringUtils.isEmpty(scNumber)) {
             throw new InvalidRequestException("Bad Request SC Number is null");
         }
         SubsidyMeasureResponse subsidySchemeById = subsidySchemeService.findSubsidySchemeById(scNumber);
+        subsidySchemeById.setCanEdit(true);
+        // if user not BEIS Admin then;
+        if (!PermissionUtils.userHasRole(userPrincipleObj, AccessManagementConstant.BEIS_ADMIN_ROLE)) {
+            SubsidyMeasure scheme = subsidyMeasureRepository.findById(scNumber).get();
+            if (!PermissionUtils.userPrincipleContainsId(userPrinciple, scheme.getGrantingAuthority().getAzureGroupId())) {
+                subsidySchemeById.setCanEdit(false);
+            }
+        }
         return new ResponseEntity<SubsidyMeasureResponse>(subsidySchemeById, HttpStatus.OK);
     }
 }
