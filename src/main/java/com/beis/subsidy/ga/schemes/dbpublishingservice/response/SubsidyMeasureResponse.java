@@ -68,11 +68,19 @@ public class SubsidyMeasureResponse {
     @JsonProperty
     private Boolean canEdit;
 
+    @JsonProperty
+    private boolean hasNoEndDate;
+
     public SubsidyMeasureResponse(SubsidyMeasure subsidyMeasure) {
         this.scNumber = subsidyMeasure.getScNumber();
         this.subsidyMeasureTitle  = subsidyMeasure.getSubsidyMeasureTitle();
         this.startDate =  SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getStartDate());
-        this.endDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getEndDate());
+
+        if(subsidyMeasure.getEndDate() == null){
+            this.endDate = "";
+        } else {
+            this.endDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getEndDate());
+        }
         this.duration = SearchUtils.getDurationInYears(subsidyMeasure.getDuration());
         if(SearchUtils.isNumeric(subsidyMeasure.getBudget())){
             this.budget = subsidyMeasure.getBudget().contains(",") ? subsidyMeasure.getBudget():
@@ -89,6 +97,7 @@ public class SubsidyMeasureResponse {
         this.legalBasisText = subsidyMeasure.getLegalBases().getLegalBasisText();
         this.lastModifiedDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getLastModifiedTimestamp());
         this.publishedMeasureDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getPublishedMeasureDate());
+        this.hasNoEndDate =subsidyMeasure.isHasNoEndDate();
         if(subsidyMeasure.getDeletedBy() != null) {
             this.deletedBy = subsidyMeasure.getDeletedBy();
         }

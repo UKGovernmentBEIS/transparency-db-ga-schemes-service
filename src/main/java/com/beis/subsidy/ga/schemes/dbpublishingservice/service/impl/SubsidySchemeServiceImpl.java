@@ -132,17 +132,25 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getBudget())){
             schemeToSave.setBudget(scheme.getBudget());
         }
-        if(!scheme.isAdhoc() && scheme.getStartDate() != null && scheme.getEndDate() != null){
+        if(scheme.isHasNoEndDate() || !scheme.isHasNoEndDate()){
+          schemeToSave.setHasNoEndDate(scheme.isHasNoEndDate());
+          schemeToSave.setEndDate(null);
+        }
+        if(!scheme.isAdhoc() && scheme.getStartDate() != null && scheme.getEndDate() != null && !scheme.isHasNoEndDate()){
             schemeToSave.setDuration(getDuration(scheme.getStartDate(), scheme.getEndDate()));
         } else if(scheme.getStartDate() != null && scheme.isAdhoc()) {
             schemeToSave.setDuration(BigInteger.ONE);
+        } else {
+            schemeToSave.setDuration(BigInteger.ZERO);
         }
         if(scheme.getStartDate() != null){
             schemeToSave.setStartDate(scheme.getStartDate());
         }
         if(scheme.isAdhoc()){
             schemeToSave.setEndDate(scheme.getStartDate());
-        } else if(scheme.getEndDate() != null){
+        } else if (scheme.getEndDate().equals(LocalDate.of(9999, 12, 31))) {
+            schemeToSave.setEndDate(null);
+        } else {
             schemeToSave.setEndDate(scheme.getEndDate());
         }
         if(!StringUtils.isEmpty(scheme.getGaSubsidyWebLink())){
@@ -242,6 +250,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         }
         if(!StringUtils.isEmpty(scheme.getLegalBasisText())){
             legalBasis.setLegalBasisText(scheme.getLegalBasisText());
+        }
+        if(scheme.isHasNoEndDate()){
+            schemeById.setHasNoEndDate(true);
         }
         schemeById.setLastModifiedTimestamp(LocalDate.now());
 
