@@ -34,4 +34,5 @@ public class SchemeDetailsRequest {
     private Long gaId;
     private String gaName;
     private String legalBasisText;
+    private boolean hasNoEndDate;
 }
