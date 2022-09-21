@@ -251,9 +251,8 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getLegalBasisText())){
             legalBasis.setLegalBasisText(scheme.getLegalBasisText());
         }
-        if(scheme.isHasNoEndDate()){
-            schemeById.setHasNoEndDate(true);
-        }
+
+        schemeById.setHasNoEndDate(scheme.isHasNoEndDate());
         schemeById.setLastModifiedTimestamp(LocalDate.now());
 
         legalBasis.setLastModifiedTimestamp(new Date());
