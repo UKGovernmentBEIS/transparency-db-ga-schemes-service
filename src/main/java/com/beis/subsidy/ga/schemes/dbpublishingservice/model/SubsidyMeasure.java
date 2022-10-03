@@ -2,6 +2,7 @@ package com.beis.subsidy.ga.schemes.dbpublishingservice.model;
 
 
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SequenceGenerator;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -104,4 +105,7 @@ public class SubsidyMeasure {
 
 	@Column(name = "HAS_NO_END_DATE")
 	private boolean hasNoEndDate;
+
+	@Column(name = "CONFIRMATION_DATE")
+	private LocalDate confirmationDate;
 }

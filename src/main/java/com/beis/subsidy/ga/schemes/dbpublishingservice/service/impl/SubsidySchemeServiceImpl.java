@@ -165,6 +165,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getStatus())){
             schemeToSave.setStatus(scheme.getStatus());
         }
+        if(scheme.getConfirmationDate() != null){
+            schemeToSave.setConfirmationDate(scheme.getConfirmationDate());
+      }
 
         if(!StringUtils.isEmpty(scheme.getGaName())){
             GrantingAuthority grantingAuthority = gaRepository.findByGrantingAuthorityName(scheme.getGaName().trim());
@@ -250,6 +253,10 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         }
         if(!StringUtils.isEmpty(scheme.getLegalBasisText())){
             legalBasis.setLegalBasisText(scheme.getLegalBasisText());
+        }
+
+        if(scheme.getConfirmationDate() != null){
+            schemeById.setConfirmationDate(scheme.getConfirmationDate());
         }
 
         schemeById.setHasNoEndDate(scheme.isHasNoEndDate());
