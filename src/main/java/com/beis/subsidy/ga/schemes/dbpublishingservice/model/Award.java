@@ -38,7 +38,7 @@ public class Award {
 	private GrantingAuthority grantingAuthority;
 
 	@ManyToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name = "scNumber", nullable = false, insertable = false, updatable = false)
+	@JoinColumn(name = "scNumber", insertable = false, updatable = false)
 	private SubsidyMeasure subsidyMeasure;
 
 	@Column(name = "SUBSIDY_ELEMENT_FULL_AMOUNT_RANGE")
@@ -87,4 +87,10 @@ public class Award {
 	@UpdateTimestamp
 	@Column(name = "LAST_MODIFIED_TIMESTAMP")
 	private LocalDate lastModifiedTimestamp;
+
+	@Column(name = "STANDALONE_AWARD")
+	private String standaloneAward;
+
+	@Column(name = "SUBSIDY_AWARD_DESCRIPTION")
+	private String subsidyAwardDescription;
 }
