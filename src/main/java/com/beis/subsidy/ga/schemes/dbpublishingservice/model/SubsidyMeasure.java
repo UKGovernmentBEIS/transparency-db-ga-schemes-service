@@ -2,7 +2,6 @@ package com.beis.subsidy.ga.schemes.dbpublishingservice.model;
 
 
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SequenceGenerator;
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
