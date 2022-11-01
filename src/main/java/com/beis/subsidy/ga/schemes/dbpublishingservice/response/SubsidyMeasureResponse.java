@@ -108,7 +108,11 @@ public class SubsidyMeasureResponse {
             this.deletedTimestamp = SearchUtils.dateTimeToFullMonthNameInDate(subsidyMeasure.getDeletedTimestamp());
         }
         this.canEdit = true;
-        this.confirmationDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getConfirmationDate());
+        if(subsidyMeasure.getConfirmationDate() == null){
+            this.confirmationDate = "";
+        } else {
+            this.confirmationDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getConfirmationDate());
+        }
     }
 
 }
