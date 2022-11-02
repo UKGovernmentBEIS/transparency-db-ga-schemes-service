@@ -4,6 +4,7 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SearchUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import javax.persistence.Column;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -71,6 +72,9 @@ public class SubsidyMeasureResponse {
     @JsonProperty
     private boolean hasNoEndDate;
 
+    @JsonProperty
+    private String subsidySchemeDescription;
+
     public SubsidyMeasureResponse(SubsidyMeasure subsidyMeasure) {
         this.scNumber = subsidyMeasure.getScNumber();
         this.subsidyMeasureTitle  = subsidyMeasure.getSubsidyMeasureTitle();
@@ -105,6 +109,7 @@ public class SubsidyMeasureResponse {
             this.deletedTimestamp = SearchUtils.dateTimeToFullMonthNameInDate(subsidyMeasure.getDeletedTimestamp());
         }
         this.canEdit = true;
+        this.subsidySchemeDescription = subsidyMeasure.getSubsidySchemeDescription();
     }
 
 }

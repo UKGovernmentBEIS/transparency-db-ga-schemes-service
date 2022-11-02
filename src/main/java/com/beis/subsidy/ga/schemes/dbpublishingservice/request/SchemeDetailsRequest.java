@@ -35,4 +35,5 @@ public class SchemeDetailsRequest {
     private String gaName;
     private String legalBasisText;
     private boolean hasNoEndDate;
+    private String subsidySchemeDescription;
 }
