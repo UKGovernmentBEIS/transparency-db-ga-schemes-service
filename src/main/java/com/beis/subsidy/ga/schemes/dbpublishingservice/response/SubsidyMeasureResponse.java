@@ -73,6 +73,9 @@ public class SubsidyMeasureResponse {
 
     @JsonProperty
     private String confirmationDate;
+    
+    @JsonProperty
+    private String spendingSectors;
 
     public SubsidyMeasureResponse(SubsidyMeasure subsidyMeasure) {
         this.scNumber = subsidyMeasure.getScNumber();
@@ -107,6 +110,7 @@ public class SubsidyMeasureResponse {
         if(subsidyMeasure.getDeletedTimestamp() != null) {
             this.deletedTimestamp = SearchUtils.dateTimeToFullMonthNameInDate(subsidyMeasure.getDeletedTimestamp());
         }
+        this.spendingSectors = subsidyMeasure.getSpendingSectors();
         this.canEdit = true;
         if(subsidyMeasure.getConfirmationDate() == null){
             this.confirmationDate = "";

@@ -189,6 +189,10 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         }
         schemeToSave.setLastModifiedTimestamp(LocalDate.now());
 
+        if(!StringUtils.isEmpty(scheme.getSpendingSectorJson())){
+            schemeToSave.setSpendingSectors(scheme.getSpendingSectorJson());
+        }
+
         legalBasis.setLastModifiedTimestamp(new Date());
         legalBasis.setStatus("Active");
         legalBasis.setCreatedBy("SYSTEM");
@@ -254,10 +258,12 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getLegalBasisText())){
             legalBasis.setLegalBasisText(scheme.getLegalBasisText());
         }
-
         if(scheme.getConfirmationDate() != null){
             schemeById.setConfirmationDate(scheme.getConfirmationDate());
         }
+       if(!StringUtils.isEmpty(scheme.getSpendingSectorJson())){
+           schemeById.setSpendingSectors(scheme.getSpendingSectorJson());
+       }
 
         schemeById.setHasNoEndDate(scheme.isHasNoEndDate());
         schemeById.setLastModifiedTimestamp(LocalDate.now());
