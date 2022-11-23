@@ -35,5 +35,6 @@ public class SchemeDetailsRequest {
     private String gaName;
     private String legalBasisText;
     private boolean hasNoEndDate;
+    private LocalDate confirmationDate;
     private String spendingSectorJson;
 }

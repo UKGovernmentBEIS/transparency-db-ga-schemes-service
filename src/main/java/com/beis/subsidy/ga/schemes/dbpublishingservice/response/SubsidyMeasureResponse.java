@@ -72,6 +72,9 @@ public class SubsidyMeasureResponse {
     private boolean hasNoEndDate;
 
     @JsonProperty
+    private String confirmationDate;
+    
+    @JsonProperty
     private String spendingSectors;
 
     public SubsidyMeasureResponse(SubsidyMeasure subsidyMeasure) {
@@ -109,6 +112,11 @@ public class SubsidyMeasureResponse {
         }
         this.spendingSectors = subsidyMeasure.getSpendingSectors();
         this.canEdit = true;
+        if(subsidyMeasure.getConfirmationDate() == null){
+            this.confirmationDate = "";
+        } else {
+            this.confirmationDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getConfirmationDate());
+        }
     }
 
 }
