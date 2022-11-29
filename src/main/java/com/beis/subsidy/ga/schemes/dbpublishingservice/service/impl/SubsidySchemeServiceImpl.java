@@ -167,8 +167,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         }
         if(scheme.getConfirmationDate() != null){
             schemeToSave.setConfirmationDate(scheme.getConfirmationDate());
-      }
-
+        }
         if(!StringUtils.isEmpty(scheme.getGaName())){
             GrantingAuthority grantingAuthority = gaRepository.findByGrantingAuthorityName(scheme.getGaName().trim());
 
@@ -189,8 +188,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         }
         schemeToSave.setLastModifiedTimestamp(LocalDate.now());
 
-        if(!StringUtils.isEmpty(scheme.getSubsidySchemeDescription())){
+        if(!StringUtils.isEmpty(scheme.getSubsidySchemeDescription())) {
             schemeToSave.setSubsidySchemeDescription(scheme.getSubsidySchemeDescription());
+        }
         if(!StringUtils.isEmpty(scheme.getSpendingSectorJson())){
             schemeToSave.setSpendingSectors(scheme.getSpendingSectorJson());
         }
