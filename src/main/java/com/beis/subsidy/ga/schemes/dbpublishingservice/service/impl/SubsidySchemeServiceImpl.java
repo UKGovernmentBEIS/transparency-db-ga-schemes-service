@@ -165,6 +165,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getStatus())){
             schemeToSave.setStatus(scheme.getStatus());
         }
+        if(scheme.getConfirmationDate() != null){
+            schemeToSave.setConfirmationDate(scheme.getConfirmationDate());
+      }
 
         if(!StringUtils.isEmpty(scheme.getGaName())){
             GrantingAuthority grantingAuthority = gaRepository.findByGrantingAuthorityName(scheme.getGaName().trim());
@@ -188,6 +191,8 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
         if(!StringUtils.isEmpty(scheme.getSubsidySchemeDescription())){
             schemeToSave.setSubsidySchemeDescription(scheme.getSubsidySchemeDescription());
+        if(!StringUtils.isEmpty(scheme.getSpendingSectorJson())){
+            schemeToSave.setSpendingSectors(scheme.getSpendingSectorJson());
         }
 
         legalBasis.setLastModifiedTimestamp(new Date());
@@ -257,6 +262,12 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         }
         if(!StringUtils.isEmpty(scheme.getSubsidySchemeDescription())){
             schemeById.setSubsidySchemeDescription(scheme.getSubsidySchemeDescription());
+        }
+        if(scheme.getConfirmationDate() != null){
+            schemeById.setConfirmationDate(scheme.getConfirmationDate());
+        }
+        if(!StringUtils.isEmpty(scheme.getSpendingSectorJson())){
+           schemeById.setSpendingSectors(scheme.getSpendingSectorJson());
         }
 
         schemeById.setHasNoEndDate(scheme.isHasNoEndDate());
