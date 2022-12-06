@@ -132,6 +132,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getBudget())){
             schemeToSave.setBudget(scheme.getBudget());
         }
+        if(!StringUtils.isEmpty(scheme.getMaximumAmountUnderScheme())) {
+            schemeToSave.setMaximumAmountUnderScheme(scheme.getMaximumAmountUnderScheme());
+        }
         if(scheme.isHasNoEndDate() || !scheme.isHasNoEndDate()){
           schemeToSave.setHasNoEndDate(scheme.isHasNoEndDate());
           schemeToSave.setEndDate(null);
@@ -224,6 +227,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         }
         if(!StringUtils.isEmpty(scheme.getBudget())){
             schemeById.setBudget(scheme.getBudget());
+        }
+        if(!StringUtils.isEmpty(scheme.getMaximumAmountUnderScheme())){
+            schemeById.setMaximumAmountUnderScheme(scheme.getMaximumAmountUnderScheme());
         }
         if(!StringUtils.isEmpty(scheme.getCreatedBy())){
             schemeById.setCreatedBy(scheme.getCreatedBy());

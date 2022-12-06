@@ -38,4 +38,5 @@ public class SchemeDetailsRequest {
     private String subsidySchemeDescription;
     private LocalDate confirmationDate;
     private String spendingSectorJson;
+    private String maximumAmountUnderScheme;
 }

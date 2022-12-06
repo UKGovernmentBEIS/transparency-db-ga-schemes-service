@@ -113,4 +113,7 @@ public class SubsidyMeasure {
 
 	@Column(name = "SPENDING_SECTORS")
 	private String spendingSectors;
+
+	@Column(name = "MAXIMUM_AMOUNT_UNDER_SCHEME")
+	private String maximumAmountUnderScheme;
 }
