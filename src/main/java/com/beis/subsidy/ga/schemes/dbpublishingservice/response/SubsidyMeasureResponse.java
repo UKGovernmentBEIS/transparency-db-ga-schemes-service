@@ -81,6 +81,9 @@ public class SubsidyMeasureResponse {
     @JsonProperty
     private String spendingSectors;
 
+    @JsonProperty
+    private String maximumAmountUnderScheme;
+
     public SubsidyMeasureResponse(SubsidyMeasure subsidyMeasure) {
         this.scNumber = subsidyMeasure.getScNumber();
         this.subsidyMeasureTitle  = subsidyMeasure.getSubsidyMeasureTitle();
@@ -122,6 +125,7 @@ public class SubsidyMeasureResponse {
         } else {
             this.confirmationDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getConfirmationDate());
         }
+        this.maximumAmountUnderScheme = subsidyMeasure.getMaximumAmountUnderScheme();
     }
 
 }
