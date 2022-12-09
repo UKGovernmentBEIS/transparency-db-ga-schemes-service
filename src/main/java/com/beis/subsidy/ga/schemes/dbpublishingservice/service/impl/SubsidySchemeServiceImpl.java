@@ -132,6 +132,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getBudget())){
             schemeToSave.setBudget(scheme.getBudget());
         }
+        if(!StringUtils.isEmpty(scheme.getMaximumAmountUnderScheme())) {
+            schemeToSave.setMaximumAmountUnderScheme(scheme.getMaximumAmountUnderScheme());
+        }
         if(scheme.isHasNoEndDate() || !scheme.isHasNoEndDate()){
           schemeToSave.setHasNoEndDate(scheme.isHasNoEndDate());
           schemeToSave.setEndDate(null);
@@ -165,7 +168,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getStatus())){
             schemeToSave.setStatus(scheme.getStatus());
         }
-
+        if(scheme.getConfirmationDate() != null){
+            schemeToSave.setConfirmationDate(scheme.getConfirmationDate());
+        }
         if(!StringUtils.isEmpty(scheme.getGaName())){
             GrantingAuthority grantingAuthority = gaRepository.findByGrantingAuthorityName(scheme.getGaName().trim());
 
@@ -186,6 +191,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         }
         schemeToSave.setLastModifiedTimestamp(LocalDate.now());
 
+        if(!StringUtils.isEmpty(scheme.getSubsidySchemeDescription())) {
+            schemeToSave.setSubsidySchemeDescription(scheme.getSubsidySchemeDescription());
+        }
         if(!StringUtils.isEmpty(scheme.getSpendingSectorJson())){
             schemeToSave.setSpendingSectors(scheme.getSpendingSectorJson());
         }
@@ -219,6 +227,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         }
         if(!StringUtils.isEmpty(scheme.getBudget())){
             schemeById.setBudget(scheme.getBudget());
+        }
+        if(!StringUtils.isEmpty(scheme.getMaximumAmountUnderScheme())){
+            schemeById.setMaximumAmountUnderScheme(scheme.getMaximumAmountUnderScheme());
         }
         if(!StringUtils.isEmpty(scheme.getCreatedBy())){
             schemeById.setCreatedBy(scheme.getCreatedBy());
@@ -255,10 +266,15 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getLegalBasisText())){
             legalBasis.setLegalBasisText(scheme.getLegalBasisText());
         }
-
-       if(!StringUtils.isEmpty(scheme.getSpendingSectorJson())){
+        if(!StringUtils.isEmpty(scheme.getSubsidySchemeDescription())){
+            schemeById.setSubsidySchemeDescription(scheme.getSubsidySchemeDescription());
+        }
+        if(scheme.getConfirmationDate() != null){
+            schemeById.setConfirmationDate(scheme.getConfirmationDate());
+        }
+        if(!StringUtils.isEmpty(scheme.getSpendingSectorJson())){
            schemeById.setSpendingSectors(scheme.getSpendingSectorJson());
-       }
+        }
 
         schemeById.setHasNoEndDate(scheme.isHasNoEndDate());
         schemeById.setLastModifiedTimestamp(LocalDate.now());

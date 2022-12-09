@@ -4,6 +4,7 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SearchUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import javax.persistence.Column;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -72,7 +73,16 @@ public class SubsidyMeasureResponse {
     private boolean hasNoEndDate;
 
     @JsonProperty
+    private String subsidySchemeDescription;
+    
+    @JsonProperty
+    private String confirmationDate;
+    
+    @JsonProperty
     private String spendingSectors;
+
+    @JsonProperty
+    private String maximumAmountUnderScheme;
 
     public SubsidyMeasureResponse(SubsidyMeasure subsidyMeasure) {
         this.scNumber = subsidyMeasure.getScNumber();
@@ -109,6 +119,13 @@ public class SubsidyMeasureResponse {
         }
         this.spendingSectors = subsidyMeasure.getSpendingSectors();
         this.canEdit = true;
+        this.subsidySchemeDescription = subsidyMeasure.getSubsidySchemeDescription();
+        if(subsidyMeasure.getConfirmationDate() == null){
+            this.confirmationDate = "";
+        } else {
+            this.confirmationDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getConfirmationDate());
+        }
+        this.maximumAmountUnderScheme = subsidyMeasure.getMaximumAmountUnderScheme();
     }
 
 }
