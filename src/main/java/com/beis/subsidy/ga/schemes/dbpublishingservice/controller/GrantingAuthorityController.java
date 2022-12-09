@@ -90,10 +90,10 @@ public class GrantingAuthorityController {
 		response.setGaId(grantingAuthority.getGaId());
 		response.setMessage("Created successfully");
 
-		StringBuilder eventMsg = new StringBuilder("Granting Authority ").append(gaInputRequest.getName())
+		StringBuilder eventMsg = new StringBuilder("Public Authority ").append(gaInputRequest.getName())
 				.append(" is added");
 
-		SearchUtils.saveAuditLogForCreateGA(gaInputRequest.getUserName(),"Create Granting Authority",
+		SearchUtils.saveAuditLogForCreateGA(gaInputRequest.getUserName(),"Create Public Authority",
 				grantingAuthority.getGaId().toString(),grantingAuthority.getGrantingAuthorityName(),eventMsg.toString(),auditLogsRepository);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
@@ -130,7 +130,7 @@ public class GrantingAuthorityController {
 				response.setMessage("updated successfully");
 
 				//Audit entry
-				StringBuilder eventMsg = new StringBuilder("Granting Authority ").append(grantingAuthority.getGrantingAuthorityName())
+				StringBuilder eventMsg = new StringBuilder("Public Authority ").append(grantingAuthority.getGrantingAuthorityName())
 						.append(" is updated" );
 				SearchUtils.saveAuditLog(userPrincipleObj,"Update Public Authority", grantingAuthority.getGaId().toString(),
 						eventMsg.toString(),auditLogsRepository);
