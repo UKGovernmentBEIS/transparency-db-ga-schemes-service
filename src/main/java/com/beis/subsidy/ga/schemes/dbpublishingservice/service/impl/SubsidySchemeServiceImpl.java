@@ -156,12 +156,10 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         } else {
             schemeToSave.setEndDate(scheme.getEndDate());
         }
-        if(!StringUtils.isEmpty(scheme.getGaSubsidyWebLink())){
-            schemeToSave.setGaSubsidyWebLink(scheme.getGaSubsidyWebLink());
-        }
-        if(!StringUtils.isEmpty(scheme.getGaSubsidyWebLinkDescription())){
-            schemeToSave.setGaSubsidyWebLinkDescription(scheme.getGaSubsidyWebLinkDescription());
-        }
+
+        schemeToSave.setGaSubsidyWebLink(scheme.getGaSubsidyWebLink());
+        schemeToSave.setGaSubsidyWebLinkDescription(scheme.getGaSubsidyWebLinkDescription());
+
         if(scheme.isAdhoc() || !scheme.isAdhoc()){
             schemeToSave.setAdhoc(scheme.isAdhoc());
         }
@@ -247,12 +245,10 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         } else if(scheme.getEndDate() != null){
             schemeById.setEndDate(scheme.getEndDate());
         }
-        if(!StringUtils.isEmpty(scheme.getGaSubsidyWebLink())){
-            schemeById.setGaSubsidyWebLink(scheme.getGaSubsidyWebLink());
-        }
-        if(!StringUtils.isEmpty(scheme.getGaSubsidyWebLinkDescription())){
-            schemeById.setGaSubsidyWebLinkDescription(scheme.getGaSubsidyWebLinkDescription());
-        }
+
+        schemeById.setGaSubsidyWebLink(scheme.getGaSubsidyWebLink());
+        schemeById.setGaSubsidyWebLinkDescription(scheme.getGaSubsidyWebLinkDescription());
+
         if(scheme.isAdhoc() || !scheme.isAdhoc()){
             schemeById.setAdhoc(scheme.isAdhoc());
         }
