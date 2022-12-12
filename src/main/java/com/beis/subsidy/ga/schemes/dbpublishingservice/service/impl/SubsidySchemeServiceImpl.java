@@ -90,7 +90,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
                 Long gaId = getGrantingAuthorityIdByName(userPriniciple.getGrantingAuthorityGroupName());
                 if(gaId == null || gaId <= 0){
-                    throw new UnauthorisedAccessException("Invalid granting authority name");
+                    throw new UnauthorisedAccessException("Invalid public authority name");
                 }
                 pageAwards = subsidyMeasureRepository.
                         findAll(subsidyMeasureByGrantingAuthority(gaId),pagingSortSchemes);
@@ -172,13 +172,13 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getGaName())){
             GrantingAuthority grantingAuthority = gaRepository.findByGrantingAuthorityName(scheme.getGaName().trim());
 
-            log.error("{} :: Granting Authority and GAName ::{}", grantingAuthority,scheme.getGaName());
+            log.error("{} :: Public Authority and PAName ::{}", grantingAuthority,scheme.getGaName());
 
             if (Objects.isNull(grantingAuthority) ||
                     "Inactive".equals(grantingAuthority.getStatus())) {
 
-               log.error("{} :: Granting Authority is Inactive for the scheme");
-               throw new InvalidRequestException("Granting Authority is Inactive");
+               log.error("{} :: Public Authority is Inactive for the scheme");
+               throw new InvalidRequestException("Public Authority is Inactive");
             }
             schemeToSave.setGaId(grantingAuthority.getGaId());
         }

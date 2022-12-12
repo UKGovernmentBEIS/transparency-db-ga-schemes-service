@@ -27,9 +27,9 @@ public class PublishingGrantingAuthServiceApplication {
     public OpenAPI customOpenAPI(@Value("${application-description}") String appDesciption, @Value("${application-version}") String appVersion) {
      return new OpenAPI()
           .info(new Info()
-          .title("BEIS Subsidy Control - Publishing Granting Authority Schemes ")
+          .title("BEIS Subsidy Control - Publishing Public Authority Schemes ")
           .version("1.0")
-          .description("BEIS Subsidy Control - Publishing Granting Authority Schemes APIs for transparency database")
+          .description("BEIS Subsidy Control - Publishing Public Authority Schemes APIs for transparency database")
           .termsOfService("http://swagger.io/terms/")
           .license(new License().name("Apache 2.0").url("http://springdoc.org")));
     }

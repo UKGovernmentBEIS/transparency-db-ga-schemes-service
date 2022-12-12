@@ -90,10 +90,10 @@ public class GrantingAuthorityController {
 		response.setGaId(grantingAuthority.getGaId());
 		response.setMessage("Created successfully");
 
-		StringBuilder eventMsg = new StringBuilder("Granting Authority ").append(gaInputRequest.getName())
+		StringBuilder eventMsg = new StringBuilder("Public Authority ").append(gaInputRequest.getName())
 				.append(" is added");
 
-		SearchUtils.saveAuditLogForCreateGA(gaInputRequest.getUserName(),"Create Granting Authority",
+		SearchUtils.saveAuditLogForCreateGA(gaInputRequest.getUserName(),"Create Public Authority",
 				grantingAuthority.getGaId().toString(),grantingAuthority.getGrantingAuthorityName(),eventMsg.toString(),auditLogsRepository);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
@@ -130,9 +130,9 @@ public class GrantingAuthorityController {
 				response.setMessage("updated successfully");
 
 				//Audit entry
-				StringBuilder eventMsg = new StringBuilder("Granting Authority ").append(grantingAuthority.getGrantingAuthorityName())
+				StringBuilder eventMsg = new StringBuilder("Public Authority ").append(grantingAuthority.getGrantingAuthorityName())
 						.append(" is updated" );
-				SearchUtils.saveAuditLog(userPrincipleObj,"Update Granting Authority", grantingAuthority.getGaId().toString(),
+				SearchUtils.saveAuditLog(userPrincipleObj,"Update Public Authority", grantingAuthority.getGaId().toString(),
 						eventMsg.toString(),auditLogsRepository);
 			} else {
 				status = HttpStatus.BAD_REQUEST;
@@ -145,10 +145,10 @@ public class GrantingAuthorityController {
 			log.info("{}::In catch block of updateGrantingAuthority", loggingComponentName, e);
 			// 2.0 - CatchException and return validation errors
 			GAResponse response = new GAResponse();
-			response.setMessage("failed to update Granting Authority");
+			response.setMessage("failed to update Public Authority");
 
-			String eventMsg = "failed to update Granting Authority";
-			SearchUtils.saveAuditLog(userPrincipleObj,"Update Granting Authority",gaNumber.toString() ,
+			String eventMsg = "failed to update Public Authority";
+			SearchUtils.saveAuditLog(userPrincipleObj,"Update Public Authority",gaNumber.toString() ,
 					eventMsg,auditLogsRepository);
 
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
@@ -175,7 +175,7 @@ public class GrantingAuthorityController {
 		}
 		//check user role here
 		SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,
-					"DeActivate Granting Authority");
+					"DeActivate Public Authority");
 		String accessToken=getBearerToken();
 			
 		UserDetailsResponse userDetailsResponse  = grantingAuthorityService
@@ -243,7 +243,7 @@ public class GrantingAuthorityController {
 		}
 
 		UserPrinciple userPrincipleObj = SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,
-					"DeActive Granting Authority and Users");
+					"DeActive Public Authority and Users");
 
 		GAResponse response = new GAResponse();
 		String accessToken=getBearerToken();
@@ -257,7 +257,7 @@ public class GrantingAuthorityController {
 		//Audit entry
 		StringBuilder eventMsg = new StringBuilder("Granting Authority ")
 				.append(" is Deactivated" );
-		SearchUtils.saveAuditLog(userPrincipleObj,"Deactivated Granting Authority", azGrpId.toString(),
+		SearchUtils.saveAuditLog(userPrincipleObj,"Deactivated Public Authority", azGrpId.toString(),
 					eventMsg.toString(),auditLogsRepository);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
