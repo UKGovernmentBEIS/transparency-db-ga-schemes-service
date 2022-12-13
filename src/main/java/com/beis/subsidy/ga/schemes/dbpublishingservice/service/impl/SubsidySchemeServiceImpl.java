@@ -90,7 +90,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
                 Long gaId = getGrantingAuthorityIdByName(userPriniciple.getGrantingAuthorityGroupName());
                 if(gaId == null || gaId <= 0){
-                    throw new UnauthorisedAccessException("Invalid granting authority name");
+                    throw new UnauthorisedAccessException("Invalid public authority name");
                 }
                 pageAwards = subsidyMeasureRepository.
                         findAll(subsidyMeasureByGrantingAuthority(gaId),pagingSortSchemes);
@@ -132,42 +132,53 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getBudget())){
             schemeToSave.setBudget(scheme.getBudget());
         }
-        if(!scheme.isAdhoc() && scheme.getStartDate() != null && scheme.getEndDate() != null){
+        if(!StringUtils.isEmpty(scheme.getMaximumAmountUnderScheme())) {
+            schemeToSave.setMaximumAmountUnderScheme(scheme.getMaximumAmountUnderScheme());
+        }
+        if(scheme.isHasNoEndDate() || !scheme.isHasNoEndDate()){
+          schemeToSave.setHasNoEndDate(scheme.isHasNoEndDate());
+          schemeToSave.setEndDate(null);
+        }
+        if(!scheme.isAdhoc() && scheme.getStartDate() != null && scheme.getEndDate() != null && !scheme.isHasNoEndDate()){
             schemeToSave.setDuration(getDuration(scheme.getStartDate(), scheme.getEndDate()));
         } else if(scheme.getStartDate() != null && scheme.isAdhoc()) {
             schemeToSave.setDuration(BigInteger.ONE);
+        } else {
+            schemeToSave.setDuration(BigInteger.ZERO);
         }
         if(scheme.getStartDate() != null){
             schemeToSave.setStartDate(scheme.getStartDate());
         }
         if(scheme.isAdhoc()){
             schemeToSave.setEndDate(scheme.getStartDate());
-        } else if(scheme.getEndDate() != null){
+        } else if (scheme.getEndDate().equals(LocalDate.of(9999, 12, 31))) {
+            schemeToSave.setEndDate(null);
+        } else {
             schemeToSave.setEndDate(scheme.getEndDate());
         }
-        if(!StringUtils.isEmpty(scheme.getGaSubsidyWebLink())){
-            schemeToSave.setGaSubsidyWebLink(scheme.getGaSubsidyWebLink());
-        }
-        if(!StringUtils.isEmpty(scheme.getGaSubsidyWebLinkDescription())){
-            schemeToSave.setGaSubsidyWebLinkDescription(scheme.getGaSubsidyWebLinkDescription());
-        }
+
+        schemeToSave.setGaSubsidyWebLink(scheme.getGaSubsidyWebLink());
+        schemeToSave.setGaSubsidyWebLinkDescription(scheme.getGaSubsidyWebLinkDescription());
+
         if(scheme.isAdhoc() || !scheme.isAdhoc()){
             schemeToSave.setAdhoc(scheme.isAdhoc());
         }
         if(!StringUtils.isEmpty(scheme.getStatus())){
             schemeToSave.setStatus(scheme.getStatus());
         }
-
+        if(scheme.getConfirmationDate() != null){
+            schemeToSave.setConfirmationDate(scheme.getConfirmationDate());
+        }
         if(!StringUtils.isEmpty(scheme.getGaName())){
             GrantingAuthority grantingAuthority = gaRepository.findByGrantingAuthorityName(scheme.getGaName().trim());
 
-            log.error("{} :: Granting Authority and GAName ::{}", grantingAuthority,scheme.getGaName());
+            log.error("{} :: Public Authority and PAName ::{}", grantingAuthority,scheme.getGaName());
 
             if (Objects.isNull(grantingAuthority) ||
                     "Inactive".equals(grantingAuthority.getStatus())) {
 
-               log.error("{} :: Granting Authority is Inactive for the scheme");
-               throw new InvalidRequestException("Granting Authority is Inactive");
+               log.error("{} :: Public Authority is Inactive for the scheme");
+               throw new InvalidRequestException("Public Authority is Inactive");
             }
             schemeToSave.setGaId(grantingAuthority.getGaId());
         }
@@ -177,6 +188,13 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
             legalBasis.setLegalBasisText(scheme.getLegalBasisText());
         }
         schemeToSave.setLastModifiedTimestamp(LocalDate.now());
+
+        if(!StringUtils.isEmpty(scheme.getSubsidySchemeDescription())) {
+            schemeToSave.setSubsidySchemeDescription(scheme.getSubsidySchemeDescription());
+        }
+        if(!StringUtils.isEmpty(scheme.getSpendingSectorJson())){
+            schemeToSave.setSpendingSectors(scheme.getSpendingSectorJson());
+        }
 
         legalBasis.setLastModifiedTimestamp(new Date());
         legalBasis.setStatus("Active");
@@ -208,6 +226,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getBudget())){
             schemeById.setBudget(scheme.getBudget());
         }
+        if(!StringUtils.isEmpty(scheme.getMaximumAmountUnderScheme())){
+            schemeById.setMaximumAmountUnderScheme(scheme.getMaximumAmountUnderScheme());
+        }
         if(!StringUtils.isEmpty(scheme.getCreatedBy())){
             schemeById.setCreatedBy(scheme.getCreatedBy());
         }
@@ -224,12 +245,10 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         } else if(scheme.getEndDate() != null){
             schemeById.setEndDate(scheme.getEndDate());
         }
-        if(!StringUtils.isEmpty(scheme.getGaSubsidyWebLink())){
-            schemeById.setGaSubsidyWebLink(scheme.getGaSubsidyWebLink());
-        }
-        if(!StringUtils.isEmpty(scheme.getGaSubsidyWebLinkDescription())){
-            schemeById.setGaSubsidyWebLinkDescription(scheme.getGaSubsidyWebLinkDescription());
-        }
+
+        schemeById.setGaSubsidyWebLink(scheme.getGaSubsidyWebLink());
+        schemeById.setGaSubsidyWebLinkDescription(scheme.getGaSubsidyWebLinkDescription());
+
         if(scheme.isAdhoc() || !scheme.isAdhoc()){
             schemeById.setAdhoc(scheme.isAdhoc());
         }
@@ -243,6 +262,17 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getLegalBasisText())){
             legalBasis.setLegalBasisText(scheme.getLegalBasisText());
         }
+        if(!StringUtils.isEmpty(scheme.getSubsidySchemeDescription())){
+            schemeById.setSubsidySchemeDescription(scheme.getSubsidySchemeDescription());
+        }
+        if(scheme.getConfirmationDate() != null){
+            schemeById.setConfirmationDate(scheme.getConfirmationDate());
+        }
+        if(!StringUtils.isEmpty(scheme.getSpendingSectorJson())){
+           schemeById.setSpendingSectors(scheme.getSpendingSectorJson());
+        }
+
+        schemeById.setHasNoEndDate(scheme.isHasNoEndDate());
         schemeById.setLastModifiedTimestamp(LocalDate.now());
 
         legalBasis.setLastModifiedTimestamp(new Date());
