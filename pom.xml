@@ -8,11 +8,11 @@
 	</parent>
   <scm>
     <developerConnection>scm:git:https://github.com/UKGovernmentBEIS/transparency-db-ga-schemes-service/</developerConnection>
-    <tag>HEAD</tag>
+    <tag>release-0.5.1</tag>
   </scm>
   <groupId>transparency-db-ga-schemes-service</groupId>
   <artifactId>transparency-db-ga-schemes-service</artifactId>
-  <version>0.5.1-SNAPSHOT</version>
+  <version>0.5.1</version>
   <name>GrantingAuthority-schemes-service</name>
   <description>Transparency DB GA Schemes Service Api</description>
   
