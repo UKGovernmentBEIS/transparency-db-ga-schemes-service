@@ -2,6 +2,8 @@ package com.beis.subsidy.ga.schemes.dbpublishingservice.service.impl;
 
 
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.InvalidRequestException;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.SearchResultNotFoundException;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.UnauthorisedAccessException;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.AdminProgram;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
@@ -9,17 +11,20 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.AdminProgramRe
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.GrantingAuthorityRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.SubsidyMeasureRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.AdminProgramDetailsRequest;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeSearchInput;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.AdminProgramResultsResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.AdminProgramService;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.service.SubsidySchemeService;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.util.AccessManagementConstant;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.util.UserPrinciple;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -34,9 +39,6 @@ public class AdminProgramServiceImpl implements AdminProgramService {
 
     @Autowired
     private SubsidyMeasureRepository smRepository;
-
-    @Autowired
-    private SubsidySchemeService subsidySchemeService;
 
     @Override
     public AdminProgram addAdminProgram(AdminProgramDetailsRequest adminProgramRequest, UserPrinciple userPrinciple) {
@@ -85,31 +87,167 @@ public class AdminProgramServiceImpl implements AdminProgramService {
         return savedAdminProgram;
     }
 
-    private Map<String, Long> schemeCounts(List<SubsidyMeasure> schemeList) {
-        long allScheme = schemeList.size();
-        long activeScheme = 0;
-        long inactiveScheme = 0;
-        long deletedScheme = 0;
+    @Override
+    public AdminProgramResultsResponse findMatchingAdminProgramDetails(SchemeSearchInput searchInput, UserPrinciple userPrinciple) {
+        log.info("Inside findMatchingAdminProgramDetails searchName : " + searchInput.getSearchName());
 
-        if(schemeList != null && schemeList.size() > 0){
-            for(SubsidyMeasure sm : schemeList){
-                if(sm.getStatus().equalsIgnoreCase(AccessManagementConstant.SM_ACTIVE)){
-                    activeScheme++;
+        Specification<AdminProgram> adminProgramSpecification = getSpecificationAdminProgramDetails(searchInput);
+        Specification<AdminProgram> schemeSpecificationsWithout = getSpecificationAdminProgramDetailsWithoutStatus(searchInput);
+        List<AdminProgram> totalAdminProgramList = new ArrayList<>();
+        List<AdminProgram> results = null;
+        Page<AdminProgram> pageResults = null;
+        List<Sort.Order> orders = getOrderByCondition(searchInput.getSortBy());
+
+        Pageable pagingSort = PageRequest.of(searchInput.getPageNumber() - 1,
+                searchInput.getTotalRecordsPerPage(), Sort.by(orders));
+
+
+        if (AccessManagementConstant.BEIS_ADMIN_ROLE.equals(userPrinciple.getRole().trim())) {
+
+            pageResults = adminProgramRepository.findAll(adminProgramSpecification, pagingSort);
+
+            results = pageResults.getContent();
+
+            if(!StringUtils.isEmpty(searchInput.getSearchName())){
+                totalAdminProgramList = adminProgramRepository.findAll(schemeSpecificationsWithout);
+            } else {
+                totalAdminProgramList = adminProgramRepository.findAll();
+            }
+
+        } else {
+            if (!StringUtils.isEmpty(searchInput.getSearchName())
+                    || !StringUtils.isEmpty(searchInput.getStatus())) {
+
+                adminProgramSpecification = getSpecificationAdminProgramDetailsForGARoles(searchInput,userPrinciple.getGrantingAuthorityGroupName());
+                pageResults = adminProgramRepository.findAll(adminProgramSpecification, pagingSort);
+
+                results = pageResults.getContent();
+                totalAdminProgramList = adminProgramRepository.findAll(adminProgramSpecification);
+
+            } else {
+
+                Long gaId = getGrantingAuthorityIdByName(userPrinciple.getGrantingAuthorityGroupName());
+                if(gaId == null || gaId <= 0){
+                    throw new UnauthorisedAccessException("Invalid public authority name");
                 }
-                if(sm.getStatus().equalsIgnoreCase(AccessManagementConstant.SM_INACTIVE)){
-                    inactiveScheme++;
+                pageResults = adminProgramRepository.
+                        findAll(adminProgramsByGrantingAuthority(gaId),pagingSort);
+                results = pageResults.getContent();
+                totalAdminProgramList = adminProgramRepository.findAll(adminProgramsByGrantingAuthority(gaId));
+
+            }
+        }
+
+        AdminProgramResultsResponse searchResults = null;
+
+        if (!results.isEmpty()) {
+            searchResults = new AdminProgramResultsResponse(results, pageResults.getTotalElements(),
+                    pageResults.getNumber() + 1, pageResults.getTotalPages(), adminProgramCounts(totalAdminProgramList));
+        } else {
+            log.info("{}::Scheme results not found");
+            throw new SearchResultNotFoundException("Scheme Results NotFound");
+        }
+        return searchResults;
+    }
+
+    public Specification<AdminProgram>  getSpecificationAdminProgramDetails(SchemeSearchInput searchInput) {
+        String searchName = searchInput.getSearchName();
+        Specification<AdminProgram> specifications = Specification
+                .where(
+                        SearchUtils.checkNullOrEmptyString(searchName)
+                                ? null : AdminProgramSpecificationUtils.adminProgramByName(searchName.trim())
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                        ? null : AdminProgramSpecificationUtils.adminProgramByScNumber(searchName.trim()))
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                        ? null :AdminProgramSpecificationUtils.grantingAuthorityName(searchName.trim()))
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                        ? null :AdminProgramSpecificationUtils.adminProgramByApNumber(searchName.trim()))
+                )
+                .and(SearchUtils.checkNullOrEmptyString(searchInput.getStatus())
+                        ? null : AdminProgramSpecificationUtils.adminProgramByStatus(searchInput.getStatus().trim()));
+        return specifications;
+    }
+    public Specification<AdminProgram>  getSpecificationAdminProgramDetailsWithoutStatus(SchemeSearchInput searchInput) {
+        String searchName = searchInput.getSearchName();
+        Specification<AdminProgram> specifications = Specification
+                .where(
+                        SearchUtils.checkNullOrEmptyString(searchName)
+                                ? null : AdminProgramSpecificationUtils.adminProgramByName(searchName.trim())
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                        ? null : AdminProgramSpecificationUtils.adminProgramByScNumber(searchName.trim()))
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                        ? null :AdminProgramSpecificationUtils.grantingAuthorityName(searchName.trim()))
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                        ? null :AdminProgramSpecificationUtils.adminProgramByApNumber(searchName.trim()))
+                );
+        return specifications;
+    }
+
+    public Specification<AdminProgram>  getSpecificationAdminProgramDetailsForGARoles(SchemeSearchInput searchInput, String gaName) {
+        String searchName = searchInput.getSearchName();
+        Specification<AdminProgram> specifications = Specification
+                .where(
+                        SearchUtils.checkNullOrEmptyString(searchName)
+                                ? null : AdminProgramSpecificationUtils.adminProgramByName(searchName.trim())
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                        ? null : AdminProgramSpecificationUtils.adminProgramByScNumber(searchName.trim()))
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                        ? null :AdminProgramSpecificationUtils.grantingAuthorityName(searchName.trim()))
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                        ? null :AdminProgramSpecificationUtils.adminProgramByApNumber(searchName.trim()))
+                )
+                .and(SearchUtils.checkNullOrEmptyString(gaName)
+                        ? null :AdminProgramSpecificationUtils.grantingAuthorityName(gaName.trim()))
+                .and(SearchUtils.checkNullOrEmptyString(searchInput.getStatus())
+                        ? null :AdminProgramSpecificationUtils.adminProgramByStatus(searchInput.getStatus().trim()));
+        return specifications;
+    }
+
+    private List<Sort.Order> getOrderByCondition(String[] sortBy) {
+        List<Sort.Order> orders = new ArrayList<Sort.Order>();
+        if (sortBy != null && sortBy.length > 0 && sortBy[0].contains(",")) {
+            for (String sortOrder : sortBy) {
+                String[] _sort = sortOrder.split(",");
+                orders.add(new Sort.Order(getSortDirection(_sort[1]), _sort[0]));
+            }
+        } else {
+            orders.add(new Sort.Order(getSortDirection("desc"), "apNumber"));
+        }
+        return orders;
+    }
+
+    private Sort.Direction getSortDirection(String direction) {
+        Sort.Direction sortDir = Sort.Direction.ASC;
+        if (direction.equals("desc")) {
+            sortDir = Sort.Direction.DESC;
+        }
+        return sortDir;
+    }
+
+    private Map<String, Long> adminProgramCounts(List<AdminProgram> adminPrograms) {
+        long all = adminPrograms.size();
+        long active = 0;
+        long deleted = 0;
+
+        if(adminPrograms.size() > 0){
+            for(AdminProgram adminProgram : adminPrograms){
+                if(adminProgram.getStatus().equalsIgnoreCase(AccessManagementConstant.SM_ACTIVE)){
+                    active++;
                 }
-                if(sm.getStatus().equalsIgnoreCase(AccessManagementConstant.SM_DELETED)){
-                    deletedScheme++;
+                if(adminProgram.getStatus().equalsIgnoreCase(AccessManagementConstant.SM_DELETED)){
+                    deleted++;
                 }
             }
         }
-        Map<String, Long> smUserActivityCount = new HashMap<>();
-        smUserActivityCount.put("allScheme",allScheme);
-        smUserActivityCount.put("activeScheme",activeScheme);
-        smUserActivityCount.put("inactiveScheme",inactiveScheme);
-        smUserActivityCount.put("deletedScheme",deletedScheme);
-        return smUserActivityCount;
+        Map<String, Long> adminProgramUserActivityCount = new HashMap<>();
+        adminProgramUserActivityCount.put("all",all);
+        adminProgramUserActivityCount.put("active",active);
+        adminProgramUserActivityCount.put("deleted",deleted);
+        return adminProgramUserActivityCount;
+    }
+
+    private Specification<AdminProgram> adminProgramsByGrantingAuthority(Long gaId) {
+        return (root, query, builder) -> builder.equal(root.get("grantingAuthority").get("gaId"), gaId);
     }
 
     private Long getGrantingAuthorityIdByName(String gaName) {

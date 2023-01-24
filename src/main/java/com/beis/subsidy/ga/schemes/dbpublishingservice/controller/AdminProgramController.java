@@ -10,6 +10,7 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.request.AdminProgramDetai
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeDetailsRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeSearchInput;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.AdminProgramResponse;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.AdminProgramResultsResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchSubsidyResultsResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SubsidyMeasureResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.AdminProgramService;
@@ -77,5 +78,23 @@ public class AdminProgramController {
         AdminProgramResponse response = new AdminProgramResponse(adminProgram);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping(
+            value = "/search",
+            produces = APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<AdminProgramResultsResponse> findAdminPrograms(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+                                                                         @Valid @RequestBody SchemeSearchInput searchInput) {
+
+        UserPrinciple userPrincipleResp = SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"find admin programs");
+        if(searchInput.getTotalRecordsPerPage() == null){
+            searchInput.setTotalRecordsPerPage(10);
+        }
+        if(searchInput.getPageNumber() == null) {
+            searchInput.setPageNumber(1);
+        }
+        AdminProgramResultsResponse searchResults = adminProgramService.findMatchingAdminProgramDetails(searchInput,userPrincipleResp);
+        return new ResponseEntity<AdminProgramResultsResponse>(searchResults, HttpStatus.OK);
     }
 }
