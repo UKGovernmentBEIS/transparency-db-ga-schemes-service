@@ -34,11 +34,11 @@ public class Award {
 	private Beneficiary beneficiary;
 
 	@ManyToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name = "gaId", nullable = false, insertable = false, updatable = false)
+	@JoinColumn(name = "ga_id", nullable = false, insertable = false, updatable = false)
 	private GrantingAuthority grantingAuthority;
 
 	@ManyToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name = "scNumber", insertable = false, updatable = false)
+	@JoinColumn(name = "sc_number", insertable = false, updatable = false)
 	private SubsidyMeasure subsidyMeasure;
 
 	@Column(name = "SUBSIDY_ELEMENT_FULL_AMOUNT_RANGE")
