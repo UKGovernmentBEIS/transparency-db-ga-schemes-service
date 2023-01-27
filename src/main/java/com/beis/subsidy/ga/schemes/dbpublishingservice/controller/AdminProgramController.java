@@ -1,21 +1,13 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.controller;
 
-import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.InvalidRequestException;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.AdminProgram;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.AdminProgramRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.AuditLogsRepository;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.SubsidyMeasureRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.AdminProgramDetailsRequest;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeDetailsRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeSearchInput;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.AdminProgramResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.AdminProgramResultsResponse;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchSubsidyResultsResponse;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SubsidyMeasureResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.AdminProgramService;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.service.SubsidySchemeService;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.util.AccessManagementConstant;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.PermissionUtils;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SearchUtils;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.UserPrinciple;
@@ -29,9 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.Objects;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -96,5 +86,34 @@ public class AdminProgramController {
         }
         AdminProgramResultsResponse searchResults = adminProgramService.findMatchingAdminProgramDetails(searchInput,userPrincipleResp);
         return new ResponseEntity<AdminProgramResultsResponse>(searchResults, HttpStatus.OK);
+    }
+
+    @GetMapping(
+            value = "{id}",
+            produces = APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<AdminProgramResponse> findSubsidyScheme(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+                                                                    @PathVariable("id") String apNumber) {
+        log.info("{} ::Before calling findById", loggingComponentName);
+        UserPrinciple userPrincipleObj = SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"find admin program");
+        if (StringUtils.isEmpty(apNumber)) {
+            return new ResponseEntity<>(new AdminProgramResponse(), HttpStatus.NOT_FOUND);
+        }
+        AdminProgram adminProgram = adminProgramRepository.findById(apNumber).orElse(null);
+
+        if (adminProgram == null){
+            return new ResponseEntity<>(new AdminProgramResponse(), HttpStatus.NOT_FOUND);
+        }
+
+        AdminProgramResponse response = new AdminProgramResponse(adminProgram);
+
+        // Set canEdit
+        if (PermissionUtils.isBeisAdmin(userPrincipleObj) ||
+                (PermissionUtils.isGaAdmin(userPrincipleObj) &&
+                        PermissionUtils.userPrincipleContainsId(userPrinciple, adminProgram.getGrantingAuthority().getAzureGroupId()))){
+            response.setCanEdit(true);
+        }
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
