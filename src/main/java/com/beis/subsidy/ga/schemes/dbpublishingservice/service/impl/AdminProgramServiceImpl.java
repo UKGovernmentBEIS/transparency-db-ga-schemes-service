@@ -150,6 +150,22 @@ public class AdminProgramServiceImpl implements AdminProgramService {
         return searchResults;
     }
 
+    @Override
+    public AdminProgram updateAdminProgramDetails(AdminProgramDetailsRequest adminProgramDetailsRequest, String adminProgramNumber, UserPrinciple userPrincipleObj) {
+        AdminProgram update = adminProgramRepository.findById(adminProgramNumber).orElse(null);
+
+        if(update == null){
+            return null;
+        }
+
+        if (!StringUtils.isEmpty(adminProgramDetailsRequest.getAdminProgramName())){
+            update.setAdminProgramName(adminProgramDetailsRequest.getAdminProgramName());
+        }
+
+        //TODO: Finish this
+        return adminProgramRepository.save(update);
+    }
+
     public Specification<AdminProgram>  getSpecificationAdminProgramDetails(SchemeSearchInput searchInput) {
         String searchName = searchInput.getSearchName();
         Specification<AdminProgram> specifications = Specification

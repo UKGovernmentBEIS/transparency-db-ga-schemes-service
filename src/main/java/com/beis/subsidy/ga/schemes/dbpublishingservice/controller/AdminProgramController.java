@@ -8,6 +8,7 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeSearchInput
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.AdminProgramResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.AdminProgramResultsResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.AdminProgramService;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.util.AccessManagementConstant;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.PermissionUtils;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SearchUtils;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.UserPrinciple;
@@ -21,7 +22,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
+import java.util.Objects;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -115,5 +119,57 @@ public class AdminProgramController {
         }
 
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PutMapping(
+            value="update/{id}"
+    )
+    public ResponseEntity<AdminProgramResponse> updateAdminProgramDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+                                                                          @RequestBody AdminProgramDetailsRequest adminProgramDetailsRequest,
+                                                                          @PathVariable("id") String adminProgramNumber,
+                                                                          HttpServletResponse response) {
+
+        log.info("{} ::Before calling updateSchemeDetails", loggingComponentName);
+        if(Objects.isNull(adminProgramDetailsRequest)|| StringUtils.isEmpty(adminProgramNumber)) {
+            log.error("No admin program number provided");
+            return new ResponseEntity<>(new AdminProgramResponse(), HttpStatus.BAD_REQUEST);
+        }
+        //check user role here
+        UserPrinciple userPrincipleObj = SearchUtils.isSchemeRoleValidation(objectMapper, userPrinciple,"update admin program");
+
+        AdminProgram adminProgram = adminProgramRepository.findById(adminProgramNumber).orElse(null);
+        if(adminProgram == null){
+            return new ResponseEntity<>(new AdminProgramResponse(), HttpStatus.BAD_REQUEST);
+        }
+
+        // if user not BEIS Admin then;
+        if (!PermissionUtils.userHasRole(userPrincipleObj, AccessManagementConstant.BEIS_ADMIN_ROLE)) {
+            if(!PermissionUtils.userPrincipleContainsId(userPrinciple, adminProgram.getGrantingAuthority().getAzureGroupId())){
+                log.error("User " + userPrincipleObj.getUserName() + " does not have the rights to update scheme: " + adminProgramNumber);
+                return new ResponseEntity<>(new AdminProgramResponse(), HttpStatus.FORBIDDEN);
+            }
+        }
+
+
+        AdminProgram updatedAdminProgram = adminProgramService.updateAdminProgramDetails(adminProgramDetailsRequest,adminProgramNumber, userPrincipleObj);
+
+        if(updatedAdminProgram == null){
+            return new ResponseEntity<>(new AdminProgramResponse(), HttpStatus.BAD_REQUEST);
+        }
+
+        AdminProgramResponse adminProgramResponse = new AdminProgramResponse(updatedAdminProgram);
+
+        StringBuilder eventMsg = new StringBuilder("Admin program ");
+
+        if (!adminProgramDetailsRequest.getStatus().equalsIgnoreCase(adminProgram.getStatus())){
+            eventMsg.append(adminProgramNumber).append(" is updated to ").append(adminProgramDetailsRequest.getStatus());
+        }else{
+            eventMsg.append(adminProgramNumber).append(" updated.");
+        }
+
+        SearchUtils.saveAuditLog(userPrincipleObj,"Update admin program", adminProgramNumber,eventMsg.toString(),auditLogsRepository);
+        log.info("{} ::end of calling updateSchemeDetails", loggingComponentName);
+
+        return new ResponseEntity<>(adminProgramResponse, HttpStatus.OK);
     }
 }

@@ -11,4 +11,6 @@ public interface AdminProgramService {
     AdminProgram addAdminProgram(AdminProgramDetailsRequest adminProgramRequest, UserPrinciple userPrinciple);
 
     AdminProgramResultsResponse findMatchingAdminProgramDetails(SchemeSearchInput searchInput, UserPrinciple userPrincipleResp);
+
+    AdminProgram updateAdminProgramDetails(AdminProgramDetailsRequest adminProgramDetailsRequest, String adminProgramNumber, UserPrinciple userPrincipleObj);
 }
