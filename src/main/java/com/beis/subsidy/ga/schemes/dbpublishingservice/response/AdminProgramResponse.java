@@ -1,7 +1,6 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.response;
 
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.AdminProgram;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SearchUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,7 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor
 @Getter
@@ -18,7 +18,6 @@ import java.math.BigDecimal;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Slf4j
 public class AdminProgramResponse {
-
     @JsonProperty
     private String adminProgramName;
 
@@ -54,6 +53,9 @@ public class AdminProgramResponse {
     @JsonProperty
     private Boolean canEdit;
 
+    @JsonProperty
+    private List<AwardResponse> awardResponseList;
+
     public AdminProgramResponse(AdminProgram adminProgram) {
         this.adminProgramName = adminProgram.getAdminProgramName();
         this.apNumber = adminProgram.getApNumber();
@@ -71,5 +73,8 @@ public class AdminProgramResponse {
             this.deletedTimestamp = SearchUtils.dateTimeToFullMonthNameInDate(adminProgram.getDeletedTimestamp());
         }
         this.canEdit = false;
+
+        this.awardResponseList = adminProgram.getAwardList().stream().map(a ->
+                new AwardResponse(a, true)).collect(Collectors.toList());
     }
 }

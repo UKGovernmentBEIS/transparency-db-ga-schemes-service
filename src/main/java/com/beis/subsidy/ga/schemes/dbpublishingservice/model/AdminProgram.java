@@ -12,6 +12,7 @@ import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 
@@ -70,4 +71,9 @@ public class AdminProgram {
 
 	@Column(name = "DELETED_TIMESTAMP", columnDefinition = "TIMESTAMP")
 	private LocalDateTime deletedTimestamp;
+
+	@OneToMany
+	@JoinColumn(name = "apNumber")
+	@OrderBy("awardNumber DESC")
+	private List<Award> awardList;
 }

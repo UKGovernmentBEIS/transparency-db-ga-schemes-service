@@ -1,15 +1,19 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.model;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
-import javax.persistence.*;
-import java.math.BigDecimal;
-import java.time.LocalDate;
 
 /**
  *
@@ -18,14 +22,10 @@ import java.time.LocalDate;
 @Entity(name = "AWARD")
 @AllArgsConstructor
 @NoArgsConstructor
-@SequenceGenerator(name = "award_read_seq", sequenceName = "award_read_seq",
-		allocationSize = 1)
-@Setter
 @Getter
 public class Award {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "award_read_seq")
 	@Column(name="AWARD_NUMBER")
 	private Long awardNumber;
 
@@ -93,4 +93,8 @@ public class Award {
 
 	@Column(name = "SUBSIDY_AWARD_DESCRIPTION")
 	private String subsidyAwardDescription;
+
+	@ManyToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name = "apNumber")
+	private AdminProgram adminProgram;
 }
