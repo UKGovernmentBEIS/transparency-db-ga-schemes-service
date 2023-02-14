@@ -96,7 +96,7 @@ public class AdminProgramController {
             value = "{id}",
             produces = APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<AdminProgramResponse> findSubsidyScheme(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+    public ResponseEntity<AdminProgramResponse> getAdminProgramById(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
                                                                     @PathVariable("id") String apNumber) {
         log.info("{} ::Before calling findById", loggingComponentName);
         UserPrinciple userPrincipleObj = SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"find admin program");
@@ -116,6 +116,11 @@ public class AdminProgramController {
                 (PermissionUtils.isGaAdmin(userPrincipleObj) &&
                         PermissionUtils.userPrincipleContainsId(userPrinciple, adminProgram.getGrantingAuthority().getAzureGroupId()))){
             response.setCanEdit(true);
+        }
+
+        // Set canDelete
+        if(PermissionUtils.isBeisAdmin(userPrincipleObj)){
+            response.setCanDelete(true);
         }
 
         return new ResponseEntity<>(response, HttpStatus.OK);

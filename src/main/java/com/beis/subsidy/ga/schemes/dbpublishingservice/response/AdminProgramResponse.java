@@ -54,6 +54,9 @@ public class AdminProgramResponse {
     private Boolean canEdit;
 
     @JsonProperty
+    private Boolean canDelete;
+
+    @JsonProperty
     private List<AwardResponse> awardResponseList;
 
     public AdminProgramResponse(AdminProgram adminProgram) {
@@ -73,6 +76,7 @@ public class AdminProgramResponse {
             this.deletedTimestamp = SearchUtils.dateTimeToFullMonthNameInDate(adminProgram.getDeletedTimestamp());
         }
         this.canEdit = false;
+        this.canDelete = false;
 
         this.awardResponseList = adminProgram.getAwardList().stream().map(a ->
                 new AwardResponse(a, true)).collect(Collectors.toList());

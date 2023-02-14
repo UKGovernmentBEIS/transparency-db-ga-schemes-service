@@ -5,9 +5,11 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.InvalidRequestE
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.SearchResultNotFoundException;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.UnauthorisedAccessException;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.AdminProgram;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.Award;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.AdminProgramRepository;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.AwardRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.GrantingAuthorityRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.SubsidyMeasureRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.AdminProgramDetailsRequest;
@@ -25,8 +27,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -39,6 +43,9 @@ public class AdminProgramServiceImpl implements AdminProgramService {
 
     @Autowired
     private SubsidyMeasureRepository smRepository;
+
+    @Autowired
+    private AwardRepository awardRepository;
 
     @Override
     public AdminProgram addAdminProgram(AdminProgramDetailsRequest adminProgramRequest, UserPrinciple userPrinciple) {
@@ -162,7 +169,33 @@ public class AdminProgramServiceImpl implements AdminProgramService {
             update.setAdminProgramName(adminProgramDetailsRequest.getAdminProgramName());
         }
 
-        //TODO: Finish this
+        if(adminProgramDetailsRequest.getBudget() != null) {
+            update.setBudget(adminProgramDetailsRequest.getBudget());
+        }
+
+        if(!StringUtils.isEmpty(adminProgramDetailsRequest.getStatus())) {
+            // if admin program is being deleted
+            if(adminProgramDetailsRequest.getStatus().equalsIgnoreCase("deleted") && !update.getStatus().equalsIgnoreCase("deleted")){
+                update.setDeletedBy(userPrincipleObj.getUserName());
+                update.setDeletedTimestamp(LocalDateTime.now());
+
+                // remove association with awards if any exist
+                if(update.getAwardList().size() > 0){
+                    List<Long> awardNumberList = update.getAwardList().stream().map(Award::getAwardNumber)
+                            .collect(Collectors.toList());
+                    log.info("Removing association AP {} from awards {}", update.getApNumber(), awardNumberList);
+                    List<Award> awards = awardRepository.findByAdminProgram(update);
+                    for (Award award : awards) {
+                        award.setAdminProgram(null);
+                        award.setLastModifiedTimestamp(LocalDate.now());
+                    }
+                    awardRepository.saveAll(awards);
+                }
+            }
+            update.setStatus(adminProgramDetailsRequest.getStatus());
+        }
+
+        update.setLastModifiedTimestamp(LocalDateTime.now());
         return adminProgramRepository.save(update);
     }
 

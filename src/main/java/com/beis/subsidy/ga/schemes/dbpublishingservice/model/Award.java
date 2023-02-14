@@ -10,7 +10,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -22,7 +22,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Entity(name = "AWARD")
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
+@Data
 public class Award {
 
 	@Id
