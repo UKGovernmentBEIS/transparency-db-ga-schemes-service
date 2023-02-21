@@ -188,7 +188,7 @@ public class BulkUploadSchemesService {
         List<ValidationErrorResult> validationSubsidySchemeNameResultList = new ArrayList<>();
 
         List<BulkUploadSchemes> validateSubsidySchemeNameLengthList = bulkUploadSchemes.stream()
-                .filter(scheme -> ((scheme.getSubsidySchemeName() != null && scheme.getPublicAuthorityName().length() > 255))).collect(Collectors.toList());
+                .filter(scheme -> ((scheme.getSubsidySchemeName() != null && scheme.getSubsidySchemeName().length() > 255))).collect(Collectors.toList());
 
         validationSubsidySchemeNameResultList.addAll(validateSubsidySchemeNameLengthList.stream()
                 .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Subsidy scheme name"),
