@@ -146,7 +146,7 @@ public class ExcelHelper {
                                     bulkUploadSchemes.setBudget(null);
                                 }
                                 if (currentCell.getCellType() == CellType.STRING) {
-                                    bulkUploadSchemes.setBudget((currentCell.getStringCellValue()));
+                                    bulkUploadSchemes.setBudget("Invalid");
                                 }
                                 if (currentCell.getCellType() == CellType.NUMERIC) {
                                     bulkUploadSchemes.setBudget((String.valueOf(currentCell.getNumericCellValue())));

@@ -307,12 +307,12 @@ public class BulkUploadSchemesService {
         }
 
         List<BulkUploadSchemes> validatePositiveIntegerBudgetErrorList = bulkUploadSchemes.stream()
-                .filter(scheme -> ((Float.parseFloat(scheme.getBudget()) < 0)
+                .filter(scheme -> (scheme.getBudget().equals("Invalid") || (Float.parseFloat(scheme.getBudget()) < 0)
                         || !(Float.parseFloat(scheme.getBudget()) % 1 == 0))).collect(Collectors.toList());
 
         validationSubsidySchemeBudgetResultList.addAll(validatePositiveIntegerBudgetErrorList.stream()
                 .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Budget (£)"),
-                        "You must enter the budget as a positive whole number."))
+                        "You must enter the budget as a positive whole number. The budget must contain only numbers and no letters or symbols"))
                 .collect(Collectors.toList()));
 
         return validationSubsidySchemeBudgetResultList;
