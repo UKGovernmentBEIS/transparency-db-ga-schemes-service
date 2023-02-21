@@ -273,6 +273,15 @@ public class BulkUploadSchemesService {
                         "The public authority policy URL must be 255 characters or less."))
                 .collect(Collectors.toList()));
 
+        List<BulkUploadSchemes> validatePublicAuthorityPolicyURLHasDescriptionList = bulkUploadSchemes.stream()
+                .filter(scheme -> ((scheme.getPublicAuthorityPolicyURL() != null) && (scheme.getPublicAuthorityPolicyPageDescription() == null)))
+                        .collect(Collectors.toList());
+
+        validationPublicAuthorityPolicyURLResultList.addAll(validatePublicAuthorityPolicyURLHasDescriptionList.stream()
+                .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Public authority policy URL"),
+                        "If you wish to provide a Public authority URL you must also provide a Public authority policy page description."))
+                .collect(Collectors.toList()));
+
         return validationPublicAuthorityPolicyURLResultList;
     }
 
@@ -287,6 +296,15 @@ public class BulkUploadSchemesService {
         validationPublicAuthorityPolicyDescriptionResultList.addAll(validatePublicAuthorityPolicyDescriptionLengthList.stream()
                 .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Public authority policy page description"),
                         "The public authority policy page description must be 255 characters or less."))
+                .collect(Collectors.toList()));
+
+        List<BulkUploadSchemes> validatePublicAuthorityPolicyDescriptionHasURLList = bulkUploadSchemes.stream()
+                .filter(scheme -> ((scheme.getPublicAuthorityPolicyURL() == null) && (scheme.getPublicAuthorityPolicyPageDescription() != null)))
+                .collect(Collectors.toList());
+
+        validationPublicAuthorityPolicyDescriptionResultList.addAll(validatePublicAuthorityPolicyDescriptionHasURLList.stream()
+                .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Public authority policy page description"),
+                        "If you wish to provide a Public authority policy page description you must also provide a Public authority URL."))
                 .collect(Collectors.toList()));
 
         return validationPublicAuthorityPolicyDescriptionResultList;
