@@ -240,11 +240,11 @@ public class BulkUploadSchemesService {
         List<ValidationErrorResult> validationLegalBasisResultList = new ArrayList<>();
 
         List<BulkUploadSchemes> validateLegalBasisLengthList = bulkUploadSchemes.stream()
-                .filter(scheme -> ((scheme.getLegalBasis() != null && scheme.getLegalBasis().length() > 255))).collect(Collectors.toList());
+                .filter(scheme -> ((scheme.getLegalBasis() != null && scheme.getLegalBasis().length() > 5000))).collect(Collectors.toList());
 
         validationLegalBasisResultList.addAll(validateLegalBasisLengthList.stream()
                 .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Legal basis"),
-                        "The legal basis must be 255 characters or less."))
+                        "The legal basis must be 5000 characters or less."))
                 .collect(Collectors.toList()));
 
         List<BulkUploadSchemes> validateLegalBasisMissingErrorList = bulkUploadSchemes.stream()
@@ -364,6 +364,14 @@ public class BulkUploadSchemesService {
         validationConfirmationDateResultList.addAll(confirmationDateFormatErrorRecordsList.stream()
                 .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Confirmation Date"),
                         "You must enter a valid confirmation date of the subsidy scheme and it must be in the following format: DD-MM-YYYY."))
+                .collect(Collectors.toList()));
+
+        List<BulkUploadSchemes> confirmationDateInFutureErrorList = bulkUploadSchemes.stream()
+                .filter(scheme -> (scheme.getConfirmationDate().isAfter(LocalDate.now()))).collect(Collectors.toList());
+
+        validationConfirmationDateResultList.addAll(confirmationDateInFutureErrorList.stream()
+                .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Confirmation Date"),
+                        "Confirmation date cannot be in the future"))
                 .collect(Collectors.toList()));
 
         return validationConfirmationDateResultList;
