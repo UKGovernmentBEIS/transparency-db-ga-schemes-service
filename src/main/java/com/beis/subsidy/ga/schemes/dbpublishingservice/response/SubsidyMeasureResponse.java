@@ -103,7 +103,7 @@ public class SubsidyMeasureResponse {
             this.budget = subsidyMeasure.getBudget();
         }
         this.gaName = subsidyMeasure.getGrantingAuthority().getGrantingAuthorityName();
-        this.adhoc = ""+subsidyMeasure.isAdhoc();
+        this.adhoc = "" + subsidyMeasure.isAdhoc();
         this.status = subsidyMeasure.getStatus();
         this.gaSubsidyWebLink = subsidyMeasure.getGaSubsidyWebLink() == null ? "" : subsidyMeasure.getGaSubsidyWebLink();
         this.gaSubsidyWebLinkDescription = subsidyMeasure.getGaSubsidyWebLinkDescription() == null ? "" : subsidyMeasure.getGaSubsidyWebLinkDescription();
