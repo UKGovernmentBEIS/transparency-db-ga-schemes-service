@@ -2,12 +2,8 @@ package com.beis.subsidy.ga.schemes.dbpublishingservice.service;
 
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.*;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.LegalBasisRepository;
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-//import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SingleScheme;
 
 import lombok.extern.slf4j.Slf4j;
 @Slf4j
@@ -45,26 +39,6 @@ public class SchemeService {
 
     @Value("${loggingComponentName}")
     private String loggingComponentName;
-
-    private LocalDate convertToDate(String incomingDate) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
-        LocalDate date = null ;
-        date = (LocalDate) formatter.parse(incomingDate);
-
-        return date;
-    }
-
-    private Date convertToDateSingleUpload(String incomingDate) {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
-        Date date = null ;
-        try {
-            date = formatter.parse(incomingDate);
-        } catch (ParseException e) {
-            log.error("{}:: date error parse issue{}",loggingComponentName,e);
-        }
-
-        return date;
-    }
 
     @Transactional
     public List<SubsidyMeasure> processBulkSchemes(List<BulkUploadSchemes> bulkSchemes, String role) {
@@ -104,11 +78,11 @@ public class SchemeService {
                 "SYSTEM",
                 "Active",
                 bulkUploadScheme.getPublicAuthorityPolicyPageDescription(),
+                LocalDate.now(),
+                LocalDate.now(),
                 null,
                 null,
-                null,
-                null,
-                bulkUploadScheme.isHasNoEndDate(), //check end date to get this
+                bulkUploadScheme.isHasNoEndDate(),
                 bulkUploadScheme.getSubsidySchemeDescription(),
                 bulkUploadScheme.getConfirmationDate(),
                 convertToSectorJson(bulkUploadScheme.getSpendingSectors()),
@@ -141,35 +115,6 @@ public class SchemeService {
         return BigInteger.valueOf(noOfDaysBetween);
     }
 
-//    public BigInteger getDuration(BulkUploadSchemes bulkUploadScheme) {
-//        long noOfDaysBetween = 0;
-//        if (bulkUploadScheme.isHasNoEndDate()) {
-//            return BigInteger.ZERO;
-//        }
-//        noOfDaysBetween = ChronoUnit.DAYS.between(bulkUploadScheme.getStartDate(), bulkUploadScheme.getEndDate());
-//        return BigInteger.valueOf(Math.max(noOfDaysBetween, 1));
-//    }
-
-
-    private String addSchemeStatus(String role) {
-        String schemeStatus = "Published";
-        if ("Granting Authority Encoder".equals(role.trim())) {
-            schemeStatus = "Awaiting Approval";
-        }
-        return schemeStatus;
-    }
-
-    private Date addPublishedDate(String role) {
-        String publishDateStr = "01-01-1970";
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
-        if (!"Granting Authority Encoder".equals(role.trim())) {
-            Date date = new Date();
-            publishDateStr = formatter.format(date);
-        }
-        return convertToDateSingleUpload(publishDateStr);
-    }
-
-
     private GrantingAuthority getGrantingAuthority(BulkUploadSchemes scheme) {
 
         log.info("Inside getGrantingAuthority...");
@@ -181,37 +126,6 @@ public class SchemeService {
         log.info("Returning from getGrantingAuthorityId.. = " + gaOptional.get().getGaId());
         return ((gaOptional != null) ? gaOptional.get() : null);
     }
-
-
-    private LegalBasis getLegalBasis(BulkUploadSchemes scheme) {
-
-        log.info("Inside getLegalBasis...");
-
-        List<LegalBasis> legalBasisList = legalBasisRepository.findAll();
-
-        Optional<LegalBasis> legalBasisOptional = legalBasisList.stream().filter(legalBasis -> legalBasis.getLegalBasisText().equals(scheme.getLegalBasis())).findAny();
-
-        log.info("Returning from getLegalBasisName.. = " + legalBasisOptional.get().getLegalBasisText());
-        return ((legalBasisOptional != null) ? legalBasisOptional.get() : null);
-    }
-
-    private SubsidyMeasure getSubsidyMeasure(BulkUploadSchemes scheme) {
-
-        log.info("Inside getSubsidyControlId..." + scheme.getSubsidySchemeName());
-        List<SubsidyMeasure> smList = smRepository.findAll();
-        Optional<SubsidyMeasure> smOptional = null;
-
-        if (!StringUtils.isEmpty(scheme.getSubsidySchemeName())) {
-            log.info("inside else title");
-            smOptional = smList.stream()
-                    .filter(sm -> sm.getSubsidyMeasureTitle().equals(scheme.getSubsidySchemeName())).findAny();
-        }
-        return ((smOptional != null) ? smOptional.get() : null);
-    }
-
-
-
-
 
 }
 
