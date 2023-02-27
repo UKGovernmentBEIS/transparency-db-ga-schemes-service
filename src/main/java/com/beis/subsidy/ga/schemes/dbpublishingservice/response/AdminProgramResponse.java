@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -78,7 +79,11 @@ public class AdminProgramResponse {
         this.canEdit = false;
         this.canDelete = false;
 
-        this.awardResponseList = adminProgram.getAwardList().stream().map(a ->
-                new AwardResponse(a, true)).collect(Collectors.toList());
+        if(adminProgram.getAwardList() !=  null) {
+            this.awardResponseList = adminProgram.getAwardList().stream().map(a ->
+                    new AwardResponse(a, true)).collect(Collectors.toList());
+        }else{
+            this.awardResponseList = new ArrayList<>();
+        }
     }
 }
