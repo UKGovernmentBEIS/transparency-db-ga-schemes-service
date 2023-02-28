@@ -1,15 +1,19 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 /**
  *
@@ -18,14 +22,10 @@ import java.time.LocalDate;
 @Entity(name = "AWARD")
 @AllArgsConstructor
 @NoArgsConstructor
-@SequenceGenerator(name = "award_read_seq", sequenceName = "award_read_seq",
-		allocationSize = 1)
-@Setter
-@Getter
+@Data
 public class Award {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "award_read_seq")
 	@Column(name="AWARD_NUMBER")
 	private Long awardNumber;
 
@@ -34,11 +34,11 @@ public class Award {
 	private Beneficiary beneficiary;
 
 	@ManyToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name = "gaId", nullable = false, insertable = false, updatable = false)
+	@JoinColumn(name = "ga_id", nullable = false, insertable = false, updatable = false)
 	private GrantingAuthority grantingAuthority;
 
 	@ManyToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name = "scNumber", insertable = false, updatable = false)
+	@JoinColumn(name = "sc_number", insertable = false, updatable = false)
 	private SubsidyMeasure subsidyMeasure;
 
 	@Column(name = "SUBSIDY_ELEMENT_FULL_AMOUNT_RANGE")
@@ -93,4 +93,8 @@ public class Award {
 
 	@Column(name = "SUBSIDY_AWARD_DESCRIPTION")
 	private String subsidyAwardDescription;
+
+	@ManyToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name = "apNumber")
+	private AdminProgram adminProgram;
 }

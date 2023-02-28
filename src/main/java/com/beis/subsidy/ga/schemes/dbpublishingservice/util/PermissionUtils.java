@@ -50,4 +50,12 @@ public class PermissionUtils {
     public static Boolean userHasRole(UserPrinciple userPrincipleObj, String role) {
         return role.equals(userPrincipleObj.getRole().trim());
     }
+
+    public static Boolean isBeisAdmin(UserPrinciple userPrinciple){
+        return PermissionUtils.userHasRole(userPrinciple, AccessManagementConstant.BEIS_ADMIN_ROLE);
+    }
+
+    public static Boolean isGaAdmin(UserPrinciple userPrinciple){
+        return PermissionUtils.userHasRole(userPrinciple, AccessManagementConstant.GA_ADMIN_ROLE);
+    }
 }
