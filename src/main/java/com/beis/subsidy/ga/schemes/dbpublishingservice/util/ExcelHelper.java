@@ -79,17 +79,13 @@ public class ExcelHelper {
                 }
                 if (containsValue(currentRow)) {
                     log.info("BulkUploadSchemesController Going Inside switch block" ,rowNumber);
-                    Iterator<Cell> cellsInRow = currentRow.iterator();
 
                     BulkUploadSchemes bulkUploadSchemes = new BulkUploadSchemes();
                     bulkUploadSchemes.setRow(currentRow.getRowNum() + 1);
 
-                    int cellIdx = 0;
-                    while (cellsInRow.hasNext()) {
-                        Cell currentCell = cellsInRow.next();
-
-                        switch (currentCell.getColumnIndex()) {
-
+                    for (int i = 0; i < currentRow.getLastCellNum(); i++){
+                        Cell currentCell = currentRow.getCell(i, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+                        switch (i) {
                             case 0:
                                 if (currentCell.getCellType() == CellType.BLANK) {
                                     bulkUploadSchemes.setPublicAuthorityName(null);
@@ -156,7 +152,7 @@ public class ExcelHelper {
 
                             case 7:
                                 if (currentCell.getCellType() != CellType.BLANK) {
-                                    bulkUploadSchemes.setMaximumAmountGivenUnderScheme(currentCell.getStringCellValue());
+                                    bulkUploadSchemes.setMaximumAmountGivenUnderScheme(String.valueOf(currentCell));
                                 } else {
                                     bulkUploadSchemes.setMaximumAmountGivenUnderScheme(null);
                                 }
@@ -216,10 +212,7 @@ public class ExcelHelper {
                             default:
                                 break;
                         }
-
-                        cellIdx++;
                     }
-
 
                     BulkUploadSchemesList.add(bulkUploadSchemes);
                 } else {
