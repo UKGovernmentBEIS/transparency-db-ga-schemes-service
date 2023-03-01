@@ -186,7 +186,7 @@ public class ExcelHelper {
                                 break;
 
                             case 10:
-                                if(currentCell.getCellType()==CellType.BLANK) {
+                                if(currentCell.getCellType()==CellType.BLANK || StringUtils.isEmpty(String.valueOf(currentCell))) {
                                     bulkUploadSchemes.setEndDate(null);
                                     bulkUploadSchemes.setHasNoEndDate(true);
 
