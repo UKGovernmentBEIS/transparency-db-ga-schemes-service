@@ -7,8 +7,10 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.UnauthorisedAcc
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.LegalBasis;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasureVersion;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.GrantingAuthorityRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.SubsidyMeasureRepository;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.SubsidyMeasureVersionRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeDetailsRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeSearchInput;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchSubsidyResultsResponse;
@@ -45,6 +47,9 @@ import java.util.Objects;
 public class SubsidySchemeServiceImpl implements SubsidySchemeService {
     @Autowired
     private SubsidyMeasureRepository subsidyMeasureRepository;
+
+    @Autowired
+    private SubsidyMeasureVersionRepository subsidyMeasureVersionRepository;
 
     @Autowired
     private GrantingAuthorityRepository gaRepository;
@@ -213,6 +218,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
    public String updateSubsidySchemeDetails(SchemeDetailsRequest scheme, String scNumber, UserPrinciple userPrinciple) {
         log.info("Inside updateSubsidySchemeDetails method - sc number " + scheme.getScNumber());
         SubsidyMeasure schemeById = subsidyMeasureRepository.findById(scNumber).get();
+
+       subsidyMeasureSaveOldVersion(schemeById);
+
         LegalBasis legalBasis = schemeById.getLegalBases();
         if (Objects.isNull(schemeById)) {
             throw new SearchResultNotFoundException("Scheme details not found::" + scheme.getScNumber());
@@ -283,6 +291,11 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         SubsidyMeasure updatedScheme = subsidyMeasureRepository.save(schemeById);
         log.info("Updated successfully : ");
         return updatedScheme.getScNumber();
+    }
+
+    private void subsidyMeasureSaveOldVersion(SubsidyMeasure scheme) {
+        SubsidyMeasureVersion version = new SubsidyMeasureVersion(scheme);
+        subsidyMeasureVersionRepository.save(version);
     }
 
     @Override
