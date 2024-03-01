@@ -190,6 +190,11 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         schemeToSave.setLastModifiedTimestamp(LocalDate.now());
 
         if(!StringUtils.isEmpty(scheme.getSubsidySchemeDescription())) {
+            if(scheme.getSubsidySchemeDescription().length() > 10000) {
+                log.error("Subsidy scheme description must be less than 10000 characters");
+                throw new InvalidRequestException("Subsidy scheme description must be less than 10000 characters");
+            }
+
             schemeToSave.setSubsidySchemeDescription(scheme.getSubsidySchemeDescription());
         }
         if(!StringUtils.isEmpty(scheme.getSpendingSectorJson())){
