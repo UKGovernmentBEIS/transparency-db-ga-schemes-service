@@ -211,11 +211,11 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
 
         List<BulkUploadSchemes> validateSubsidySchemeDescriptionLengthList = bulkUploadSchemes.stream()
                 .filter(scheme -> ((scheme.getSubsidySchemeDescription() != null && scheme.getSubsidySchemeDescription()
-                        .length() > 5000))).collect(Collectors.toList());
+                        .length() > 10000))).collect(Collectors.toList());
 
         validationSubsidySchemeDescriptionResultList.addAll(validateSubsidySchemeDescriptionLengthList.stream()
                 .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Subsidy scheme description"),
-                        "The subsidy scheme description must be 5000 characters or less."))
+                        "The subsidy scheme description must be 10000 characters or less."))
                 .collect(Collectors.toList()));
 
         List<BulkUploadSchemes> validateSubsidyDescriptionNameMissingErrorList = bulkUploadSchemes.stream()
