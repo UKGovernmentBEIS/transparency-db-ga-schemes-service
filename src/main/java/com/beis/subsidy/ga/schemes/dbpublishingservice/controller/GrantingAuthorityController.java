@@ -1,11 +1,17 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.controller;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import javax.validation.Valid;
 
+import com.beis.subsidy.ga.schemes.dbpublishingservice.controller.feign.GraphAPIFeignClient;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.*;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.GrantingAuthorityService;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.util.AccessManagementConstant;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.UserPrinciple;
+import feign.FeignException;
+import feign.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -41,6 +47,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
+import static com.beis.subsidy.ga.schemes.dbpublishingservice.util.JsonFeignResponseUtil.toResponseEntity;
+
 @Slf4j
 @RestController
 public class GrantingAuthorityController {
@@ -50,6 +58,9 @@ public class GrantingAuthorityController {
 	
 	@Autowired
 	GraphAPILoginFeignClient graphAPILoginFeignClient;
+
+	@Autowired
+	GraphAPIFeignClient graphAPIFeignClient;
 
 	static final String BEARER = "Bearer ";
 	    
@@ -177,7 +188,34 @@ public class GrantingAuthorityController {
 		SearchUtils.beisAdminRoleValidation(objectMapper, userPrinciple,
 					"DeActivate Public Authority");
 		String accessToken=getBearerToken();
-			
+		GroupResponse groupResponse;
+		try {
+			log.info("{}::before calling toGraph getGroupById ",loggingComponentName);
+			Response response = graphAPIFeignClient.getGroupByID("Bearer " + accessToken,azGrpId);
+			if (response.status() == 200) {
+				Object groupClass = GroupResponse.class;
+				ResponseEntity<Object> responseResponseEntity =  toResponseEntity(response, groupClass);
+				groupResponse = (GroupResponse) responseResponseEntity.getBody();
+			} else {
+				log.error("get group by ID Graph Api failed ::{}",response.status());
+				return new ResponseEntity<UserDetailsResponse>(HttpStatus.valueOf(response.status()));
+			}
+		} catch (FeignException ex) {
+			log.error("{}:: get group by ID Graph Api failed:: status code {} & message {}",
+					loggingComponentName, ex.status(), ex.getMessage());
+			return new ResponseEntity<UserDetailsResponse>(HttpStatus.valueOf(ex.status()));
+		}
+
+		if(groupResponse != null)
+		{
+			boolean isProtectedGA = Arrays.asList(AccessManagementConstant.PROTECTED_GRANTING_AUTHORITIES)
+					.contains(groupResponse.getDisplayName());
+
+			if (isProtectedGA) {
+				log.error("disallowed deactivation of group: {}", groupResponse.getDisplayName());
+				return new ResponseEntity<UserDetailsResponse>(HttpStatus.FORBIDDEN);
+			}
+		}
 		UserDetailsResponse userDetailsResponse  = grantingAuthorityService
 					.deActivateGrantingAuthority(azGrpId,accessToken);
 

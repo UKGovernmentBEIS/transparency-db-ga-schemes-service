@@ -25,4 +25,12 @@ public class AccessManagementConstant {
             "public administration and defence; compulsory social security", "real estate activities",
             "transportation and storage", "water supply; sewerage, waste management and remediation activities",
             "wholesale and retail trade; repair of motor vehicles and motorcycles"));
+    public static final String[] PROTECTED_GRANTING_AUTHORITIES =
+            {
+                    "GrantingAuthorityEncoders",
+                    "GrantingAuthorityApprovers",
+                    "GrantingAuthorityAdministrators",
+                    "BEISAdministrators",
+                    "TEST GA"
+            };
 }

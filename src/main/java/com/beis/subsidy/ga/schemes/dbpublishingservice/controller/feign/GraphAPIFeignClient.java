@@ -48,6 +48,11 @@ public interface GraphAPIFeignClient {
     Response getUsersByGroupId(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                @PathVariable("groupId")  String groupId);
 
+    @GetMapping(value = "/v1.0/groups/{groupId}")
+    @RequestLine("GET /v1.0/groups/{groupId}")
+    @Headers({"Authorization: {authorization}","Content-Type: application/json"})
+    Response getGroupByID(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                               @PathVariable("groupId")  String groupId);
 
     @PatchMapping(value = "v1.0/groups/{id}")
     @RequestLine("PATCH v1.0/groups")
