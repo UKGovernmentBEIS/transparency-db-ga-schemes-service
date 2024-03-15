@@ -4,24 +4,28 @@ package com.beis.subsidy.ga.schemes.dbpublishingservice.service.impl;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.InvalidRequestException;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.SearchResultNotFoundException;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.UnauthorisedAccessException;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.Award;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.LegalBasis;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.AwardRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.GrantingAuthorityRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.SubsidyMeasureRepository;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.request.AwardSearchInput;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeDetailsRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeSearchInput;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SearchInput;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.AwardResponse;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchResults;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchSubsidyResultsResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SubsidyMeasureResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.SubsidySchemeService;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.util.AccessManagementConstant;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SchemeSpecificationUtils;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SearchUtils;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.util.UserPrinciple;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -39,6 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -48,6 +53,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
     @Autowired
     private GrantingAuthorityRepository gaRepository;
+
+    @Autowired
+    private AwardRepository awardRepository;
 
     @Override
     public SearchSubsidyResultsResponse findMatchingSubsidySchemeDetails(SchemeSearchInput searchInput,  UserPrinciple userPriniciple) {
@@ -296,6 +304,25 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         return new SubsidyMeasureResponse(subsidyMeasure);
     }
 
+    @Override
+    public SubsidyMeasureResponse findSubsidySchemeWithAwardsById(String scNumber, AwardSearchInput awardSearchInput) {
+        SubsidyMeasure subsidyMeasure = subsidyMeasureRepository.findById(scNumber).get();
+        List<AwardResponse> awardResponses = subsidyMeasure.getAwardList()
+                .stream().map(award -> new AwardResponse(award, true)).collect(Collectors.toList());
+
+        List<Sort.Order> orders = getOrderByCondition(awardSearchInput.getSortBy());
+        Pageable awardsPageable = PageRequest.of(awardSearchInput.getPageNumber() - 1,
+                awardSearchInput.getTotalRecordsPerPage(), Sort.by(orders));
+        SearchResults<AwardResponse> searchResults = new SearchResults<>();
+        Page<Award> page = awardRepository.findAll(getSpecificationAwardDetails(awardSearchInput),awardsPageable);
+        searchResults.setResponseList(page.getContent().stream().map(award -> new AwardResponse(award, true)).collect(Collectors.toList()));
+        searchResults.totalSearchResults = awardResponses.size();
+        searchResults.totalPages = (int) Math.ceil((double)awardResponses.size() / awardSearchInput.getTotalRecordsPerPage());
+        searchResults.currentPage = awardSearchInput.getPageNumber();
+
+        return new SubsidyMeasureResponse(subsidyMeasure, searchResults);
+    }
+
     private Map<String, Long> schemeCounts(List<SubsidyMeasure> schemeList) {
         long allScheme = schemeList.size();
         long activeScheme = 0;
@@ -386,7 +413,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
     private Sort.Direction getSortDirection(String direction) {
         Sort.Direction sortDir = Sort.Direction.ASC;
-        if (direction.equals("desc")) {
+        if (direction.trim().equals("desc")) {
             sortDir = Sort.Direction.DESC;
         }
         return sortDir;
@@ -406,5 +433,35 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
     public  Specification<SubsidyMeasure> subsidyMeasureByGa(Long gaId) {
         return (root, query, builder) -> builder.equal(root.get("grantingAuthority").get("gaId"), gaId);
+    }
+
+    public Specification<Award>  getSpecificationAwardDetails(AwardSearchInput awardSearchInput) {
+        Specification<Award> awardSpecifications = Specification
+
+                // getSubsidyObjective from input parameter
+                .where(awardSearchInput.getSubsidyObjective() == null || awardSearchInput.getSubsidyObjective().isEmpty()
+                        ? null : AwardSpecificationUtils.subsidyObjectiveIn(awardSearchInput.getSubsidyObjective())
+                        //Like search for other subsidy objective
+                        .or(awardSearchInput.getOtherSubsidyObjective() == null || awardSearchInput.getOtherSubsidyObjective().isEmpty()
+                                ? null : AwardSpecificationUtils.otherSubsidyObjective(awardSearchInput.getOtherSubsidyObjective())))
+
+                // getSpendingRegion from input parameter
+                .and(awardSearchInput.getSpendingRegion() == null || awardSearchInput.getSpendingRegion().isEmpty()
+                        ? null : AwardSpecificationUtils.spendingRegionIn(awardSearchInput.getSpendingRegion()))
+
+                // getSpendingSector from input parameter
+                .and(awardSearchInput.getSpendingSector() == null || awardSearchInput.getSpendingSector().isEmpty()
+                        ? null : AwardSpecificationUtils.spendingSectorIn(awardSearchInput.getSpendingSector()))
+
+                // getSubsidyInstrument from input parameter
+                .and(awardSearchInput.getSubsidyInstrument() == null || awardSearchInput.getSubsidyInstrument().isEmpty()
+                        ? null : AwardSpecificationUtils.subsidyInstrumentIn(awardSearchInput.getSubsidyInstrument()))
+                // Like search for other instrument
+
+                // getSubsidyMeasureTitle from input parameter
+                .and(SearchUtils.checkNullOrEmptyString(awardSearchInput.getSubsidyMeasureTitle())
+                        ? null : AwardSpecificationUtils.subsidyMeasureTitle(awardSearchInput.getSubsidyMeasureTitle().trim()));
+
+        return awardSpecifications;
     }
 }

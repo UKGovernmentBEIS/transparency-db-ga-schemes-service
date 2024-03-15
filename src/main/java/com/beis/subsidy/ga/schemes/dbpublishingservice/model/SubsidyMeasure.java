@@ -15,6 +15,7 @@ import javax.persistence.*;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 
@@ -116,4 +117,9 @@ public class SubsidyMeasure {
 
 	@Column(name = "MAXIMUM_AMOUNT_UNDER_SCHEME")
 	private String maximumAmountUnderScheme;
+
+	@OneToMany
+	@JoinColumn(name = "sc_number")
+	@OrderBy("awardNumber DESC")
+	private List<Award> awardList;
 }
