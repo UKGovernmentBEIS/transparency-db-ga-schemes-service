@@ -4,6 +4,11 @@ import java.util.Objects;
 
 import javax.validation.Valid;
 
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.GAResponse;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.GrantingAuthorityResponse;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.UserDetailsResponse;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchResults;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.AccessTokenResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.GrantingAuthorityService;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.UserPrinciple;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +37,6 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthorityRe
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.UsersGroupRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.AuditLogsRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SearchInput;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.GAResponse;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchResults;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.UserDetailsResponse;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.AccessTokenResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SearchUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -193,17 +194,17 @@ public class GrantingAuthorityController {
 	 */
 	
 	@PostMapping("searchGrantingAuthority")
-	public ResponseEntity<SearchResults> findSearchResults(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
-														   @Valid @RequestBody SearchInput searchInput) {
+	public ResponseEntity<SearchResults<GrantingAuthorityResponse>> findSearchResults(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+																					  @Valid @RequestBody SearchInput searchInput) {
 
 		    SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"Search Results");
 			//Set Default Page records
 			if(searchInput.getTotalRecordsPerPage() == 0) {
 				searchInput.setTotalRecordsPerPage(10);
 			}
-			SearchResults searchResults = grantingAuthorityService.findMatchingGrantingAuthorities(searchInput);
+			SearchResults<GrantingAuthorityResponse> searchResults = grantingAuthorityService.findMatchingGrantingAuthorities(searchInput);
 
-			return new ResponseEntity<SearchResults>(searchResults, HttpStatus.OK);
+			return new ResponseEntity<SearchResults<GrantingAuthorityResponse>>(searchResults, HttpStatus.OK);
 	}
 	/**
 	 * 

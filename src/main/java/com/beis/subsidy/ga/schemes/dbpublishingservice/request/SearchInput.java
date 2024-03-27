@@ -15,16 +15,16 @@ import lombok.Setter;
 @Getter
 public class SearchInput {
 
-	private String grantingAuthorityName;
+	protected String searchText;
 
-	private String grantingAuthorityID;
-	
-	private String status;
+	protected String id;
 
-	private int pageNumber;
+	protected String status;
 
-	private int totalRecordsPerPage;
+	protected int pageNumber;
 
-	private String[] sortBy;
+	protected int totalRecordsPerPage;
+
+	protected String[] sortBy;
 
 }
