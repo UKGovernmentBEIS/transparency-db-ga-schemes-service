@@ -307,8 +307,6 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
     @Override
     public SubsidyMeasureResponse findSubsidySchemeWithAwardsById(String scNumber, AwardSearchInput awardSearchInput) {
         SubsidyMeasure subsidyMeasure = subsidyMeasureRepository.findById(scNumber).get();
-        List<AwardResponse> awardResponses = subsidyMeasure.getAwardList()
-                .stream().map(award -> new AwardResponse(award, true)).collect(Collectors.toList());
 
         List<Sort.Order> orders = getOrderByCondition(awardSearchInput.getSortBy());
         Pageable awardsPageable = PageRequest.of(awardSearchInput.getPageNumber() - 1,
@@ -316,8 +314,8 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         SearchResults<AwardResponse> searchResults = new SearchResults<>();
         Page<Award> page = awardRepository.findAll(getSpecificationAwardDetails(awardSearchInput),awardsPageable);
         searchResults.setResponseList(page.getContent().stream().map(award -> new AwardResponse(award, true)).collect(Collectors.toList()));
-        searchResults.totalSearchResults = awardResponses.size();
-        searchResults.totalPages = (int) Math.ceil((double)awardResponses.size() / awardSearchInput.getTotalRecordsPerPage());
+        searchResults.totalSearchResults = subsidyMeasure.getAwardList().size();
+        searchResults.totalPages = (int) Math.ceil((double)subsidyMeasure.getAwardList().size() / awardSearchInput.getTotalRecordsPerPage());
         searchResults.currentPage = awardSearchInput.getPageNumber();
 
         return new SubsidyMeasureResponse(subsidyMeasure, searchResults);
@@ -444,7 +442,8 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
                         //Like search for other subsidy objective
                         .or(awardSearchInput.getOtherSubsidyObjective() == null || awardSearchInput.getOtherSubsidyObjective().isEmpty()
                                 ? null : AwardSpecificationUtils.otherSubsidyObjective(awardSearchInput.getOtherSubsidyObjective())))
-
+                .and(awardSearchInput.getScNumber() == null || awardSearchInput.getScNumber().isEmpty()
+                ? null : AwardSpecificationUtils.scNumber(awardSearchInput.getScNumber()))
                 // getSpendingRegion from input parameter
                 .and(awardSearchInput.getSpendingRegion() == null || awardSearchInput.getSpendingRegion().isEmpty()
                         ? null : AwardSpecificationUtils.spendingRegionIn(awardSearchInput.getSpendingRegion()))

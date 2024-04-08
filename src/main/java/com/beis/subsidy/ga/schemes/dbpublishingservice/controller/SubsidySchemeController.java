@@ -177,7 +177,7 @@ public class SubsidySchemeController {
         log.info("{} ::Before calling findSubsidySchemeWithAwards", loggingComponentName);
         UserPrinciple userPrincipleObj = SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"find Subsidy Schema");
         if (StringUtils.isEmpty(scNumber)) {
-            throw new InvalidRequestException("Bad Request SC Number is null");
+            throw new InvalidRequestException("Bad Request SC Number is empty");
         }
         SubsidyMeasureResponse subsidySchemeById = subsidySchemeService.findSubsidySchemeWithAwardsById(scNumber, awardSearchInput);
         subsidySchemeById.setCanEdit(true);
