@@ -90,7 +90,7 @@ public class ExcelHelper {
                                 if (currentCell.getCellType() == CellType.BLANK) {
                                     bulkUploadSchemes.setPublicAuthorityName(null);
                                 } else {
-                                    bulkUploadSchemes.setPublicAuthorityName(currentCell.getStringCellValue());
+                                    bulkUploadSchemes.setPublicAuthorityName(currentCell.getStringCellValue().trim());
                                 }
                                 break;
 
@@ -98,7 +98,7 @@ public class ExcelHelper {
                                 if (currentCell.getCellType() == CellType.BLANK) {
                                     bulkUploadSchemes.setSubsidySchemeName(null);
                                 } else {
-                                    bulkUploadSchemes.setSubsidySchemeName(currentCell.getStringCellValue());
+                                    bulkUploadSchemes.setSubsidySchemeName(currentCell.getStringCellValue().trim());
                                 }
 
                                 break;
@@ -107,7 +107,7 @@ public class ExcelHelper {
                                 if (currentCell.getCellType() == CellType.BLANK) {
                                     bulkUploadSchemes.setSubsidySchemeDescription(null);
                                 } else {
-                                    bulkUploadSchemes.setSubsidySchemeDescription(currentCell.getStringCellValue());
+                                    bulkUploadSchemes.setSubsidySchemeDescription(currentCell.getStringCellValue().trim());
                                 }
                                 break;
 
@@ -115,7 +115,7 @@ public class ExcelHelper {
                                 if (currentCell.getCellType() == CellType.BLANK) {
                                     bulkUploadSchemes.setLegalBasis(null);
                                 } else {
-                                    bulkUploadSchemes.setLegalBasis(currentCell.getStringCellValue());
+                                    bulkUploadSchemes.setLegalBasis(currentCell.getStringCellValue().trim());
                                 }
                                 break;
 
@@ -123,7 +123,7 @@ public class ExcelHelper {
                                 if (currentCell.getCellType() == CellType.BLANK) {
                                     bulkUploadSchemes.setPublicAuthorityPolicyURL(null);
                                 } else {
-                                    bulkUploadSchemes.setPublicAuthorityPolicyURL(currentCell.getStringCellValue());
+                                    bulkUploadSchemes.setPublicAuthorityPolicyURL(currentCell.getStringCellValue().trim());
                                 }
 
                                 break;
@@ -132,7 +132,7 @@ public class ExcelHelper {
                                 if (currentCell.getCellType() == CellType.BLANK) {
                                     bulkUploadSchemes.setPublicAuthorityPolicyPageDescription(null);
                                 } else {
-                                    bulkUploadSchemes.setPublicAuthorityPolicyPageDescription(currentCell.getStringCellValue());
+                                    bulkUploadSchemes.setPublicAuthorityPolicyPageDescription(currentCell.getStringCellValue().trim());
                                 }
 
                                 break;
@@ -152,7 +152,7 @@ public class ExcelHelper {
 
                             case 7:
                                 if (currentCell.getCellType() != CellType.BLANK) {
-                                    bulkUploadSchemes.setMaximumAmountGivenUnderScheme(String.valueOf(currentCell));
+                                    bulkUploadSchemes.setMaximumAmountGivenUnderScheme(String.valueOf(currentCell).trim());
                                 } else {
                                     bulkUploadSchemes.setMaximumAmountGivenUnderScheme(null);
                                 }
@@ -204,7 +204,7 @@ public class ExcelHelper {
                                 if(currentCell.getCellType()==CellType.BLANK) {
                                     bulkUploadSchemes.setSpendingSectors(null);
                                 } else {
-                                    bulkUploadSchemes.setSpendingSectors(currentCell.getStringCellValue());
+                                    bulkUploadSchemes.setSpendingSectors(currentCell.getStringCellValue().trim());
                                 }
 
                                 break;
