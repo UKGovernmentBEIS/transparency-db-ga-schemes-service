@@ -129,6 +129,8 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
   @Override
   public String addSubsidySchemeDetails(SchemeDetailsRequest scheme) {
 
+
+
         log.info("Inside addSubsidySchemeDetails method :");
         SubsidyMeasure schemeToSave = new SubsidyMeasure();
         LegalBasis legalBasis = new LegalBasis();
@@ -205,6 +207,14 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
             schemeToSave.setSubsidySchemeDescription(scheme.getSubsidySchemeDescription());
         }
+      if(!StringUtils.isEmpty(scheme.getSpecificPolicyObjective())) {
+          if(scheme.getSpecificPolicyObjective().length() > 1500) {
+              log.error("Specific policy objective must be less than 1500 characters");
+              throw new InvalidRequestException("Specific policy objective must be less than 1500 characters");
+          }
+
+          schemeToSave.setSpecificPolicyObjective(scheme.getSpecificPolicyObjective());
+      }
         if(!StringUtils.isEmpty(scheme.getSpendingSectorJson())){
             schemeToSave.setSpendingSectors(scheme.getSpendingSectorJson());
         }
@@ -216,6 +226,8 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         legalBasis.setCreatedTimestamp(new Date());
         schemeToSave.setLegalBases(legalBasis);
         legalBasis.setSubsidyMeasure(schemeToSave);
+
+
 
         SubsidyMeasure savedScheme = subsidyMeasureRepository.save(schemeToSave);
         log.info("Scheme added successfully with Id : "+savedScheme.getScNumber());
@@ -262,6 +274,8 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         schemeById.setGaSubsidyWebLink(scheme.getGaSubsidyWebLink());
         schemeById.setGaSubsidyWebLinkDescription(scheme.getGaSubsidyWebLinkDescription());
 
+
+
         if(scheme.isAdhoc() || !scheme.isAdhoc()){
             schemeById.setAdhoc(scheme.isAdhoc());
         }
@@ -278,6 +292,10 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getSubsidySchemeDescription())){
             schemeById.setSubsidySchemeDescription(scheme.getSubsidySchemeDescription());
         }
+
+       if(!StringUtils.isEmpty(scheme.getSpecificPolicyObjective())){
+           schemeById.setSpecificPolicyObjective(scheme.getSpecificPolicyObjective());
+       }
         if(scheme.getConfirmationDate() != null){
             schemeById.setConfirmationDate(scheme.getConfirmationDate());
         }

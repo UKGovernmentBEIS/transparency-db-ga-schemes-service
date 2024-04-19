@@ -37,15 +37,16 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
         put("Public authority name", "A");
         put("Subsidy scheme name", "B");
         put("Subsidy scheme description", "C");
-        put("Legal basis", "D");
-        put("Public authority policy URL", "E");
-        put("Public authority policy page description", "F");
-        put("Budget (£)", "G");
-        put("Maximum amount given under scheme", "H");
-        put("Confirmation Date", "I");
-        put("Start Date", "J");
-        put("End Date", "K");
-        put("Spending sectors", "L");
+        put("Specific Policy Objective","D");
+        put("Legal basis", "E");
+        put("Public authority policy URL", "F");
+        put("Public authority policy page description", "G");
+        put("Budget (£)", "H");
+        put("Maximum amount given under scheme", "I");
+        put("Confirmation Date", "J");
+        put("Start Date", "K");
+        put("End Date", "L");
+        put("Spending sectors", "M");
     }};
 
 
@@ -85,6 +86,9 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
 
             List<ValidationErrorResult> subsidySchemeDescriptionErrorList = validateSubsidySchemeDescription(bulkUploadSchemes);
 
+            List<ValidationErrorResult> specificPolicyObjectiveErrorList = validateSpecificPolicyObjective(bulkUploadSchemes);
+
+
             List<ValidationErrorResult> legalBasisErrorList = validateLegalBasis(bulkUploadSchemes);
 
             List<ValidationErrorResult> publicAuthorityPolicyURLErrorList = validatePublicAuthorityPolicyURL(bulkUploadSchemes);
@@ -105,7 +109,7 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
 
 
             List<ValidationErrorResult> validationErrorResultList = Stream.of(publicAuthorityNameErrorList,
-                    subsidySchemeNameErrorList, subsidySchemeDescriptionErrorList, legalBasisErrorList,
+                    subsidySchemeNameErrorList, subsidySchemeDescriptionErrorList,specificPolicyObjectiveErrorList, legalBasisErrorList,
                     publicAuthorityPolicyURLErrorList, PublicAuthorityPolicyDescriptionErrorList,
                     subsidySchemeBudgetErrorList, MaximumAmountGivenUnderSchemeErrorList, confirmationDateErrorList,
                     startDateErrorList, endDateErrorList, spendingSectorsErrorList).flatMap(x -> x.stream()).collect(Collectors.toList());
@@ -230,6 +234,33 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
 
 
         return validationSubsidySchemeDescriptionResultList;
+    }
+
+    private List<ValidationErrorResult> validateSpecificPolicyObjective(List<BulkUploadSchemes> bulkUploadSchemes) {
+
+        List<ValidationErrorResult> validationSpecificPolicyObjectiveResultList = new ArrayList<>();
+
+        List<BulkUploadSchemes> validateSpecificPolicyObjectiveLengthList = bulkUploadSchemes.stream()
+                .filter(scheme -> ((scheme.getSpecificPolicyObjective() != null && scheme.getSpecificPolicyObjective()
+                        .length() > 1500))).collect(Collectors.toList());
+
+        validationSpecificPolicyObjectiveResultList.addAll(validateSpecificPolicyObjectiveLengthList.stream()
+                .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Specific Policy Objective"),
+                        "The specific policy objective must be 1500 characters or less."))
+                .collect(Collectors.toList()));
+
+        List<BulkUploadSchemes> validateSpecificPolicyObjectiveMissingErrorList = bulkUploadSchemes.stream()
+                .filter(scheme -> (scheme.getSpecificPolicyObjective() == null)).collect(Collectors.toList());
+
+        if (validateSpecificPolicyObjectiveMissingErrorList.size() > 0){
+            validationSpecificPolicyObjectiveResultList.addAll(validateSpecificPolicyObjectiveMissingErrorList.stream()
+                    .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Specific Policy Objective"),
+                            "You must enter the specific policy objective."))
+                    .collect(Collectors.toList()));
+        }
+
+
+        return validationSpecificPolicyObjectiveResultList;
     }
 
     private List<ValidationErrorResult> validateLegalBasis(List<BulkUploadSchemes> bulkUploadSchemes) {
