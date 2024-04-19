@@ -142,14 +142,14 @@ public class GrantingAuthorityServiceImpl implements GrantingAuthorityService {
      * @return SearchResults - Returns search result based on search criteria
      */
 
-    public SearchResults findMatchingGrantingAuthorities(SearchInput searchInput) {
+    public SearchResults<GrantingAuthorityResponse> findMatchingGrantingAuthorities(SearchInput searchInput) {
 
         Specification<GrantingAuthority> gaSpecifications = null;
         List<GrantingAuthority> totalGaList;
         boolean isValid = false;
 
-        if (!StringUtils.isEmpty(searchInput.getGrantingAuthorityID()) ||
-                !StringUtils.isEmpty(searchInput.getGrantingAuthorityName())||
+        if (!StringUtils.isEmpty(searchInput.getId()) ||
+                !StringUtils.isEmpty(searchInput.getSearchText())||
                 !StringUtils.isEmpty(searchInput.getStatus())) {
             gaSpecifications = getSpecificationGADetails(searchInput);
             isValid = true;
@@ -247,13 +247,13 @@ public class GrantingAuthorityServiceImpl implements GrantingAuthorityService {
         Specification<GrantingAuthority> awardSpecifications = Specification
 
                 // getGrantingAuthorityID from input parameter
-                .where(StringUtils.isEmpty(searchinput.getGrantingAuthorityID())  ? null
+                .where(StringUtils.isEmpty(searchinput.getId())  ? null
                         : GrantingAuthSpecificationUtils
-                        .grantingAuthorityId(Long.valueOf(searchinput.getGrantingAuthorityID())))
+                        .grantingAuthorityId(Long.valueOf(searchinput.getId())))
 
                 // getGrantingAuthorityName from input parameter
-                .and(StringUtils.isEmpty(searchinput.getGrantingAuthorityName()) ? null
-                        : GrantingAuthSpecificationUtils.grantingAuthorityName(searchinput.getGrantingAuthorityName()))
+                .and(StringUtils.isEmpty(searchinput.getSearchText()) ? null
+                        : GrantingAuthSpecificationUtils.grantingAuthorityName(searchinput.getSearchText()))
 
                 .and(StringUtils.isEmpty(searchinput.getStatus()) ? null
                         : GrantingAuthSpecificationUtils.status(searchinput.getStatus()));

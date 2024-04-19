@@ -5,13 +5,21 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.Award;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.SubsidyMeasureRepository;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.request.AwardSearchInput;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.AwardResponse;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchResults;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.AccessManagementConstant;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.PermissionUtils;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.UserPrinciple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +37,7 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.InvalidRequestE
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.AuditLogsRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeDetailsRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeSearchInput;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SearchInput;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchSubsidyResultsResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SubsidyMeasureResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.SubsidySchemeService;
@@ -37,6 +46,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.Objects;
 
 @RequestMapping(path = "/scheme")
@@ -158,4 +168,27 @@ public class SubsidySchemeController {
         }
         return new ResponseEntity<SubsidyMeasureResponse>(subsidySchemeById, HttpStatus.OK);
     }
+
+    @PostMapping(
+            value = "{scNumber}/withawards"
+    )
+    public ResponseEntity<SubsidyMeasureResponse> findSubsidySchemeWithAwards(@RequestHeader("userPrinciple") HttpHeaders userPrinciple, @PathVariable("scNumber") String scNumber, @Valid @RequestBody AwardSearchInput awardSearchInput)
+    {
+        log.info("{} ::Before calling findSubsidySchemeWithAwards", loggingComponentName);
+        UserPrinciple userPrincipleObj = SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"find Subsidy Schema");
+        if (StringUtils.isEmpty(scNumber)) {
+            throw new InvalidRequestException("Bad Request SC Number is empty");
+        }
+        SubsidyMeasureResponse subsidySchemeById = subsidySchemeService.findSubsidySchemeWithAwardsById(scNumber, awardSearchInput);
+        subsidySchemeById.setCanEdit(true);
+        // if user not BEIS Admin then;
+        if (!PermissionUtils.userHasRole(userPrincipleObj, AccessManagementConstant.BEIS_ADMIN_ROLE)) {
+            SubsidyMeasure scheme = subsidyMeasureRepository.findById(scNumber).get();
+            if (!PermissionUtils.userPrincipleContainsId(userPrinciple, scheme.getGrantingAuthority().getAzureGroupId())) {
+                subsidySchemeById.setCanEdit(false);
+            }
+        }
+        return new ResponseEntity<SubsidyMeasureResponse>(subsidySchemeById, HttpStatus.OK);
+    }
+
 }

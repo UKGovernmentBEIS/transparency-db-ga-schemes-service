@@ -5,6 +5,7 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthorityRe
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.UsersGroupRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.AddGroupRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SearchInput;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.GrantingAuthorityResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchResults;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.response.UserDetailsResponse;
 
@@ -16,7 +17,7 @@ public interface GrantingAuthorityService {
                                               Long gaNumber,String accessToken);
     UserDetailsResponse deActivateGrantingAuthority(String azGrpId, String accessToken);
 
-    SearchResults findMatchingGrantingAuthorities(SearchInput searchInput);
+    SearchResults<GrantingAuthorityResponse> findMatchingGrantingAuthorities(SearchInput searchInput);
 
     GrantingAuthority deleteUser(String token, UsersGroupRequest usersGroupRequest, String azGrpId);
 
