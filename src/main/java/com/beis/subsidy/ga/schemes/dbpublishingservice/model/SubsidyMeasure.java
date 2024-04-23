@@ -91,11 +91,11 @@ public class SubsidyMeasure {
 
 	@CreationTimestamp
 	@Column(name = "CREATED_TIMESTAMP")
-	private LocalDate createdTimestamp;
+	private LocalDateTime createdTimestamp;
 
 	@UpdateTimestamp
 	@Column(name = "LAST_MODIFIED_TIMESTAMP")
-	private LocalDate lastModifiedTimestamp;
+	private LocalDateTime lastModifiedTimestamp;
 
 	@Column(name = "DELETED_BY")
 	private String deletedBy;

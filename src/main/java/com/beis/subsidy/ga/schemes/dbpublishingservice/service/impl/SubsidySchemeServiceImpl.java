@@ -200,7 +200,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getLegalBasisText())){
             legalBasis.setLegalBasisText(scheme.getLegalBasisText());
         }
-        schemeToSave.setLastModifiedTimestamp(LocalDate.now());
+        schemeToSave.setLastModifiedTimestamp(LocalDateTime.now());
 
         if(!StringUtils.isEmpty(scheme.getSubsidySchemeDescription())) {
             if(scheme.getSubsidySchemeDescription().length() > 10000) {
@@ -294,7 +294,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         }
 
         schemeById.setHasNoEndDate(scheme.isHasNoEndDate());
-        schemeById.setLastModifiedTimestamp(LocalDate.now());
+        schemeById.setLastModifiedTimestamp(LocalDateTime.now());
 
         legalBasis.setLastModifiedTimestamp(new Date());
         legalBasis.setCreatedTimestamp(new Date());

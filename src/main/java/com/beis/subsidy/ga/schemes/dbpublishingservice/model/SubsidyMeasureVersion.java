@@ -82,10 +82,10 @@ public class SubsidyMeasureVersion {
 	private String gaSubsidyWebLinkDescription;
 
 	@Column(name = "CREATED_TIMESTAMP")
-	private LocalDate createdTimestamp;
+	private LocalDateTime createdTimestamp;
 
 	@Column(name = "LAST_MODIFIED_TIMESTAMP")
-	private LocalDate lastModifiedTimestamp;
+	private LocalDateTime lastModifiedTimestamp;
 
 	@Column(name = "DELETED_BY")
 	private String deletedBy;
