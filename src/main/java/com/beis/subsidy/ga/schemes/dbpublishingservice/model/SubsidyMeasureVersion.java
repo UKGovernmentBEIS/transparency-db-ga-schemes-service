@@ -63,6 +63,9 @@ public class SubsidyMeasureVersion {
 	@Column(name = "BUDGET")
 	private String budget;
 
+	@Column(name = "ADHOC")
+	private boolean adhoc;
+
 	@Column(name = "GA_SUBSIDY_WEBLINK")
 	private String gaSubsidyWebLink;
 
@@ -118,6 +121,7 @@ public class SubsidyMeasureVersion {
 		this.setEndDate(scheme.getEndDate());
 		this.setDuration(scheme.getDuration());
 		this.setBudget(scheme.getBudget());
+		this.setAdhoc(scheme.isAdhoc());
 		this.setGaSubsidyWebLink(scheme.getGaSubsidyWebLink());
 		this.setPublishedMeasureDate(scheme.getPublishedMeasureDate());
 		this.setCreatedBy(scheme.getCreatedBy());

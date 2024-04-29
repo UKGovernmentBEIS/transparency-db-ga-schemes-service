@@ -122,4 +122,9 @@ public class SubsidyMeasure {
 	@JoinColumn(name = "sc_number")
 	@OrderBy("awardNumber DESC")
 	private List<Award> awardList;
+
+	@OneToMany
+	@JoinColumn(name = "sc_number")
+	@OrderBy("lastModifiedTimestamp DESC")
+	private List<SubsidyMeasureVersion> schemeVersions;
 }

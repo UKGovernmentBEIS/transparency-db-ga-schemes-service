@@ -16,18 +16,13 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.SubsidyMeasure
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.SubsidyMeasureVersionRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeDetailsRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeSearchInput;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SearchInput;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.AwardResponse;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchResults;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchSubsidyResultsResponse;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SubsidyMeasureResponse;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.*;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.SubsidySchemeService;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -38,13 +33,8 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
+import java.util.*;
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -332,6 +322,13 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         searchResults.currentPage = awardSearchInput.getPageNumber();
 
         return new SubsidyMeasureResponse(subsidyMeasure, searchResults);
+    }
+
+    @Override
+    public SubsidyMeasureVersionResponse findSubsidySchemeVersion(String scNumber, String version) {
+        SubsidyMeasureVersion schemeVersion = subsidyMeasureVersionRepository.findByScNumberAndVersion(scNumber, UUID.fromString(version));
+
+        return new SubsidyMeasureVersionResponse(schemeVersion);
     }
 
     private Map<String, Long> schemeCounts(List<SubsidyMeasure> schemeList) {
