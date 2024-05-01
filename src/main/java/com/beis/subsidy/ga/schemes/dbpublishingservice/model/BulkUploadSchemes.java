@@ -27,5 +27,6 @@ public class BulkUploadSchemes {
     private LocalDate endDate;
     private String spendingSectors;
     private boolean hasNoEndDate;
+    private String subsidySchemeInterest;
 
 }

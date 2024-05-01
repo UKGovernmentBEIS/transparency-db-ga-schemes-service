@@ -122,4 +122,7 @@ public class SubsidyMeasure {
 	@JoinColumn(name = "sc_number")
 	@OrderBy("awardNumber DESC")
 	private List<Award> awardList;
+
+	@Column(name = "SUBSIDY_SCHEME_INTEREST")
+	private String subsidySchemeInterest;
 }

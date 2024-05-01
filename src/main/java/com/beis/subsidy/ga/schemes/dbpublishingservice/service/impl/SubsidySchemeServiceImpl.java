@@ -209,6 +209,10 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
             schemeToSave.setSpendingSectors(scheme.getSpendingSectorJson());
         }
 
+        if(!StringUtils.isEmpty(scheme.getSubsidySchemeInterest())){
+          schemeToSave.setSubsidySchemeInterest(scheme.getSubsidySchemeInterest());
+        }
+
         legalBasis.setLastModifiedTimestamp(new Date());
         legalBasis.setStatus("Active");
         legalBasis.setCreatedBy("SYSTEM");
@@ -292,6 +296,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         legalBasis.setCreatedTimestamp(new Date());
         schemeById.setLegalBases(legalBasis);
         legalBasis.setSubsidyMeasure(schemeById);
+        schemeById.setSubsidySchemeInterest(scheme.getSubsidySchemeInterest());
 
         SubsidyMeasure updatedScheme = subsidyMeasureRepository.save(schemeById);
         log.info("Updated successfully : ");
