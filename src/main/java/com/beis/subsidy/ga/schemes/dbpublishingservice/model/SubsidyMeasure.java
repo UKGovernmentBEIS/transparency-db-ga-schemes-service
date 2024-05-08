@@ -118,6 +118,9 @@ public class SubsidyMeasure {
 	@Column(name = "MAXIMUM_AMOUNT_UNDER_SCHEME")
 	private String maximumAmountUnderScheme;
 
+	@Column(name = "PURPOSE")
+	private String purpose;
+
 	@OneToMany
 	@JoinColumn(name = "sc_number")
 	@OrderBy("awardNumber DESC")

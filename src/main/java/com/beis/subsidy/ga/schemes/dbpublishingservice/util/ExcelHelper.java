@@ -33,7 +33,7 @@ public class ExcelHelper {
 
     public static String TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-    public final static int EXPECTED_COLUMN_COUNT = 19;
+    public final static int EXPECTED_COLUMN_COUNT = 13;
 
     public  final static String SHEET = "Upload Template";
 
@@ -205,6 +205,15 @@ public class ExcelHelper {
                                     bulkUploadSchemes.setSpendingSectors(null);
                                 } else {
                                     bulkUploadSchemes.setSpendingSectors(currentCell.getStringCellValue().trim());
+                                }
+
+                                break;
+
+                            case 12:
+                                if(currentCell.getCellType()==CellType.BLANK) {
+                                    bulkUploadSchemes.setPurpose(null);
+                                } else {
+                                    bulkUploadSchemes.setPurpose(currentCell.getStringCellValue().trim());
                                 }
 
                                 break;

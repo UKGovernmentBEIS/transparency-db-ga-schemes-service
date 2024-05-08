@@ -87,6 +87,7 @@ public class SchemeService {
                 bulkUploadScheme.getConfirmationDate(),
                 convertToSectorJson(bulkUploadScheme.getSpendingSectors()),
                 bulkUploadScheme.getMaximumAmountGivenUnderScheme(),
+                convertToSectorJson(bulkUploadScheme.getPurpose()),
                 null);
         legalBasis.setSubsidyMeasure(subsidyMeasure);
         subsidyMeasure.setLegalBases(legalBasis);

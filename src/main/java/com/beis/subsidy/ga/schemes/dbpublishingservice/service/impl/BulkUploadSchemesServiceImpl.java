@@ -46,6 +46,7 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
         put("Start Date", "J");
         put("End Date", "K");
         put("Spending sectors", "L");
+        put("Purpose", "M");
     }};
 
 
@@ -58,7 +59,7 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
 
             Boolean isLatestVersion = ExcelHelper.validateColumnCount(file.getInputStream());
 
-            if (isLatestVersion) {
+            if (!isLatestVersion) {
                 ValidationResult validationResult = new ValidationResult();
 
                 ValidationErrorResult validationErrorResult = new ValidationErrorResult();
@@ -103,12 +104,13 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
 
             List<ValidationErrorResult> spendingSectorsErrorList = validateSpendingSectors(bulkUploadSchemes);
 
+            List<ValidationErrorResult> purposeErrorList = validatePurpose(bulkUploadSchemes);
 
             List<ValidationErrorResult> validationErrorResultList = Stream.of(publicAuthorityNameErrorList,
                     subsidySchemeNameErrorList, subsidySchemeDescriptionErrorList, legalBasisErrorList,
                     publicAuthorityPolicyURLErrorList, PublicAuthorityPolicyDescriptionErrorList,
                     subsidySchemeBudgetErrorList, MaximumAmountGivenUnderSchemeErrorList, confirmationDateErrorList,
-                    startDateErrorList, endDateErrorList, spendingSectorsErrorList).flatMap(x -> x.stream()).collect(Collectors.toList());
+                    startDateErrorList, endDateErrorList, spendingSectorsErrorList, purposeErrorList).flatMap(x -> x.stream()).collect(Collectors.toList());
 
             log.info("Final validation errors list ...printing list of errors - start");
 
@@ -454,5 +456,43 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
             }
         }
         return validationSpendingSectorsResultList;
+    }
+
+    private List<ValidationErrorResult> validatePurpose(List<BulkUploadSchemes> bulkUploadSchemes) {
+
+        List<ValidationErrorResult> validationPurposeResultList = new ArrayList<>();
+
+        List<BulkUploadSchemes> validatePurposeMissingErrorList = bulkUploadSchemes.stream()
+                .filter(scheme -> (scheme.getPurpose() == null)).collect(Collectors.toList());
+
+
+        if (validatePurposeMissingErrorList.size() > 0){
+            validationPurposeResultList.addAll(validatePurposeMissingErrorList.stream()
+                    .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Purpose"),
+                            "You must enter a minimum of one purpose."))
+                    .collect(Collectors.toList()));
+        }
+
+
+        List<BulkUploadSchemes> purposeFormatErrorList = bulkUploadSchemes.stream()
+                .filter(scheme -> (scheme.getPurpose() != null &&
+                        !(AccessManagementConstant.PURPOSES.containsAll(Arrays.asList(scheme.getPurpose().toLowerCase().trim().split("\\s*\\|\\s*"))))))
+                .collect(Collectors.toList());
+
+
+        ArrayList<String> purposeErrorList = new ArrayList<>();
+
+        for (BulkUploadSchemes scheme : purposeFormatErrorList) {
+            ArrayList<String> purposeList = new ArrayList<>(Arrays.asList(scheme.getPurpose().toLowerCase().trim().split("\\s*\\|\\s*")));
+            for (int i = 0; i < purposeList.size(); i++) {
+                if (!AccessManagementConstant.PURPOSES.contains(purposeList.get(i))) {
+                    String currentError = purposeList.get(i);
+                    purposeErrorList.add(purposeList.get(i));
+                    validationPurposeResultList.add(new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Purpose"),
+                            "The following purpose(s) are incorrect '" + currentError + "'. Check that the spelling and punctuation matches the purpose list."));
+                }
+            }
+        }
+        return validationPurposeResultList;
     }
 }
