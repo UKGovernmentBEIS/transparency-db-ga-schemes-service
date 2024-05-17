@@ -24,7 +24,10 @@ public final class AwardSpecificationUtils {
 	public static Specification<Award> subsidyMeasureTitle(String subsidyMeasureTitle) {
 	    return (root, query, builder) -> builder.like(root.get("subsidyMeasure").get("subsidyMeasureTitle"), contains(subsidyMeasureTitle));
 	}
-	
+
+	public static Specification<Award> scNumber(String scNumber) {
+		return (root, query, builder) -> builder.like(root.get("subsidyMeasure").get("scNumber"), contains(scNumber));
+	}
 	/**
 	 * To define specification for legal granting date range
 	 * 

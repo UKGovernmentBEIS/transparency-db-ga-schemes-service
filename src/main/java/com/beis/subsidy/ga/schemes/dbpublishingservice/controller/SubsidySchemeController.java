@@ -9,8 +9,7 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.model.Award;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.SubsidyMeasureRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.AwardSearchInput;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.AwardResponse;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchResults;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.*;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.AccessManagementConstant;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.PermissionUtils;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.UserPrinciple;
@@ -38,8 +37,6 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.AuditLogsRepos
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeDetailsRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeSearchInput;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SearchInput;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchSubsidyResultsResponse;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SubsidyMeasureResponse;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.SubsidySchemeService;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SearchUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -177,7 +174,7 @@ public class SubsidySchemeController {
         log.info("{} ::Before calling findSubsidySchemeWithAwards", loggingComponentName);
         UserPrinciple userPrincipleObj = SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"find Subsidy Schema");
         if (StringUtils.isEmpty(scNumber)) {
-            throw new InvalidRequestException("Bad Request SC Number is null");
+            throw new InvalidRequestException("Bad Request SC Number is empty");
         }
         SubsidyMeasureResponse subsidySchemeById = subsidySchemeService.findSubsidySchemeWithAwardsById(scNumber, awardSearchInput);
         subsidySchemeById.setCanEdit(true);
@@ -189,6 +186,25 @@ public class SubsidySchemeController {
             }
         }
         return new ResponseEntity<SubsidyMeasureResponse>(subsidySchemeById, HttpStatus.OK);
+    }
+
+    @GetMapping(
+            value = "{scNumber}/version/{version}",
+            produces = APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<SubsidyMeasureVersionResponse> findSubsidySchemeVersion(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+                                                                    @PathVariable("scNumber") String scNumber,@PathVariable("version") String version) {
+        log.info("{} ::Before calling findSubsidyScheme", loggingComponentName);
+
+        if (StringUtils.isEmpty(scNumber)) {
+            throw new InvalidRequestException("Bad Request SC Number is null");
+        }
+        if (StringUtils.isEmpty(version)) {
+            throw new InvalidRequestException("Bad Request version is null");
+        }
+        SubsidyMeasureVersionResponse schemeVersion = subsidySchemeService.findSubsidySchemeVersion(scNumber,version);
+
+        return new ResponseEntity<SubsidyMeasureVersionResponse>(schemeVersion, HttpStatus.OK);
     }
 
 }

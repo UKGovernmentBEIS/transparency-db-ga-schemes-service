@@ -1,9 +1,12 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.util;
 
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.AuditLogs;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.AuditLogsRepository;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
+
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SubsidyMeasureVersionResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +21,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 
@@ -238,5 +243,9 @@ public class SearchUtils {
 			return false;
 		}
 		return true;
+	}
+
+	public static List<SubsidyMeasureVersionResponse> getSchemeVersionResponseList(SubsidyMeasure scheme){
+		return scheme.getSchemeVersions().stream().map(SubsidyMeasureVersionResponse::new).collect(Collectors.toList());
 	}
 }

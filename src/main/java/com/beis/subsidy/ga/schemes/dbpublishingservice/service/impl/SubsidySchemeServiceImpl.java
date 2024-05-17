@@ -9,23 +9,20 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.LegalBasis;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.AwardRepository;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.request.AwardSearchInput;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasureVersion;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.GrantingAuthorityRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.SubsidyMeasureRepository;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.request.AwardSearchInput;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.SubsidyMeasureVersionRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeDetailsRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeSearchInput;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SearchInput;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.AwardResponse;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchResults;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchSubsidyResultsResponse;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SubsidyMeasureResponse;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.*;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.SubsidySchemeService;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -36,13 +33,8 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
+import java.util.*;
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,6 +42,9 @@ import java.util.stream.Collectors;
 public class SubsidySchemeServiceImpl implements SubsidySchemeService {
     @Autowired
     private SubsidyMeasureRepository subsidyMeasureRepository;
+
+    @Autowired
+    private SubsidyMeasureVersionRepository subsidyMeasureVersionRepository;
 
     @Autowired
     private GrantingAuthorityRepository gaRepository;
@@ -195,7 +190,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getLegalBasisText())){
             legalBasis.setLegalBasisText(scheme.getLegalBasisText());
         }
-        schemeToSave.setLastModifiedTimestamp(LocalDate.now());
+        schemeToSave.setLastModifiedTimestamp(LocalDateTime.now());
 
         if(!StringUtils.isEmpty(scheme.getSubsidySchemeDescription())) {
             if(scheme.getSubsidySchemeDescription().length() > 10000) {
@@ -226,6 +221,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
    public String updateSubsidySchemeDetails(SchemeDetailsRequest scheme, String scNumber, UserPrinciple userPrinciple) {
         log.info("Inside updateSubsidySchemeDetails method - sc number " + scheme.getScNumber());
         SubsidyMeasure schemeById = subsidyMeasureRepository.findById(scNumber).get();
+
+       subsidyMeasureSaveOldVersion(schemeById);
+
         LegalBasis legalBasis = schemeById.getLegalBases();
         if (Objects.isNull(schemeById)) {
             throw new SearchResultNotFoundException("Scheme details not found::" + scheme.getScNumber());
@@ -286,12 +284,14 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         }
 
         schemeById.setHasNoEndDate(scheme.isHasNoEndDate());
+
         if(scheme.isHasNoEndDate()){
             schemeById.setEndDate(null);
         }
 
-       // schemeById.setLastModifiedTimestamp(null);
-        schemeById.setLastModifiedTimestamp(LocalDate.now());
+
+        schemeById.setLastModifiedTimestamp(LocalDateTime.now());
+
 
         legalBasis.setLastModifiedTimestamp(new Date());
         legalBasis.setCreatedTimestamp(new Date());
@@ -303,6 +303,11 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         return updatedScheme.getScNumber();
     }
 
+    private void subsidyMeasureSaveOldVersion(SubsidyMeasure scheme) {
+        SubsidyMeasureVersion version = new SubsidyMeasureVersion(scheme);
+        subsidyMeasureVersionRepository.save(version);
+    }
+
     @Override
     public SubsidyMeasureResponse findSubsidySchemeById(String scNumber) {
         SubsidyMeasure subsidyMeasure = subsidyMeasureRepository.findById(scNumber).get();
@@ -312,8 +317,6 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
     @Override
     public SubsidyMeasureResponse findSubsidySchemeWithAwardsById(String scNumber, AwardSearchInput awardSearchInput) {
         SubsidyMeasure subsidyMeasure = subsidyMeasureRepository.findById(scNumber).get();
-        List<AwardResponse> awardResponses = subsidyMeasure.getAwardList()
-                .stream().map(award -> new AwardResponse(award, true)).collect(Collectors.toList());
 
         List<Sort.Order> orders = getOrderByCondition(awardSearchInput.getSortBy());
         Pageable awardsPageable = PageRequest.of(awardSearchInput.getPageNumber() - 1,
@@ -321,11 +324,18 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         SearchResults<AwardResponse> searchResults = new SearchResults<>();
         Page<Award> page = awardRepository.findAll(getSpecificationAwardDetails(awardSearchInput),awardsPageable);
         searchResults.setResponseList(page.getContent().stream().map(award -> new AwardResponse(award, true)).collect(Collectors.toList()));
-        searchResults.totalSearchResults = awardResponses.size();
-        searchResults.totalPages = (int) Math.ceil((double)awardResponses.size() / awardSearchInput.getTotalRecordsPerPage());
+        searchResults.totalSearchResults = subsidyMeasure.getAwardList().size();
+        searchResults.totalPages = (int) Math.ceil((double)subsidyMeasure.getAwardList().size() / awardSearchInput.getTotalRecordsPerPage());
         searchResults.currentPage = awardSearchInput.getPageNumber();
 
         return new SubsidyMeasureResponse(subsidyMeasure, searchResults);
+    }
+
+    @Override
+    public SubsidyMeasureVersionResponse findSubsidySchemeVersion(String scNumber, String version) {
+        SubsidyMeasureVersion schemeVersion = subsidyMeasureVersionRepository.findByScNumberAndVersion(scNumber, UUID.fromString(version));
+
+        return new SubsidyMeasureVersionResponse(schemeVersion);
     }
 
     private Map<String, Long> schemeCounts(List<SubsidyMeasure> schemeList) {
@@ -449,7 +459,8 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
                         //Like search for other subsidy objective
                         .or(awardSearchInput.getOtherSubsidyObjective() == null || awardSearchInput.getOtherSubsidyObjective().isEmpty()
                                 ? null : AwardSpecificationUtils.otherSubsidyObjective(awardSearchInput.getOtherSubsidyObjective())))
-
+                .and(awardSearchInput.getScNumber() == null || awardSearchInput.getScNumber().isEmpty()
+                ? null : AwardSpecificationUtils.scNumber(awardSearchInput.getScNumber()))
                 // getSpendingRegion from input parameter
                 .and(awardSearchInput.getSpendingRegion() == null || awardSearchInput.getSpendingRegion().isEmpty()
                         ? null : AwardSpecificationUtils.spendingRegionIn(awardSearchInput.getSpendingRegion()))
