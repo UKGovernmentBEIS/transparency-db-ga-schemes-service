@@ -284,7 +284,14 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         }
 
         schemeById.setHasNoEndDate(scheme.isHasNoEndDate());
+
+        if(scheme.isHasNoEndDate()){
+            schemeById.setEndDate(null);
+        }
+
+
         schemeById.setLastModifiedTimestamp(LocalDateTime.now());
+
 
         legalBasis.setLastModifiedTimestamp(new Date());
         legalBasis.setCreatedTimestamp(new Date());
