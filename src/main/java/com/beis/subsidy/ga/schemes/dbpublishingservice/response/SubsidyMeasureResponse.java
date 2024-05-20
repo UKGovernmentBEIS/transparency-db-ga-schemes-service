@@ -93,6 +93,9 @@ public class SubsidyMeasureResponse {
     private SearchResults<AwardResponse> awardSearchResults;
 
     @JsonProperty
+    private String subsidySchemeInterest;
+    
+    @JsonProperty
     private List<SubsidyMeasureVersionResponse> schemeVersions;
 
     public SubsidyMeasureResponse(SubsidyMeasure subsidyMeasure) {
@@ -137,6 +140,7 @@ public class SubsidyMeasureResponse {
             this.confirmationDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getConfirmationDate());
         }
         this.maximumAmountUnderScheme = subsidyMeasure.getMaximumAmountUnderScheme();
+        this.subsidySchemeInterest = subsidyMeasure.getSubsidySchemeInterest();
         this.schemeVersions = SearchUtils.getSchemeVersionResponseList(subsidyMeasure);
     }
 
@@ -184,6 +188,7 @@ public class SubsidyMeasureResponse {
 
         this.awardSearchResults = awardSearchResults;
         this.maximumAmountUnderScheme = subsidyMeasure.getMaximumAmountUnderScheme();
+        this.subsidySchemeInterest = subsidyMeasure.getSubsidySchemeInterest();
         this.schemeVersions = SearchUtils.getSchemeVersionResponseList(subsidyMeasure);
     }
 
