@@ -94,6 +94,9 @@ public class SubsidyMeasureResponse {
 
     @JsonProperty
     private String subsidySchemeInterest;
+    
+    @JsonProperty
+    private List<SubsidyMeasureVersionResponse> schemeVersions;
 
     public SubsidyMeasureResponse(SubsidyMeasure subsidyMeasure) {
         this.scNumber = subsidyMeasure.getScNumber();
@@ -119,7 +122,7 @@ public class SubsidyMeasureResponse {
         this.gaSubsidyWebLink = subsidyMeasure.getGaSubsidyWebLink() == null ? "" : subsidyMeasure.getGaSubsidyWebLink();
         this.gaSubsidyWebLinkDescription = subsidyMeasure.getGaSubsidyWebLinkDescription() == null ? "" : subsidyMeasure.getGaSubsidyWebLinkDescription();
         this.legalBasisText = subsidyMeasure.getLegalBases().getLegalBasisText();
-        this.lastModifiedDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getLastModifiedTimestamp());
+        this.lastModifiedDate = SearchUtils.dateTimeToFullMonthNameInDate(subsidyMeasure.getLastModifiedTimestamp());
         this.publishedMeasureDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getPublishedMeasureDate());
         this.hasNoEndDate =subsidyMeasure.isHasNoEndDate();
         if(subsidyMeasure.getDeletedBy() != null) {
@@ -138,6 +141,7 @@ public class SubsidyMeasureResponse {
         }
         this.maximumAmountUnderScheme = subsidyMeasure.getMaximumAmountUnderScheme();
         this.subsidySchemeInterest = subsidyMeasure.getSubsidySchemeInterest();
+        this.schemeVersions = SearchUtils.getSchemeVersionResponseList(subsidyMeasure);
     }
 
     public SubsidyMeasureResponse(SubsidyMeasure subsidyMeasure, SearchResults<AwardResponse> awardSearchResults) {
@@ -164,7 +168,7 @@ public class SubsidyMeasureResponse {
         this.gaSubsidyWebLink = subsidyMeasure.getGaSubsidyWebLink() == null ? "" : subsidyMeasure.getGaSubsidyWebLink();
         this.gaSubsidyWebLinkDescription = subsidyMeasure.getGaSubsidyWebLinkDescription() == null ? "" : subsidyMeasure.getGaSubsidyWebLinkDescription();
         this.legalBasisText = subsidyMeasure.getLegalBases().getLegalBasisText();
-        this.lastModifiedDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getLastModifiedTimestamp());
+        this.lastModifiedDate = SearchUtils.dateTimeToFullMonthNameInDate(subsidyMeasure.getLastModifiedTimestamp());
         this.publishedMeasureDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getPublishedMeasureDate());
         this.hasNoEndDate =subsidyMeasure.isHasNoEndDate();
         if(subsidyMeasure.getDeletedBy() != null) {
@@ -185,6 +189,7 @@ public class SubsidyMeasureResponse {
         this.awardSearchResults = awardSearchResults;
         this.maximumAmountUnderScheme = subsidyMeasure.getMaximumAmountUnderScheme();
         this.subsidySchemeInterest = subsidyMeasure.getSubsidySchemeInterest();
+        this.schemeVersions = SearchUtils.getSchemeVersionResponseList(subsidyMeasure);
     }
 
 }
