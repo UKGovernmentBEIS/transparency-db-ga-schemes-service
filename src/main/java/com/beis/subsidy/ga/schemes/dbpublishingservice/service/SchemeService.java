@@ -4,6 +4,7 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.model.*;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.LegalBasisRepository;
 import java.math.BigInteger;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -78,8 +79,8 @@ public class SchemeService {
                 "SYSTEM",
                 "Active",
                 bulkUploadScheme.getPublicAuthorityPolicyPageDescription(),
-                LocalDate.now(),
-                LocalDate.now(),
+                LocalDateTime.now(),
+                LocalDateTime.now(),
                 null,
                 null,
                 bulkUploadScheme.isHasNoEndDate(),
@@ -88,6 +89,8 @@ public class SchemeService {
                 convertToSectorJson(bulkUploadScheme.getSpendingSectors()),
                 bulkUploadScheme.getMaximumAmountGivenUnderScheme(),
                 convertToSectorJson(bulkUploadScheme.getPurpose()),
+                null,
+                bulkUploadScheme.getSubsidySchemeInterest(),
                 null);
         legalBasis.setSubsidyMeasure(subsidyMeasure);
         subsidyMeasure.setLegalBases(legalBasis);

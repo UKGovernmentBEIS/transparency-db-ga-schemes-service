@@ -15,30 +15,26 @@ import javax.persistence.*;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.UUID;
 
 /**
  * 
- * Subsidy Measure entity class
+ * Subsidy Measure Version entity class
  *
  */
-@Entity(name = "SUBSIDY_MEASURE")
-//@SequenceGenerator(name = "subsidy_control_read_seq", sequenceName = "subsidy_control_read_seq", allocationSize = 1)
+@Entity(name = "SUBSIDY_MEASURE_VERSION")
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
 @Getter
-public class SubsidyMeasure {
+public class SubsidyMeasureVersion {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "subsidy_control_read_seq")
-	@GenericGenerator(
-			name = "subsidy_control_read_seq",
-			strategy = "com.beis.subsidy.ga.schemes.dbpublishingservice.util.SequenceGenerator",
-			parameters = {
-					@Parameter(name = SequenceGenerator.INCREMENT_PARAM, value = "1"),
-					@Parameter(name = SequenceGenerator.VALUE_PREFIX_PARAMETER, value = "SC"),
-					@Parameter(name = SequenceGenerator.NUMBER_FORMAT_PARAMETER, value = "%05d")})
+	@Column(name="VERSION")
+	@GeneratedValue(generator = "UUID")
+	@GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+	private UUID version;
+
 	@Column(name="SC_NUMBER")
 	private String scNumber;
 
@@ -49,9 +45,8 @@ public class SubsidyMeasure {
 	@Column(name = "GA_ID")
 	private Long gaId;
 
-	@OneToOne(mappedBy="subsidyMeasure", cascade = CascadeType.PERSIST)
-	@JoinColumn(name = "sc_number", nullable = false, insertable = false, updatable = false)
-	private LegalBasis legalBases;
+	@Column(name = "LEGAL_BASIS_TEXT")
+	private String legalBasisText;
 
 	@Column(name = "SUBSIDY_MEASURE_TITLE")
 	private String subsidyMeasureTitle;
@@ -89,11 +84,9 @@ public class SubsidyMeasure {
 	@Column(name = "GA_SUBSIDY_WEBLINK_DESCRIPTION")
 	private String gaSubsidyWebLinkDescription;
 
-	@CreationTimestamp
 	@Column(name = "CREATED_TIMESTAMP")
 	private LocalDateTime createdTimestamp;
 
-	@UpdateTimestamp
 	@Column(name = "LAST_MODIFIED_TIMESTAMP")
 	private LocalDateTime lastModifiedTimestamp;
 
@@ -118,19 +111,31 @@ public class SubsidyMeasure {
 	@Column(name = "MAXIMUM_AMOUNT_UNDER_SCHEME")
 	private String maximumAmountUnderScheme;
 
-	@Column(name = "PURPOSE")
-	private String purpose;
-
-	@OneToMany
-	@JoinColumn(name = "sc_number")
-	@OrderBy("awardNumber DESC")
-	private List<Award> awardList;
-
-	@Column(name = "SUBSIDY_SCHEME_INTEREST")
-	private String subsidySchemeInterest;
-
-	@OneToMany
-	@JoinColumn(name = "sc_number")
-	@OrderBy("lastModifiedTimestamp DESC")
-	private List<SubsidyMeasureVersion> schemeVersions;
+	public SubsidyMeasureVersion(SubsidyMeasure scheme){
+		this.setScNumber(scheme.getScNumber());
+		this.setGrantingAuthority(scheme.getGrantingAuthority());
+		this.setGaId(scheme.getGaId());
+		this.setLegalBasisText(scheme.getLegalBases().getLegalBasisText());
+		this.setSubsidyMeasureTitle(scheme.getSubsidyMeasureTitle());
+		this.setStartDate(scheme.getStartDate());
+		this.setEndDate(scheme.getEndDate());
+		this.setDuration(scheme.getDuration());
+		this.setBudget(scheme.getBudget());
+		this.setAdhoc(scheme.isAdhoc());
+		this.setGaSubsidyWebLink(scheme.getGaSubsidyWebLink());
+		this.setPublishedMeasureDate(scheme.getPublishedMeasureDate());
+		this.setCreatedBy(scheme.getCreatedBy());
+		this.setApprovedBy(scheme.getApprovedBy());
+		this.setStatus(scheme.getStatus());
+		this.setGaSubsidyWebLinkDescription(scheme.getGaSubsidyWebLinkDescription());
+		this.setCreatedTimestamp(scheme.getCreatedTimestamp());
+		this.setLastModifiedTimestamp(scheme.getLastModifiedTimestamp());
+		this.setDeletedBy(scheme.getDeletedBy());
+		this.setDeletedTimestamp(scheme.getDeletedTimestamp());
+		this.setHasNoEndDate(scheme.isHasNoEndDate());
+		this.setSubsidySchemeDescription(scheme.getSubsidySchemeDescription());
+		this.setConfirmationDate(scheme.getConfirmationDate());
+		this.setSpendingSectors(scheme.getSpendingSectors());
+		this.setMaximumAmountUnderScheme(scheme.getMaximumAmountUnderScheme());
+	}
 }

@@ -13,13 +13,11 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,17 +34,18 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
     private final HashMap<String, String> columnMapping = new HashMap<String, String>() {{
         put("Public authority name", "A");
         put("Subsidy scheme name", "B");
-        put("Subsidy scheme description", "C");
-        put("Legal basis", "D");
-        put("Public authority policy URL", "E");
-        put("Public authority policy page description", "F");
-        put("Budget (£)", "G");
-        put("Maximum amount given under scheme", "H");
-        put("Confirmation Date", "I");
-        put("Start Date", "J");
-        put("End Date", "K");
-        put("Spending sectors", "L");
-        put("Purpose", "M");
+        put("Subsidies or Schemes of Interest (SSoI) or Subsidies or Schemes of Particular Interest (SSoPI)", "C");
+        put("Subsidy scheme description", "D");
+        put("Legal basis", "E");
+        put("Public authority policy URL", "F");
+        put("Public authority policy page description", "G");
+        put("Budget (£)", "H");
+        put("Maximum amount given under scheme", "I");
+        put("Confirmation Date", "J");
+        put("Start Date", "K");
+        put("End Date", "L");
+        put("Spending sectors", "M");
+        put("Purpose", "N");
     }};
 
 
@@ -84,6 +83,8 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
 
             List<ValidationErrorResult> subsidySchemeNameErrorList = validateSubsidySchemeName(bulkUploadSchemes);
 
+            List<ValidationErrorResult> subsidySchemeInterestErrorList = validateSubsidySchemeInterest(bulkUploadSchemes);
+
             List<ValidationErrorResult> subsidySchemeDescriptionErrorList = validateSubsidySchemeDescription(bulkUploadSchemes);
 
             List<ValidationErrorResult> legalBasisErrorList = validateLegalBasis(bulkUploadSchemes);
@@ -107,7 +108,7 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
             List<ValidationErrorResult> purposeErrorList = validatePurpose(bulkUploadSchemes);
 
             List<ValidationErrorResult> validationErrorResultList = Stream.of(publicAuthorityNameErrorList,
-                    subsidySchemeNameErrorList, subsidySchemeDescriptionErrorList, legalBasisErrorList,
+                    subsidySchemeNameErrorList,subsidySchemeInterestErrorList, subsidySchemeDescriptionErrorList, legalBasisErrorList,
                     publicAuthorityPolicyURLErrorList, PublicAuthorityPolicyDescriptionErrorList,
                     subsidySchemeBudgetErrorList, MaximumAmountGivenUnderSchemeErrorList, confirmationDateErrorList,
                     startDateErrorList, endDateErrorList, spendingSectorsErrorList, purposeErrorList).flatMap(x -> x.stream()).collect(Collectors.toList());
@@ -205,6 +206,27 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
         }
 
         return validationSubsidySchemeNameResultList;
+    }
+
+    private List<ValidationErrorResult> validateSubsidySchemeInterest(List<BulkUploadSchemes> bulkUploadSchemes) {
+        List<ValidationErrorResult> validationSubsidySchemeInterestResultList = new ArrayList<>();
+
+        Set<String> validOptions = new HashSet<>();
+        validOptions.add("Subsidies or Schemes of Interest (SSoI)");
+        validOptions.add("Subsidies or Schemes of Particular Interest (SSoPI)");
+        validOptions.add("Neither");
+
+        List<BulkUploadSchemes> validateSubsidySchemeInterestNotNullErrorList = bulkUploadSchemes.stream().filter(
+                        scheme -> ((scheme.getSubsidySchemeInterest() == null || StringUtils.isEmpty(scheme.getSubsidySchemeInterest())
+                                || !(validOptions.toString().contains(scheme.getSubsidySchemeInterest())))))
+                .collect(Collectors.toList());
+
+        validationSubsidySchemeInterestResultList.addAll(validateSubsidySchemeInterestNotNullErrorList.stream()
+                .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Subsidies or Schemes of Interest (SSoI) or Subsidies or Schemes of Particular Interest (SSoPI)"),
+                        "The subsidy scheme of interest or particular interest must be selected. This will be Subsidies or Schemes of Interest (SSoI), Subsidies or Schemes of Particular Interest (SSoPI) or Neither"))
+                .collect(Collectors.toList()));
+
+        return validationSubsidySchemeInterestResultList;
     }
 
     private List<ValidationErrorResult> validateSubsidySchemeDescription(List<BulkUploadSchemes> bulkUploadSchemes) {

@@ -40,4 +40,5 @@ public class SchemeDetailsRequest {
     private String spendingSectorJson;
     private String maximumAmountUnderScheme;
     private String purposeJson;
+    private String subsidySchemeInterest;
 }
