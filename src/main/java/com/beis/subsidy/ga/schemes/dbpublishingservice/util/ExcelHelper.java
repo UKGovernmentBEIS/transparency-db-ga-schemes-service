@@ -217,7 +217,7 @@ public class ExcelHelper {
 
                                 break;
 
-                            case 12:
+                            case 13:
                                 if(currentCell.getCellType()==CellType.BLANK) {
                                     bulkUploadSchemes.setPurpose(null);
                                 } else {
