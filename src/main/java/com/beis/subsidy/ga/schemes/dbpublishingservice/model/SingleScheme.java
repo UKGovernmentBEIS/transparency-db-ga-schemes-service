@@ -25,6 +25,6 @@ public class SingleScheme {
     private String startDate;
     private String endDate;
     private String spendingSectors;
-
+    private String subsidySchemeInterest;
 
 }
