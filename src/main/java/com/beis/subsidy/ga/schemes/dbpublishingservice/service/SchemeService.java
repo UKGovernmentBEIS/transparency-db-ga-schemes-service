@@ -90,6 +90,7 @@ public class SchemeService {
                 bulkUploadScheme.getMaximumAmountGivenUnderScheme(),
                 null,
                 bulkUploadScheme.getSubsidySchemeInterest(),
+                null,
                 null);
         legalBasis.setSubsidyMeasure(subsidyMeasure);
         subsidyMeasure.setLegalBases(legalBasis);

@@ -83,6 +83,9 @@ public class SubsidyMeasureVersionResponse {
     @JsonProperty
     private String maximumAmountUnderScheme;
 
+    @JsonProperty
+    private String reason;
+
     public SubsidyMeasureVersionResponse(SubsidyMeasureVersion subsidyMeasureVersion) {
         this.version = subsidyMeasureVersion.getVersion().toString();
         this.scNumber = subsidyMeasureVersion.getScNumber();
@@ -105,6 +108,7 @@ public class SubsidyMeasureVersionResponse {
         this.gaName = subsidyMeasureVersion.getGrantingAuthority().getGrantingAuthorityName();
         this.adhoc = "" + subsidyMeasureVersion.isAdhoc();
         this.status = subsidyMeasureVersion.getStatus();
+        this.reason = subsidyMeasureVersion.getReason();
         this.gaSubsidyWebLink = subsidyMeasureVersion.getGaSubsidyWebLink() == null ? "" : subsidyMeasureVersion.getGaSubsidyWebLink();
         this.gaSubsidyWebLinkDescription = subsidyMeasureVersion.getGaSubsidyWebLinkDescription() == null ? "" : subsidyMeasureVersion.getGaSubsidyWebLinkDescription();
         this.legalBasisText = subsidyMeasureVersion.getLegalBasisText();

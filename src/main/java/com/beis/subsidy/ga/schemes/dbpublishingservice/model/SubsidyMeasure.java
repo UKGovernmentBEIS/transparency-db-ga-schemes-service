@@ -130,4 +130,7 @@ public class SubsidyMeasure {
 	@JoinColumn(name = "sc_number")
 	@OrderBy("lastModifiedTimestamp DESC")
 	private List<SubsidyMeasureVersion> schemeVersions;
+
+	@Column(name = "reason")
+	private String reason;
 }

@@ -269,6 +269,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         }
         if(!StringUtils.isEmpty(scheme.getStatus())){
             schemeById.setStatus(scheme.getStatus());
+            if(!scheme.getStatus().equalsIgnoreCase("active"))
+                schemeById.setReason(scheme.getReason());
+
             if(scheme.getStatus().equals("Deleted")){
                 schemeById.setDeletedBy(userPrinciple.getUserName());
                 schemeById.setDeletedTimestamp(LocalDateTime.now());
@@ -286,7 +289,6 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getSpendingSectorJson())){
            schemeById.setSpendingSectors(scheme.getSpendingSectorJson());
         }
-
         schemeById.setHasNoEndDate(scheme.isHasNoEndDate());
 
         if(scheme.isHasNoEndDate()){
@@ -332,8 +334,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         searchResults.totalSearchResults = subsidyMeasure.getAwardList().size();
         searchResults.totalPages = (int) Math.ceil((double)subsidyMeasure.getAwardList().size() / awardSearchInput.getTotalRecordsPerPage());
         searchResults.currentPage = awardSearchInput.getPageNumber();
-
-        return new SubsidyMeasureResponse(subsidyMeasure, searchResults);
+        SubsidyMeasureResponse subsidyMeasureResponse = new SubsidyMeasureResponse(subsidyMeasure);
+        subsidyMeasureResponse.setAwardSearchResults(searchResults);
+        return subsidyMeasureResponse;
     }
 
     @Override
