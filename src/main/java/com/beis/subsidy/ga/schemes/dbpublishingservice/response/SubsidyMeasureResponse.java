@@ -103,6 +103,9 @@ public class SubsidyMeasureResponse {
     @JsonProperty
     private List<SubsidyMeasureVersionResponse> schemeVersions;
 
+    @JsonProperty
+    private String reason;
+
     public SubsidyMeasureResponse(SubsidyMeasure subsidyMeasure) {
         this.scNumber = subsidyMeasure.getScNumber();
         this.subsidyMeasureTitle  = subsidyMeasure.getSubsidyMeasureTitle();
@@ -124,6 +127,7 @@ public class SubsidyMeasureResponse {
         this.gaName = subsidyMeasure.getGrantingAuthority().getGrantingAuthorityName();
         this.adhoc = "" + subsidyMeasure.isAdhoc();
         this.status = subsidyMeasure.getStatus();
+        this.reason = subsidyMeasure.getReason();
         this.gaSubsidyWebLink = subsidyMeasure.getGaSubsidyWebLink() == null ? "" : subsidyMeasure.getGaSubsidyWebLink();
         this.gaSubsidyWebLinkDescription = subsidyMeasure.getGaSubsidyWebLinkDescription() == null ? "" : subsidyMeasure.getGaSubsidyWebLinkDescription();
         this.legalBasisText = subsidyMeasure.getLegalBases().getLegalBasisText();
@@ -150,55 +154,4 @@ public class SubsidyMeasureResponse {
         this.subsidySchemeInterest = subsidyMeasure.getSubsidySchemeInterest() == null ? "" : subsidyMeasure.getSubsidySchemeInterest();
         this.schemeVersions = SearchUtils.getSchemeVersionResponseList(subsidyMeasure);
     }
-
-    public SubsidyMeasureResponse(SubsidyMeasure subsidyMeasure, SearchResults<AwardResponse> awardSearchResults) {
-        this.scNumber = subsidyMeasure.getScNumber();
-        this.subsidyMeasureTitle  = subsidyMeasure.getSubsidyMeasureTitle();
-        this.startDate =  SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getStartDate());
-
-        if(subsidyMeasure.getEndDate() == null){
-            this.endDate = "";
-        } else {
-            this.endDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getEndDate());
-        }
-        this.duration = SearchUtils.getDurationInYears(subsidyMeasure.getDuration());
-        if(SearchUtils.isNumeric(subsidyMeasure.getBudget())){
-            this.budget = subsidyMeasure.getBudget().contains(",") ? subsidyMeasure.getBudget():
-                    SearchUtils.decimalNumberFormat(new BigDecimal(subsidyMeasure.getBudget().trim()));
-        }else{
-            log.error("Budget for scheme {} is not numeric, Budget is {}",subsidyMeasure.getScNumber(),subsidyMeasure.getBudget());
-            this.budget = subsidyMeasure.getBudget();
-        }
-        this.gaName = subsidyMeasure.getGrantingAuthority().getGrantingAuthorityName();
-        this.adhoc = "" + subsidyMeasure.isAdhoc();
-        this.status = subsidyMeasure.getStatus();
-        this.gaSubsidyWebLink = subsidyMeasure.getGaSubsidyWebLink() == null ? "" : subsidyMeasure.getGaSubsidyWebLink();
-        this.gaSubsidyWebLinkDescription = subsidyMeasure.getGaSubsidyWebLinkDescription() == null ? "" : subsidyMeasure.getGaSubsidyWebLinkDescription();
-        this.legalBasisText = subsidyMeasure.getLegalBases().getLegalBasisText();
-        this.lastModifiedDate = SearchUtils.dateTimeToFullMonthNameInDate(subsidyMeasure.getLastModifiedTimestamp());
-        this.publishedMeasureDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getPublishedMeasureDate());
-        this.hasNoEndDate =subsidyMeasure.isHasNoEndDate();
-        if(subsidyMeasure.getDeletedBy() != null) {
-            this.deletedBy = subsidyMeasure.getDeletedBy();
-        }
-        if(subsidyMeasure.getDeletedTimestamp() != null) {
-            this.deletedTimestamp = SearchUtils.dateTimeToFullMonthNameInDate(subsidyMeasure.getDeletedTimestamp());
-        }
-        this.spendingSectors = subsidyMeasure.getSpendingSectors();
-        this.purpose = subsidyMeasure.getPurpose();
-        this.canEdit = true;
-        this.subsidySchemeDescription = subsidyMeasure.getSubsidySchemeDescription();
-        this.specificPolicyObjective = subsidyMeasure.getSpecificPolicyObjective();
-        if(subsidyMeasure.getConfirmationDate() == null){
-            this.confirmationDate = "";
-        } else {
-            this.confirmationDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getConfirmationDate());
-        }
-
-        this.awardSearchResults = awardSearchResults;
-        this.maximumAmountUnderScheme = subsidyMeasure.getMaximumAmountUnderScheme();
-        this.subsidySchemeInterest = subsidyMeasure.getSubsidySchemeInterest() == null ? "" : subsidyMeasure.getSubsidySchemeInterest();
-        this.schemeVersions = SearchUtils.getSchemeVersionResponseList(subsidyMeasure);
-    }
-
 }

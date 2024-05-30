@@ -124,8 +124,6 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
   @Override
   public String addSubsidySchemeDetails(SchemeDetailsRequest scheme) {
 
-
-
         log.info("Inside addSubsidySchemeDetails method :");
         SubsidyMeasure schemeToSave = new SubsidyMeasure();
         LegalBasis legalBasis = new LegalBasis();
@@ -230,8 +228,6 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         schemeToSave.setLegalBases(legalBasis);
         legalBasis.setSubsidyMeasure(schemeToSave);
 
-
-
         SubsidyMeasure savedScheme = subsidyMeasureRepository.save(schemeToSave);
         log.info("Scheme added successfully with Id : "+savedScheme.getScNumber());
         return savedScheme.getScNumber();
@@ -280,13 +276,14 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         schemeById.setGaSubsidyWebLink(scheme.getGaSubsidyWebLink());
         schemeById.setGaSubsidyWebLinkDescription(scheme.getGaSubsidyWebLinkDescription());
 
-
-
         if(scheme.isAdhoc() || !scheme.isAdhoc()){
             schemeById.setAdhoc(scheme.isAdhoc());
         }
         if(!StringUtils.isEmpty(scheme.getStatus())){
             schemeById.setStatus(scheme.getStatus());
+            if(!scheme.getStatus().equalsIgnoreCase("active"))
+                schemeById.setReason(scheme.getReason());
+
             if(scheme.getStatus().equals("Deleted")){
                 schemeById.setDeletedBy(userPrinciple.getUserName());
                 schemeById.setDeletedTimestamp(LocalDateTime.now());
@@ -318,6 +315,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(scheme.isHasNoEndDate()){
             schemeById.setEndDate(null);
         }
+
 
         schemeById.setLastModifiedTimestamp(LocalDateTime.now());
 
@@ -357,8 +355,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         searchResults.totalSearchResults = subsidyMeasure.getAwardList().size();
         searchResults.totalPages = (int) Math.ceil((double)subsidyMeasure.getAwardList().size() / awardSearchInput.getTotalRecordsPerPage());
         searchResults.currentPage = awardSearchInput.getPageNumber();
-
-        return new SubsidyMeasureResponse(subsidyMeasure, searchResults);
+        SubsidyMeasureResponse subsidyMeasureResponse = new SubsidyMeasureResponse(subsidyMeasure);
+        subsidyMeasureResponse.setAwardSearchResults(searchResults);
+        return subsidyMeasureResponse;
     }
 
     @Override
