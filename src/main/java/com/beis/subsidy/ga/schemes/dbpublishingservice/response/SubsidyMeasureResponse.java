@@ -144,7 +144,7 @@ public class SubsidyMeasureResponse {
             this.confirmationDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getConfirmationDate());
         }
         this.maximumAmountUnderScheme = subsidyMeasure.getMaximumAmountUnderScheme();
-        this.subsidySchemeInterest = subsidyMeasure.getSubsidySchemeInterest();
+        this.subsidySchemeInterest = subsidyMeasure.getSubsidySchemeInterest() == null ? "" : subsidyMeasure.getSubsidySchemeInterest();
         this.schemeVersions = SearchUtils.getSchemeVersionResponseList(subsidyMeasure);
     }
 }
