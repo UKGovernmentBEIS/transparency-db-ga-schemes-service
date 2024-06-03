@@ -81,6 +81,9 @@ public class SubsidyMeasureVersionResponse {
     private String spendingSectors;
 
     @JsonProperty
+    private String specificPolicyObjective;
+
+    @JsonProperty
     private String maximumAmountUnderScheme;
 
     public SubsidyMeasureVersionResponse(SubsidyMeasureVersion subsidyMeasureVersion) {
@@ -111,6 +114,7 @@ public class SubsidyMeasureVersionResponse {
         this.lastModifiedDate = SearchUtils.dateTimeToFullMonthNameInDate(subsidyMeasureVersion.getLastModifiedTimestamp()).replaceAll(" 00:00:00", "");
         this.publishedMeasureDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasureVersion.getPublishedMeasureDate());
         this.hasNoEndDate =subsidyMeasureVersion.isHasNoEndDate();
+        this.specificPolicyObjective = subsidyMeasureVersion.getSpecificPolicyObjective();
         if(subsidyMeasureVersion.getDeletedBy() != null) {
             this.deletedBy = subsidyMeasureVersion.getDeletedBy();
         }

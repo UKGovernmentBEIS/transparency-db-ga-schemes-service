@@ -90,6 +90,9 @@ public class SubsidyMeasureVersion {
 	@Column(name = "LAST_MODIFIED_TIMESTAMP")
 	private LocalDateTime lastModifiedTimestamp;
 
+	@Column(name = "SPECIFIC_POLICY_OBJECTIVE")
+	private String specificPolicyObjective;
+
 	@Column(name = "DELETED_BY")
 	private String deletedBy;
 
@@ -130,6 +133,7 @@ public class SubsidyMeasureVersion {
 		this.setGaSubsidyWebLinkDescription(scheme.getGaSubsidyWebLinkDescription());
 		this.setCreatedTimestamp(scheme.getCreatedTimestamp());
 		this.setLastModifiedTimestamp(scheme.getLastModifiedTimestamp());
+		this.setSpecificPolicyObjective(scheme.getSpecificPolicyObjective());
 		this.setDeletedBy(scheme.getDeletedBy());
 		this.setDeletedTimestamp(scheme.getDeletedTimestamp());
 		this.setHasNoEndDate(scheme.isHasNoEndDate());
@@ -137,5 +141,8 @@ public class SubsidyMeasureVersion {
 		this.setConfirmationDate(scheme.getConfirmationDate());
 		this.setSpendingSectors(scheme.getSpendingSectors());
 		this.setMaximumAmountUnderScheme(scheme.getMaximumAmountUnderScheme());
+
 	}
+
+
 }
