@@ -510,7 +510,8 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
                         if(otherIndex >= 0){
                             purposeList.remove(otherIndex);
                         }
-                        if(!Objects.equals(purposeList.get(0), "")) {
+
+                        if(purposeList.size() > 0 && !Objects.equals(purposeList.get(0), "")) {
                             return (!new HashSet<>(AccessManagementConstant.PURPOSES).containsAll(purposeList));
                         }
                     }

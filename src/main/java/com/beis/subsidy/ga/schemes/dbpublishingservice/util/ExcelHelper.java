@@ -227,11 +227,14 @@ public class ExcelHelper {
                                 break;
 
                             case 14:
+                                //if purpose and other purpose are both blank - sets them both to null
                                 if(currentCell.getCellType()==CellType.BLANK && bulkUploadSchemes.getPurpose() == null) {
                                     bulkUploadSchemes.setPurposeOther(null);
-                                }else if(!(currentCell.getCellType()==CellType.BLANK) && bulkUploadSchemes.getPurpose() == null) {
-                                    bulkUploadSchemes.setPurpose(" | Other - " + currentCell.getStringCellValue().trim());
+                                //if purpose other is populated but purpose is blank
+                                }else if(currentCell.getCellType()!=CellType.BLANK && bulkUploadSchemes.getPurpose() == null) {
+                                    bulkUploadSchemes.setPurpose("Other - " + currentCell.getStringCellValue().trim());
                                     bulkUploadSchemes.setPurposeOther(currentCell.getStringCellValue().trim());
+                                //if purpose and other purpose are both populated
                                 }else {
                                     bulkUploadSchemes.setPurposeOther(currentCell.getStringCellValue().trim());
                                     bulkUploadSchemes.setPurpose(bulkUploadSchemes.getPurpose() + " | Other - " + currentCell.getStringCellValue().trim());
