@@ -90,6 +90,8 @@ public class SubsidyMeasureResponse {
     private String maximumAmountUnderScheme;
 
     @JsonProperty
+    private String purpose;
+    @JsonProperty
     private SearchResults<AwardResponse> awardSearchResults;
 
     @JsonProperty
@@ -132,6 +134,7 @@ public class SubsidyMeasureResponse {
             this.deletedTimestamp = SearchUtils.dateTimeToFullMonthNameInDate(subsidyMeasure.getDeletedTimestamp());
         }
         this.spendingSectors = subsidyMeasure.getSpendingSectors();
+        this.purpose = subsidyMeasure.getPurpose();
         this.canEdit = true;
         this.subsidySchemeDescription = subsidyMeasure.getSubsidySchemeDescription();
         if(subsidyMeasure.getConfirmationDate() == null){
@@ -178,6 +181,7 @@ public class SubsidyMeasureResponse {
             this.deletedTimestamp = SearchUtils.dateTimeToFullMonthNameInDate(subsidyMeasure.getDeletedTimestamp());
         }
         this.spendingSectors = subsidyMeasure.getSpendingSectors();
+        this.purpose = subsidyMeasure.getPurpose();
         this.canEdit = true;
         this.subsidySchemeDescription = subsidyMeasure.getSubsidySchemeDescription();
         if(subsidyMeasure.getConfirmationDate() == null){

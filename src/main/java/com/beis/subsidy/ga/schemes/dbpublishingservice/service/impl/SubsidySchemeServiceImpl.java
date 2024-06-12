@@ -204,6 +204,10 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
             schemeToSave.setSpendingSectors(scheme.getSpendingSectorJson());
         }
 
+      if(!StringUtils.isEmpty(scheme.getPurposeJson())){
+          schemeToSave.setPurpose(scheme.getPurposeJson());
+      }
+
         if(!StringUtils.isEmpty(scheme.getSubsidySchemeInterest())){
           schemeToSave.setSubsidySchemeInterest(scheme.getSubsidySchemeInterest());
         }
@@ -287,12 +291,15 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
            schemeById.setSpendingSectors(scheme.getSpendingSectorJson());
         }
 
+       if(!StringUtils.isEmpty(scheme.getPurposeJson())){
+           schemeById.setPurpose(scheme.getPurposeJson());
+       }
+
         schemeById.setHasNoEndDate(scheme.isHasNoEndDate());
 
         if(scheme.isHasNoEndDate()){
             schemeById.setEndDate(null);
         }
-
 
         schemeById.setLastModifiedTimestamp(LocalDateTime.now());
 

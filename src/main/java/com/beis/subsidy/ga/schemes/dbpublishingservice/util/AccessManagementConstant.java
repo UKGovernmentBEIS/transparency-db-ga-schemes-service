@@ -25,4 +25,8 @@ public class AccessManagementConstant {
             "public administration and defence; compulsory social security", "real estate activities",
             "transportation and storage", "water supply; sewerage, waste management and remediation activities",
             "wholesale and retail trade; repair of motor vehicles and motorcycles"));
+
+    public static List<String> PURPOSES = new ArrayList<String>(Arrays.asList("culture or heritage", "employment", "energy efficiency",
+            "environmental protection", "infrastructure", "regional development", "rescue subsidy", "research and development",
+            "sme (small/medium-sized enterprise) support", "training","other"));
 }

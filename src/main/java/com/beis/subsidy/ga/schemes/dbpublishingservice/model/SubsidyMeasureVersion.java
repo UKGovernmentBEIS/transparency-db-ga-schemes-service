@@ -114,6 +114,9 @@ public class SubsidyMeasureVersion {
 	@Column(name = "SUBSIDY_SCHEME_INTEREST")
 	private String subsidySchemeInterest;
 
+	@Column(name = "PURPOSE")
+	private String purpose;
+
 	public SubsidyMeasureVersion(SubsidyMeasure scheme){
 		this.setScNumber(scheme.getScNumber());
 		this.setGrantingAuthority(scheme.getGrantingAuthority());
@@ -141,5 +144,6 @@ public class SubsidyMeasureVersion {
 		this.setSpendingSectors(scheme.getSpendingSectors());
 		this.setMaximumAmountUnderScheme(scheme.getMaximumAmountUnderScheme());
 		this.setSubsidySchemeInterest(scheme.getSubsidySchemeInterest());
+		this.setPurpose(scheme.getPurpose());
 	}
 }

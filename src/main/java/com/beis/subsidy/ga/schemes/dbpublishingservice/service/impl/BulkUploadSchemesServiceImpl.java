@@ -45,6 +45,8 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
         put("Start Date", "K");
         put("End Date", "L");
         put("Spending sectors", "M");
+        put("Purpose", "N");
+        put("Purpose - Other", "O");
     }};
 
 
@@ -104,12 +106,13 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
 
             List<ValidationErrorResult> spendingSectorsErrorList = validateSpendingSectors(bulkUploadSchemes);
 
+            List<ValidationErrorResult> purposeErrorList = validatePurpose(bulkUploadSchemes);
 
             List<ValidationErrorResult> validationErrorResultList = Stream.of(publicAuthorityNameErrorList,
                     subsidySchemeNameErrorList,subsidySchemeInterestErrorList, subsidySchemeDescriptionErrorList, legalBasisErrorList,
                     publicAuthorityPolicyURLErrorList, PublicAuthorityPolicyDescriptionErrorList,
                     subsidySchemeBudgetErrorList, MaximumAmountGivenUnderSchemeErrorList, confirmationDateErrorList,
-                    startDateErrorList, endDateErrorList, spendingSectorsErrorList).flatMap(x -> x.stream()).collect(Collectors.toList());
+                    startDateErrorList, endDateErrorList, spendingSectorsErrorList, purposeErrorList).flatMap(x -> x.stream()).collect(Collectors.toList());
 
             log.info("Final validation errors list ...printing list of errors - start");
 
@@ -476,5 +479,81 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
             }
         }
         return validationSpendingSectorsResultList;
+    }
+
+    private List<ValidationErrorResult> validatePurpose(List<BulkUploadSchemes> bulkUploadSchemes) {
+
+        List<ValidationErrorResult> validationPurposeResultList = new ArrayList<>();
+
+//        List<BulkUploadSchemes> validatePurposeMissingErrorList = bulkUploadSchemes.stream()
+//                .filter(scheme -> (scheme.getPurpose() == null)).collect(Collectors.toList());
+//
+//
+//        if (validatePurposeMissingErrorList.size() > 0){
+//            validationPurposeResultList.addAll(validatePurposeMissingErrorList.stream()
+//                    .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Purpose"),
+//                            "You must enter a minimum of one purpose."))
+//                    .collect(Collectors.toList()));
+//        }
+
+//validation issue atm is getPurpose contains the "other -" entry so line 502 will mean non other entries will skip over the validation
+        List<BulkUploadSchemes> purposeFormatErrorList = bulkUploadSchemes.stream()
+                .filter(scheme -> {
+                    if (scheme.getPurpose() != null) {
+                        ArrayList<String> purposeList = new ArrayList<>(Arrays.asList(scheme.getPurpose().toLowerCase().trim().split("\\s*\\|\\s*")));
+                        int otherIndex = -1;
+                        for (int i = 0; i < purposeList.size(); i++) {
+                            if(purposeList.get(i).startsWith("other")) {
+                                otherIndex = i;
+                            }
+                        }
+                        if(otherIndex >= 0){
+                            purposeList.remove(otherIndex);
+                        }
+
+                        if(purposeList.size() > 0 && !Objects.equals(purposeList.get(0), "")) {
+                            return (!new HashSet<>(AccessManagementConstant.PURPOSES).containsAll(purposeList));
+                        }
+                    }
+                    return false;
+                }).collect(Collectors.toList());
+
+
+        ArrayList<String> purposeErrorList = new ArrayList<>();
+
+        for (BulkUploadSchemes scheme : purposeFormatErrorList) {
+            ArrayList<String> purposeList = new ArrayList<>(Arrays.asList(scheme.getPurpose().toLowerCase().trim().split("\\s*\\|\\s*")));
+            for (int i = 0; i < purposeList.size(); i++) {
+                if (!AccessManagementConstant.PURPOSES.contains(purposeList.get(i))) {
+                    String currentError = purposeList.get(i);
+                    purposeErrorList.add(purposeList.get(i));
+                    validationPurposeResultList.add(new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Purpose"),
+                            "The following purpose(s) are incorrect '" + currentError + "'. Check that the spelling and punctuation matches the purpose list."));
+                }
+            }
+        }
+
+        List<BulkUploadSchemes> validatePurposeOtherMissingErrorList = bulkUploadSchemes.stream()
+                .filter(scheme -> (scheme.getPurposeOther() == null && scheme.getPurpose() == null)).collect(Collectors.toList());
+
+
+        if (validatePurposeOtherMissingErrorList.size() > 0){
+            validationPurposeResultList.addAll(validatePurposeOtherMissingErrorList.stream()
+                    .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Purpose - Other"),
+                            "You must enter a Purpose or Other Purpose."))
+                    .collect(Collectors.toList()));
+        }
+
+        List<BulkUploadSchemes> validatePurposeOtherCharLimitErrorList = bulkUploadSchemes.stream()
+                .filter(scheme -> (scheme.getPurposeOther() != null && scheme.getPurposeOther().length() > 255)).collect(Collectors.toList());
+
+
+        if (validatePurposeOtherCharLimitErrorList.size() > 0){
+            validationPurposeResultList.addAll(validatePurposeOtherCharLimitErrorList.stream()
+                    .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Purpose - Other"),
+                            "You cannot have more than 255 characters for the Other Purpose field."))
+                    .collect(Collectors.toList()));
+        }
+        return validationPurposeResultList;
     }
 }
