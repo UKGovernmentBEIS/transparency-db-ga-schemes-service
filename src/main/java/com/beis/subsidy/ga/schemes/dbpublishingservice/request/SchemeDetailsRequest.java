@@ -40,5 +40,6 @@ public class SchemeDetailsRequest {
     private LocalDate confirmationDate;
     private String spendingSectorJson;
     private String maximumAmountUnderScheme;
+    private String purposeJson;
     private String subsidySchemeInterest;
 }
