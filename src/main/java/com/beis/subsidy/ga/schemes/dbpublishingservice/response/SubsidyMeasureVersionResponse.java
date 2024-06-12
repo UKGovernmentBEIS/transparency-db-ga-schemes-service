@@ -86,6 +86,9 @@ public class SubsidyMeasureVersionResponse {
     @JsonProperty
     private String maximumAmountUnderScheme;
 
+    @JsonProperty
+    private String subsidySchemeInterest;
+
     public SubsidyMeasureVersionResponse(SubsidyMeasureVersion subsidyMeasureVersion) {
         this.version = subsidyMeasureVersion.getVersion().toString();
         this.scNumber = subsidyMeasureVersion.getScNumber();
@@ -129,5 +132,7 @@ public class SubsidyMeasureVersionResponse {
             this.confirmationDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasureVersion.getConfirmationDate());
         }
         this.maximumAmountUnderScheme = subsidyMeasureVersion.getMaximumAmountUnderScheme();
+
+        this.subsidySchemeInterest = subsidyMeasureVersion.getSubsidySchemeInterest() == null ? "" : subsidyMeasureVersion.getSubsidySchemeInterest();;
     }
 }
