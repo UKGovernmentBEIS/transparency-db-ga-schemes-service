@@ -112,17 +112,18 @@ public class ExcelHelper {
                                 break;
 
                             case 3:
-                                if (currentCell.getCellType() == CellType.BLANK) {
-                                    bulkUploadSchemes.setSubsidySchemeDescription(null);
-                                } else {
-                                    bulkUploadSchemes.setSubsidySchemeDescription(currentCell.getStringCellValue().trim());
-                                }
-                                break;
-                            case 4:
+
                                 if (currentCell.getCellType() == CellType.BLANK) {
                                     bulkUploadSchemes.setSpecificPolicyObjective(null);
                                 } else {
                                     bulkUploadSchemes.setSpecificPolicyObjective(currentCell.getStringCellValue().trim());
+                                }
+                                break;
+                            case 4:
+                                if (currentCell.getCellType() == CellType.BLANK) {
+                                    bulkUploadSchemes.setSubsidySchemeDescription(null);
+                                } else {
+                                    bulkUploadSchemes.setSubsidySchemeDescription(currentCell.getStringCellValue().trim());
                                 }
                                 break;
                             case 5:
