@@ -79,6 +79,9 @@ public class SubsidyMeasureResponse {
 
     @JsonProperty
     private String subsidySchemeDescription;
+
+    @JsonProperty
+    private String specificPolicyObjective;
     
     @JsonProperty
     private String confirmationDate;
@@ -137,6 +140,7 @@ public class SubsidyMeasureResponse {
         this.purpose = subsidyMeasure.getPurpose();
         this.canEdit = true;
         this.subsidySchemeDescription = subsidyMeasure.getSubsidySchemeDescription();
+        this.specificPolicyObjective = subsidyMeasure.getSpecificPolicyObjective();
         if(subsidyMeasure.getConfirmationDate() == null){
             this.confirmationDate = "";
         } else {
@@ -184,6 +188,7 @@ public class SubsidyMeasureResponse {
         this.purpose = subsidyMeasure.getPurpose();
         this.canEdit = true;
         this.subsidySchemeDescription = subsidyMeasure.getSubsidySchemeDescription();
+        this.specificPolicyObjective = subsidyMeasure.getSpecificPolicyObjective();
         if(subsidyMeasure.getConfirmationDate() == null){
             this.confirmationDate = "";
         } else {

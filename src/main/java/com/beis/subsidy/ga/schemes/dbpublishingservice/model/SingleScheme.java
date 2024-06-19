@@ -15,6 +15,7 @@ public class SingleScheme {
     private String publicAuthorityName;
     private String subsidySchemeName;
     private String subsidySchemeDescription;
+    private String specificPolicyObjective;
     private String legalBasis;
     private String publicAuthorityPolicyURL;
     private String publicAuthorityPolicyPageDescription;

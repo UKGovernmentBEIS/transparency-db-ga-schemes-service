@@ -85,6 +85,7 @@ public class SchemeService {
                 null,
                 bulkUploadScheme.isHasNoEndDate(),
                 bulkUploadScheme.getSubsidySchemeDescription(),
+                bulkUploadScheme.getSpecificPolicyObjective(),
                 bulkUploadScheme.getConfirmationDate(),
                 convertToSectorJson(bulkUploadScheme.getSpendingSectors()),
                 bulkUploadScheme.getMaximumAmountGivenUnderScheme(),

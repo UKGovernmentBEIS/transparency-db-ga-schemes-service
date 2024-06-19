@@ -94,6 +94,11 @@ public class Award {
 	@Column(name = "SUBSIDY_AWARD_DESCRIPTION")
 	private String subsidyAwardDescription;
 
+	@Column(name = "SPECIFIC_POLICY_OBJECTIVE")
+	private String specificPolicyObjective;
+
+
+
 	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name = "apNumber")
 	private AdminProgram adminProgram;
