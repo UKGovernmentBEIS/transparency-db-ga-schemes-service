@@ -35,7 +35,7 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
         put("Public authority name", "A");
         put("Subsidy scheme name", "B");
         put("Subsidies or Schemes of Interest (SSoI) or Subsidies or Schemes of Particular Interest (SSoPI)", "C");
-        put("Specific Policy Objective","D");
+        put("Specific policy objective","D");
         put("Subsidy scheme description", "E");
         put("Legal basis", "F");
         put("Public authority policy URL", "G");
@@ -99,7 +99,6 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
             List<ValidationErrorResult> subsidySchemeDescriptionErrorList = validateSubsidySchemeDescription(bulkUploadSchemes);
 
             List<ValidationErrorResult> specificPolicyObjectiveErrorList = validateSpecificPolicyObjective(bulkUploadSchemes);
-
 
             List<ValidationErrorResult> legalBasisErrorList = validateLegalBasis(bulkUploadSchemes);
 

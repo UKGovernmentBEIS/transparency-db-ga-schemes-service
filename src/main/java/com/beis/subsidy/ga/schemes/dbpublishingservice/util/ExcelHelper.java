@@ -33,7 +33,7 @@ public class ExcelHelper {
 
     public static String TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-    public final static int EXPECTED_COLUMN_COUNT = 15;
+    public final static int EXPECTED_COLUMN_COUNT = 16;
 
     public  final static String SHEET = "Upload Template";
 
@@ -110,15 +110,14 @@ public class ExcelHelper {
                                     bulkUploadSchemes.setSubsidySchemeInterest(currentCell.getStringCellValue());
                                 }
                                 break;
-
                             case 3:
-
                                 if (currentCell.getCellType() == CellType.BLANK) {
                                     bulkUploadSchemes.setSpecificPolicyObjective(null);
                                 } else {
                                     bulkUploadSchemes.setSpecificPolicyObjective(currentCell.getStringCellValue().trim());
                                 }
                                 break;
+
                             case 4:
                                 if (currentCell.getCellType() == CellType.BLANK) {
                                     bulkUploadSchemes.setSubsidySchemeDescription(null);
@@ -126,6 +125,7 @@ public class ExcelHelper {
                                     bulkUploadSchemes.setSubsidySchemeDescription(currentCell.getStringCellValue().trim());
                                 }
                                 break;
+
                             case 5:
                                 if (currentCell.getCellType() == CellType.BLANK) {
                                     bulkUploadSchemes.setLegalBasis(null);
@@ -237,11 +237,11 @@ public class ExcelHelper {
                                 //if purpose and other purpose are both blank - sets them both to null
                                 if(currentCell.getCellType()==CellType.BLANK && bulkUploadSchemes.getPurpose() == null) {
                                     bulkUploadSchemes.setPurposeOther(null);
-                                //if purpose other is populated but purpose is blank
+                                    //if purpose other is populated but purpose is blank
                                 }else if(currentCell.getCellType()!=CellType.BLANK && bulkUploadSchemes.getPurpose() == null) {
                                     bulkUploadSchemes.setPurpose("Other - " + currentCell.getStringCellValue().trim());
                                     bulkUploadSchemes.setPurposeOther(currentCell.getStringCellValue().trim());
-                                //if purpose and other purpose are both populated
+                                    //if purpose and other purpose are both populated
                                 }else {
                                     bulkUploadSchemes.setPurposeOther(currentCell.getStringCellValue().trim());
                                     bulkUploadSchemes.setPurpose(bulkUploadSchemes.getPurpose() + " | Other - " + currentCell.getStringCellValue().trim());
