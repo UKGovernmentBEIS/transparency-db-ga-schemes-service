@@ -66,6 +66,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         Pageable pagingSortSchemes = PageRequest.of(searchInput.getPageNumber() - 1,
                 searchInput.getTotalRecordsPerPage(), Sort.by(orders));
 
+        String searchName = searchInput.getSearchName().toUpperCase();
 
         if (AccessManagementConstant.BEIS_ADMIN_ROLE.equals(userPriniciple.getRole().trim())) {
 
@@ -73,14 +74,15 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
             schemeResults = pageAwards.getContent();
 
-            if(!StringUtils.isEmpty(searchInput.getSearchName())){
+
+            if(!StringUtils.isEmpty(searchName)){
                 totalSchemeList = subsidyMeasureRepository.findAll(schemeSpecificationsWithout);
             } else {
                 totalSchemeList = subsidyMeasureRepository.findAll();
             }
 
         } else {
-            if (!StringUtils.isEmpty(searchInput.getSearchName())
+            if (!StringUtils.isEmpty(searchName)
                     || !StringUtils.isEmpty(searchInput.getStatus())) {
 
                 schemeSpecifications = getSpecificationSchemeDetailsForGARoles(searchInput,userPriniciple.getGrantingAuthorityGroupName());
@@ -384,7 +386,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
                         SearchUtils.checkNullOrEmptyString(searchName)
                                 ? null : SchemeSpecificationUtils.subsidySchemeName(searchName.trim())
                                 .or(SearchUtils.checkNullOrEmptyString(searchName)
-                                        ? null : SchemeSpecificationUtils.subsidyNumber(searchName.trim()))
+                                        ? null :SchemeSpecificationUtils.scNumberSearch(searchName.trim()))
+                                //.or(SearchUtils.checkNullOrEmptyString(searchName)
+                                  //      ? null : SchemeSpecificationUtils.subsidyNumber(searchName.trim()))
                                 .or(SearchUtils.checkNullOrEmptyString(searchName)
                                         ? null :SchemeSpecificationUtils.grantingAuthorityName(searchName.trim()))
                 )
