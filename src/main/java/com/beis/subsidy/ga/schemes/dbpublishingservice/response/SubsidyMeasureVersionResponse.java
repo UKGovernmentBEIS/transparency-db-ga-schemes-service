@@ -87,9 +87,6 @@ public class SubsidyMeasureVersionResponse {
     private String maximumAmountUnderScheme;
 
     @JsonProperty
-    private String reason;
-    
-    @JsonProperty
     private String subsidySchemeInterest;
 
     @JsonProperty
