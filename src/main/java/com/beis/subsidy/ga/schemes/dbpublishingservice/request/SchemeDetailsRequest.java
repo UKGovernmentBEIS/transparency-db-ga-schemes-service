@@ -42,4 +42,5 @@ public class SchemeDetailsRequest {
     private String maximumAmountUnderScheme;
     private String purposeJson;
     private String subsidySchemeInterest;
+    private String reason;
 }

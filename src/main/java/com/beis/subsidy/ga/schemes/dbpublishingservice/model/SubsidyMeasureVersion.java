@@ -120,6 +120,9 @@ public class SubsidyMeasureVersion {
 	@Column(name = "PURPOSE")
 	private String purpose;
 
+	@Column(name = "REASON")
+	private String reason;
+
 	public SubsidyMeasureVersion(SubsidyMeasure scheme){
 		this.setScNumber(scheme.getScNumber());
 		this.setGrantingAuthority(scheme.getGrantingAuthority());
@@ -147,9 +150,9 @@ public class SubsidyMeasureVersion {
 		this.setConfirmationDate(scheme.getConfirmationDate());
 		this.setSpendingSectors(scheme.getSpendingSectors());
 		this.setMaximumAmountUnderScheme(scheme.getMaximumAmountUnderScheme());
+		this.setReason(scheme.getReason());
 		this.setSubsidySchemeInterest(scheme.getSubsidySchemeInterest());
 		this.setPurpose(scheme.getPurpose());
+		this.setReason(scheme.getReason());
 	}
-
-
 }

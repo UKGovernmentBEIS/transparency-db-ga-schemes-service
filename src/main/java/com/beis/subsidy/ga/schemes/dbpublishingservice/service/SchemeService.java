@@ -92,6 +92,7 @@ public class SchemeService {
                 convertToSectorJson(bulkUploadScheme.getPurpose()),
                 null,
                 bulkUploadScheme.getSubsidySchemeInterest(),
+                null,
                 null);
         legalBasis.setSubsidyMeasure(subsidyMeasure);
         subsidyMeasure.setLegalBases(legalBasis);
