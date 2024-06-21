@@ -36,9 +36,11 @@ public class SchemeDetailsRequest {
     private String legalBasisText;
     private boolean hasNoEndDate;
     private String subsidySchemeDescription;
+    private String specificPolicyObjective;
     private LocalDate confirmationDate;
     private String spendingSectorJson;
     private String maximumAmountUnderScheme;
     private String purposeJson;
     private String subsidySchemeInterest;
+    private String reason;
 }

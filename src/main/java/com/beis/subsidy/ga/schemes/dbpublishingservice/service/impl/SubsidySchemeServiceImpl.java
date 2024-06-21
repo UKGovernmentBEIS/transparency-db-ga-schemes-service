@@ -202,6 +202,14 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
             schemeToSave.setSubsidySchemeDescription(scheme.getSubsidySchemeDescription());
         }
+      if(!StringUtils.isEmpty(scheme.getSpecificPolicyObjective())) {
+          if(scheme.getSpecificPolicyObjective().length() > 1500) {
+              log.error("Specific policy objective must be less than 1500 characters");
+              throw new InvalidRequestException("Specific policy objective must be less than 1500 characters");
+          }
+
+          schemeToSave.setSpecificPolicyObjective(scheme.getSpecificPolicyObjective());
+      }
         if(!StringUtils.isEmpty(scheme.getSpendingSectorJson())){
             schemeToSave.setSpendingSectors(scheme.getSpendingSectorJson());
         }
@@ -275,6 +283,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         }
         if(!StringUtils.isEmpty(scheme.getStatus())){
             schemeById.setStatus(scheme.getStatus());
+            if(!scheme.getStatus().equalsIgnoreCase("active"))
+                schemeById.setReason(scheme.getReason());
+
             if(scheme.getStatus().equals("Deleted")){
                 schemeById.setDeletedBy(userPrinciple.getUserName());
                 schemeById.setDeletedTimestamp(LocalDateTime.now());
@@ -286,6 +297,10 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getSubsidySchemeDescription())){
             schemeById.setSubsidySchemeDescription(scheme.getSubsidySchemeDescription());
         }
+
+       if(!StringUtils.isEmpty(scheme.getSpecificPolicyObjective())){
+           schemeById.setSpecificPolicyObjective(scheme.getSpecificPolicyObjective());
+       }
         if(scheme.getConfirmationDate() != null){
             schemeById.setConfirmationDate(scheme.getConfirmationDate());
         }
@@ -302,6 +317,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(scheme.isHasNoEndDate()){
             schemeById.setEndDate(null);
         }
+
 
         schemeById.setLastModifiedTimestamp(LocalDateTime.now());
 
@@ -341,8 +357,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         searchResults.totalSearchResults = subsidyMeasure.getAwardList().size();
         searchResults.totalPages = (int) Math.ceil((double)subsidyMeasure.getAwardList().size() / awardSearchInput.getTotalRecordsPerPage());
         searchResults.currentPage = awardSearchInput.getPageNumber();
-
-        return new SubsidyMeasureResponse(subsidyMeasure, searchResults);
+        SubsidyMeasureResponse subsidyMeasureResponse = new SubsidyMeasureResponse(subsidyMeasure);
+        subsidyMeasureResponse.setAwardSearchResults(searchResults);
+        return subsidyMeasureResponse;
     }
 
     @Override

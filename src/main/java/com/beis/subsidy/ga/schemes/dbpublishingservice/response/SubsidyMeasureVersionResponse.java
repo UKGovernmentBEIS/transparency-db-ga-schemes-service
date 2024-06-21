@@ -81,6 +81,9 @@ public class SubsidyMeasureVersionResponse {
     private String spendingSectors;
 
     @JsonProperty
+    private String specificPolicyObjective;
+
+    @JsonProperty
     private String maximumAmountUnderScheme;
 
     @JsonProperty
@@ -88,6 +91,9 @@ public class SubsidyMeasureVersionResponse {
 
     @JsonProperty
     private String purpose;
+
+    @JsonProperty
+    private String reason;
 
     public SubsidyMeasureVersionResponse(SubsidyMeasureVersion subsidyMeasureVersion) {
         this.version = subsidyMeasureVersion.getVersion().toString();
@@ -111,12 +117,14 @@ public class SubsidyMeasureVersionResponse {
         this.gaName = subsidyMeasureVersion.getGrantingAuthority().getGrantingAuthorityName();
         this.adhoc = "" + subsidyMeasureVersion.isAdhoc();
         this.status = subsidyMeasureVersion.getStatus();
+        this.reason = subsidyMeasureVersion.getReason();
         this.gaSubsidyWebLink = subsidyMeasureVersion.getGaSubsidyWebLink() == null ? "" : subsidyMeasureVersion.getGaSubsidyWebLink();
         this.gaSubsidyWebLinkDescription = subsidyMeasureVersion.getGaSubsidyWebLinkDescription() == null ? "" : subsidyMeasureVersion.getGaSubsidyWebLinkDescription();
         this.legalBasisText = subsidyMeasureVersion.getLegalBasisText();
         this.lastModifiedDate = SearchUtils.dateTimeToFullMonthNameInDate(subsidyMeasureVersion.getLastModifiedTimestamp()).replaceAll(" 00:00:00", "");
         this.publishedMeasureDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasureVersion.getPublishedMeasureDate());
         this.hasNoEndDate =subsidyMeasureVersion.isHasNoEndDate();
+        this.specificPolicyObjective = subsidyMeasureVersion.getSpecificPolicyObjective();
         if(subsidyMeasureVersion.getDeletedBy() != null) {
             this.deletedBy = subsidyMeasureVersion.getDeletedBy();
         }
