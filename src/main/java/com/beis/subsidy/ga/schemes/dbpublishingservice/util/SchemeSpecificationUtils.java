@@ -1,5 +1,6 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.util;
 
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.Award;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -40,7 +41,13 @@ public final class SchemeSpecificationUtils {
 	public static Specification<SubsidyMeasure> subsidyNumber(String subsidyNumber) {
 		return (root, query, builder) -> builder.equal(root.get("scNumber"), subsidyNumber);
 	}
+	public static Specification<SubsidyMeasure> scNumberSearch(String scNumber) {
+		return (root, query, builder) -> builder.like(
+				builder.lower(root.get("scNumber")),
+				"%" + scNumber.trim().toLowerCase() + "%"
+		);
 
+	}
 	/**
 	 * To check contains operations
 	 * @param expression - input string
