@@ -29,4 +29,13 @@ public class AccessManagementConstant {
     public static List<String> PURPOSES = new ArrayList<String>(Arrays.asList("culture or heritage", "employment", "energy efficiency",
             "environmental protection", "infrastructure", "regional development", "rescue subsidy", "research and development",
             "sme (small/medium-sized enterprise) support", "training","other"));
+
+    public static final String[] PROTECTED_GRANTING_AUTHORITIES =
+            {
+                    "GrantingAuthorityEncoders",
+                    "GrantingAuthorityApprovers",
+                    "GrantingAuthorityAdministrators",
+                    "BEISAdministrators",
+                    "TEST GA"
+            };
 }
