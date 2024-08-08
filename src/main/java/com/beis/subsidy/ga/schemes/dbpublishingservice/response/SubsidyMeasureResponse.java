@@ -1,6 +1,8 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.response;
 
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.Award;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SearchInput;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SearchUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,6 +12,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor
 @Getter
@@ -74,6 +79,9 @@ public class SubsidyMeasureResponse {
 
     @JsonProperty
     private String subsidySchemeDescription;
+
+    @JsonProperty
+    private String specificPolicyObjective;
     
     @JsonProperty
     private String confirmationDate;
@@ -83,6 +91,20 @@ public class SubsidyMeasureResponse {
 
     @JsonProperty
     private String maximumAmountUnderScheme;
+
+    @JsonProperty
+    private String purpose;
+    @JsonProperty
+    private SearchResults<AwardResponse> awardSearchResults;
+
+    @JsonProperty
+    private String subsidySchemeInterest;
+    
+    @JsonProperty
+    private List<SubsidyMeasureVersionResponse> schemeVersions;
+
+    @JsonProperty
+    private String reason;
 
     public SubsidyMeasureResponse(SubsidyMeasure subsidyMeasure) {
         this.scNumber = subsidyMeasure.getScNumber();
@@ -105,10 +127,11 @@ public class SubsidyMeasureResponse {
         this.gaName = subsidyMeasure.getGrantingAuthority().getGrantingAuthorityName();
         this.adhoc = "" + subsidyMeasure.isAdhoc();
         this.status = subsidyMeasure.getStatus();
+        this.reason = subsidyMeasure.getReason();
         this.gaSubsidyWebLink = subsidyMeasure.getGaSubsidyWebLink() == null ? "" : subsidyMeasure.getGaSubsidyWebLink();
         this.gaSubsidyWebLinkDescription = subsidyMeasure.getGaSubsidyWebLinkDescription() == null ? "" : subsidyMeasure.getGaSubsidyWebLinkDescription();
         this.legalBasisText = subsidyMeasure.getLegalBases().getLegalBasisText();
-        this.lastModifiedDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getLastModifiedTimestamp());
+        this.lastModifiedDate = SearchUtils.dateTimeToFullMonthNameInDate(subsidyMeasure.getLastModifiedTimestamp());
         this.publishedMeasureDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getPublishedMeasureDate());
         this.hasNoEndDate =subsidyMeasure.isHasNoEndDate();
         if(subsidyMeasure.getDeletedBy() != null) {
@@ -118,14 +141,17 @@ public class SubsidyMeasureResponse {
             this.deletedTimestamp = SearchUtils.dateTimeToFullMonthNameInDate(subsidyMeasure.getDeletedTimestamp());
         }
         this.spendingSectors = subsidyMeasure.getSpendingSectors();
+        this.purpose = subsidyMeasure.getPurpose();
         this.canEdit = true;
         this.subsidySchemeDescription = subsidyMeasure.getSubsidySchemeDescription();
+        this.specificPolicyObjective = subsidyMeasure.getSpecificPolicyObjective();
         if(subsidyMeasure.getConfirmationDate() == null){
             this.confirmationDate = "";
         } else {
             this.confirmationDate = SearchUtils.dateToFullMonthNameInDate(subsidyMeasure.getConfirmationDate());
         }
         this.maximumAmountUnderScheme = subsidyMeasure.getMaximumAmountUnderScheme();
+        this.subsidySchemeInterest = subsidyMeasure.getSubsidySchemeInterest() == null ? "" : subsidyMeasure.getSubsidySchemeInterest();
+        this.schemeVersions = SearchUtils.getSchemeVersionResponseList(subsidyMeasure);
     }
-
 }

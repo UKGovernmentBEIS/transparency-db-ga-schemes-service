@@ -13,13 +13,11 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,16 +34,29 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
     private final HashMap<String, String> columnMapping = new HashMap<String, String>() {{
         put("Public authority name", "A");
         put("Subsidy scheme name", "B");
-        put("Subsidy scheme description", "C");
-        put("Legal basis", "D");
-        put("Public authority policy URL", "E");
-        put("Public authority policy page description", "F");
-        put("Budget (£)", "G");
-        put("Maximum amount given under scheme", "H");
-        put("Confirmation Date", "I");
-        put("Start Date", "J");
-        put("End Date", "K");
-        put("Spending sectors", "L");
+        put("Subsidies or Schemes of Interest (SSoI) or Subsidies or Schemes of Particular Interest (SSoPI)", "C");
+        put("Specific policy objective","D");
+        put("Subsidy scheme description", "E");
+        put("Legal basis", "F");
+        put("Public authority policy URL", "G");
+        put("Public authority policy page description", "H");
+        put("Budget (£)", "I");
+        put("Maximum amount given under scheme", "J");
+        put("Confirmation Date", "K");
+        put("Start Date", "L");
+        put("End Date", "M");
+        put("Spending sectors", "N");
+        put("Legal basis", "E");
+        put("Public authority policy URL", "F");
+        put("Public authority policy page description", "G");
+        put("Budget (£)", "H");
+        put("Maximum amount given under scheme", "I");
+        put("Confirmation Date", "J");
+        put("Start Date", "K");
+        put("End Date", "L");
+        put("Spending sectors", "M");
+        put("Purpose", "N");
+        put("Purpose - Other", "O");
     }};
 
 
@@ -58,7 +69,7 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
 
             Boolean isLatestVersion = ExcelHelper.validateColumnCount(file.getInputStream());
 
-            if (isLatestVersion) {
+            if (!isLatestVersion) {
                 ValidationResult validationResult = new ValidationResult();
 
                 ValidationErrorResult validationErrorResult = new ValidationErrorResult();
@@ -83,7 +94,11 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
 
             List<ValidationErrorResult> subsidySchemeNameErrorList = validateSubsidySchemeName(bulkUploadSchemes);
 
+            List<ValidationErrorResult> subsidySchemeInterestErrorList = validateSubsidySchemeInterest(bulkUploadSchemes);
+
             List<ValidationErrorResult> subsidySchemeDescriptionErrorList = validateSubsidySchemeDescription(bulkUploadSchemes);
+
+            List<ValidationErrorResult> specificPolicyObjectiveErrorList = validateSpecificPolicyObjective(bulkUploadSchemes);
 
             List<ValidationErrorResult> legalBasisErrorList = validateLegalBasis(bulkUploadSchemes);
 
@@ -103,12 +118,14 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
 
             List<ValidationErrorResult> spendingSectorsErrorList = validateSpendingSectors(bulkUploadSchemes);
 
+            List<ValidationErrorResult> purposeErrorList = validatePurpose(bulkUploadSchemes);
 
             List<ValidationErrorResult> validationErrorResultList = Stream.of(publicAuthorityNameErrorList,
-                    subsidySchemeNameErrorList, subsidySchemeDescriptionErrorList, legalBasisErrorList,
+                    subsidySchemeNameErrorList, subsidySchemeDescriptionErrorList,specificPolicyObjectiveErrorList, legalBasisErrorList,
+                    subsidySchemeNameErrorList,subsidySchemeInterestErrorList, subsidySchemeDescriptionErrorList, legalBasisErrorList,
                     publicAuthorityPolicyURLErrorList, PublicAuthorityPolicyDescriptionErrorList,
                     subsidySchemeBudgetErrorList, MaximumAmountGivenUnderSchemeErrorList, confirmationDateErrorList,
-                    startDateErrorList, endDateErrorList, spendingSectorsErrorList).flatMap(x -> x.stream()).collect(Collectors.toList());
+                    startDateErrorList, endDateErrorList, spendingSectorsErrorList, purposeErrorList).flatMap(x -> x.stream()).collect(Collectors.toList());
 
             log.info("Final validation errors list ...printing list of errors - start");
 
@@ -205,6 +222,27 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
         return validationSubsidySchemeNameResultList;
     }
 
+    private List<ValidationErrorResult> validateSubsidySchemeInterest(List<BulkUploadSchemes> bulkUploadSchemes) {
+        List<ValidationErrorResult> validationSubsidySchemeInterestResultList = new ArrayList<>();
+
+        Set<String> validOptions = new HashSet<>();
+        validOptions.add("Subsidies or Schemes of Interest (SSoI)");
+        validOptions.add("Subsidies or Schemes of Particular Interest (SSoPI)");
+        validOptions.add("Neither");
+
+        List<BulkUploadSchemes> validateSubsidySchemeInterestNotNullErrorList = bulkUploadSchemes.stream().filter(
+                        scheme -> ((scheme.getSubsidySchemeInterest() == null || StringUtils.isEmpty(scheme.getSubsidySchemeInterest())
+                                || !(validOptions.toString().contains(scheme.getSubsidySchemeInterest())))))
+                .collect(Collectors.toList());
+
+        validationSubsidySchemeInterestResultList.addAll(validateSubsidySchemeInterestNotNullErrorList.stream()
+                .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Subsidies or Schemes of Interest (SSoI) or Subsidies or Schemes of Particular Interest (SSoPI)"),
+                        "The subsidy scheme of interest or particular interest must be selected. This will be Subsidies or Schemes of Interest (SSoI), Subsidies or Schemes of Particular Interest (SSoPI) or Neither"))
+                .collect(Collectors.toList()));
+
+        return validationSubsidySchemeInterestResultList;
+    }
+
     private List<ValidationErrorResult> validateSubsidySchemeDescription(List<BulkUploadSchemes> bulkUploadSchemes) {
 
         List<ValidationErrorResult> validationSubsidySchemeDescriptionResultList = new ArrayList<>();
@@ -230,6 +268,33 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
 
 
         return validationSubsidySchemeDescriptionResultList;
+    }
+
+    private List<ValidationErrorResult> validateSpecificPolicyObjective(List<BulkUploadSchemes> bulkUploadSchemes) {
+
+        List<ValidationErrorResult> validationSpecificPolicyObjectiveResultList = new ArrayList<>();
+
+        List<BulkUploadSchemes> validateSpecificPolicyObjectiveLengthList = bulkUploadSchemes.stream()
+                .filter(scheme -> ((scheme.getSpecificPolicyObjective() != null && scheme.getSpecificPolicyObjective()
+                        .length() > 1500))).collect(Collectors.toList());
+
+        validationSpecificPolicyObjectiveResultList.addAll(validateSpecificPolicyObjectiveLengthList.stream()
+                .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Specific Policy Objective"),
+                        "The specific policy objective must be 1500 characters or less."))
+                .collect(Collectors.toList()));
+
+        List<BulkUploadSchemes> validateSpecificPolicyObjectiveMissingErrorList = bulkUploadSchemes.stream()
+                .filter(scheme -> (scheme.getSpecificPolicyObjective() == null)).collect(Collectors.toList());
+
+        if (validateSpecificPolicyObjectiveMissingErrorList.size() > 0){
+            validationSpecificPolicyObjectiveResultList.addAll(validateSpecificPolicyObjectiveMissingErrorList.stream()
+                    .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Specific Policy Objective"),
+                            "You must enter the specific policy objective."))
+                    .collect(Collectors.toList()));
+        }
+
+
+        return validationSpecificPolicyObjectiveResultList;
     }
 
     private List<ValidationErrorResult> validateLegalBasis(List<BulkUploadSchemes> bulkUploadSchemes) {
@@ -454,5 +519,81 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
             }
         }
         return validationSpendingSectorsResultList;
+    }
+
+    private List<ValidationErrorResult> validatePurpose(List<BulkUploadSchemes> bulkUploadSchemes) {
+
+        List<ValidationErrorResult> validationPurposeResultList = new ArrayList<>();
+
+//        List<BulkUploadSchemes> validatePurposeMissingErrorList = bulkUploadSchemes.stream()
+//                .filter(scheme -> (scheme.getPurpose() == null)).collect(Collectors.toList());
+//
+//
+//        if (validatePurposeMissingErrorList.size() > 0){
+//            validationPurposeResultList.addAll(validatePurposeMissingErrorList.stream()
+//                    .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Purpose"),
+//                            "You must enter a minimum of one purpose."))
+//                    .collect(Collectors.toList()));
+//        }
+
+//validation issue atm is getPurpose contains the "other -" entry so line 502 will mean non other entries will skip over the validation
+        List<BulkUploadSchemes> purposeFormatErrorList = bulkUploadSchemes.stream()
+                .filter(scheme -> {
+                    if (scheme.getPurpose() != null) {
+                        ArrayList<String> purposeList = new ArrayList<>(Arrays.asList(scheme.getPurpose().toLowerCase().trim().split("\\s*\\|\\s*")));
+                        int otherIndex = -1;
+                        for (int i = 0; i < purposeList.size(); i++) {
+                            if(purposeList.get(i).startsWith("other")) {
+                                otherIndex = i;
+                            }
+                        }
+                        if(otherIndex >= 0){
+                            purposeList.remove(otherIndex);
+                        }
+
+                        if(purposeList.size() > 0 && !Objects.equals(purposeList.get(0), "")) {
+                            return (!new HashSet<>(AccessManagementConstant.PURPOSES).containsAll(purposeList));
+                        }
+                    }
+                    return false;
+                }).collect(Collectors.toList());
+
+
+        ArrayList<String> purposeErrorList = new ArrayList<>();
+
+        for (BulkUploadSchemes scheme : purposeFormatErrorList) {
+            ArrayList<String> purposeList = new ArrayList<>(Arrays.asList(scheme.getPurpose().toLowerCase().trim().split("\\s*\\|\\s*")));
+            for (int i = 0; i < purposeList.size(); i++) {
+                if (!AccessManagementConstant.PURPOSES.contains(purposeList.get(i))) {
+                    String currentError = purposeList.get(i);
+                    purposeErrorList.add(purposeList.get(i));
+                    validationPurposeResultList.add(new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Purpose"),
+                            "The following purpose(s) are incorrect '" + currentError + "'. Check that the spelling and punctuation matches the purpose list."));
+                }
+            }
+        }
+
+        List<BulkUploadSchemes> validatePurposeOtherMissingErrorList = bulkUploadSchemes.stream()
+                .filter(scheme -> (scheme.getPurposeOther() == null && scheme.getPurpose() == null)).collect(Collectors.toList());
+
+
+        if (validatePurposeOtherMissingErrorList.size() > 0){
+            validationPurposeResultList.addAll(validatePurposeOtherMissingErrorList.stream()
+                    .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Purpose - Other"),
+                            "You must enter a Purpose or Other Purpose."))
+                    .collect(Collectors.toList()));
+        }
+
+        List<BulkUploadSchemes> validatePurposeOtherCharLimitErrorList = bulkUploadSchemes.stream()
+                .filter(scheme -> (scheme.getPurposeOther() != null && scheme.getPurposeOther().length() > 255)).collect(Collectors.toList());
+
+
+        if (validatePurposeOtherCharLimitErrorList.size() > 0){
+            validationPurposeResultList.addAll(validatePurposeOtherCharLimitErrorList.stream()
+                    .map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Purpose - Other"),
+                            "You cannot have more than 255 characters for the Other Purpose field."))
+                    .collect(Collectors.toList()));
+        }
+        return validationPurposeResultList;
     }
 }

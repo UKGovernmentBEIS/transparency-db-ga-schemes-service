@@ -17,6 +17,7 @@ public class BulkUploadSchemes {
     private String publicAuthorityName;
     private String subsidySchemeName;
     private String subsidySchemeDescription;
+    private String specificPolicyObjective;
     private String legalBasis;
     private String publicAuthorityPolicyURL;
     private String publicAuthorityPolicyPageDescription;
@@ -27,5 +28,8 @@ public class BulkUploadSchemes {
     private LocalDate endDate;
     private String spendingSectors;
     private boolean hasNoEndDate;
+    private String purpose;
+    private String purposeOther;
+    private String subsidySchemeInterest;
 
 }

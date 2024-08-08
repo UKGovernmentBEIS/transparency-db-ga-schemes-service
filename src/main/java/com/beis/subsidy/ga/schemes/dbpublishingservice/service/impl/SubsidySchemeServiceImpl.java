@@ -4,20 +4,21 @@ package com.beis.subsidy.ga.schemes.dbpublishingservice.service.impl;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.InvalidRequestException;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.SearchResultNotFoundException;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.exception.UnauthorisedAccessException;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.Award;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.LegalBasis;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.AwardRepository;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.request.AwardSearchInput;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasureVersion;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.GrantingAuthorityRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.SubsidyMeasureRepository;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.SubsidyMeasureVersionRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeDetailsRequest;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.request.SchemeSearchInput;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SearchSubsidyResultsResponse;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.response.SubsidyMeasureResponse;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.response.*;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.service.SubsidySchemeService;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.util.AccessManagementConstant;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SchemeSpecificationUtils;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.util.SearchUtils;
-import com.beis.subsidy.ga.schemes.dbpublishingservice.util.UserPrinciple;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +33,9 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
+import java.util.*;
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -47,7 +44,13 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
     private SubsidyMeasureRepository subsidyMeasureRepository;
 
     @Autowired
+    private SubsidyMeasureVersionRepository subsidyMeasureVersionRepository;
+
+    @Autowired
     private GrantingAuthorityRepository gaRepository;
+
+    @Autowired
+    private AwardRepository awardRepository;
 
     @Override
     public SearchSubsidyResultsResponse findMatchingSubsidySchemeDetails(SchemeSearchInput searchInput,  UserPrinciple userPriniciple) {
@@ -63,6 +66,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         Pageable pagingSortSchemes = PageRequest.of(searchInput.getPageNumber() - 1,
                 searchInput.getTotalRecordsPerPage(), Sort.by(orders));
 
+        String searchName = searchInput.getSearchName().toUpperCase();
 
         if (AccessManagementConstant.BEIS_ADMIN_ROLE.equals(userPriniciple.getRole().trim())) {
 
@@ -70,14 +74,15 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
             schemeResults = pageAwards.getContent();
 
-            if(!StringUtils.isEmpty(searchInput.getSearchName())){
+
+            if(!StringUtils.isEmpty(searchName)){
                 totalSchemeList = subsidyMeasureRepository.findAll(schemeSpecificationsWithout);
             } else {
                 totalSchemeList = subsidyMeasureRepository.findAll();
             }
 
         } else {
-            if (!StringUtils.isEmpty(searchInput.getSearchName())
+            if (!StringUtils.isEmpty(searchName)
                     || !StringUtils.isEmpty(searchInput.getStatus())) {
 
                 schemeSpecifications = getSpecificationSchemeDetailsForGARoles(searchInput,userPriniciple.getGrantingAuthorityGroupName());
@@ -187,7 +192,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getLegalBasisText())){
             legalBasis.setLegalBasisText(scheme.getLegalBasisText());
         }
-        schemeToSave.setLastModifiedTimestamp(LocalDate.now());
+        schemeToSave.setLastModifiedTimestamp(LocalDateTime.now());
 
         if(!StringUtils.isEmpty(scheme.getSubsidySchemeDescription())) {
             if(scheme.getSubsidySchemeDescription().length() > 10000) {
@@ -197,8 +202,24 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
             schemeToSave.setSubsidySchemeDescription(scheme.getSubsidySchemeDescription());
         }
+      if(!StringUtils.isEmpty(scheme.getSpecificPolicyObjective())) {
+          if(scheme.getSpecificPolicyObjective().length() > 1500) {
+              log.error("Specific policy objective must be less than 1500 characters");
+              throw new InvalidRequestException("Specific policy objective must be less than 1500 characters");
+          }
+
+          schemeToSave.setSpecificPolicyObjective(scheme.getSpecificPolicyObjective());
+      }
         if(!StringUtils.isEmpty(scheme.getSpendingSectorJson())){
             schemeToSave.setSpendingSectors(scheme.getSpendingSectorJson());
+        }
+
+      if(!StringUtils.isEmpty(scheme.getPurposeJson())){
+          schemeToSave.setPurpose(scheme.getPurposeJson());
+      }
+
+        if(!StringUtils.isEmpty(scheme.getSubsidySchemeInterest())){
+          schemeToSave.setSubsidySchemeInterest(scheme.getSubsidySchemeInterest());
         }
 
         legalBasis.setLastModifiedTimestamp(new Date());
@@ -218,6 +239,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
    public String updateSubsidySchemeDetails(SchemeDetailsRequest scheme, String scNumber, UserPrinciple userPrinciple) {
         log.info("Inside updateSubsidySchemeDetails method - sc number " + scheme.getScNumber());
         SubsidyMeasure schemeById = subsidyMeasureRepository.findById(scNumber).get();
+
+       subsidyMeasureSaveOldVersion(schemeById);
+
         LegalBasis legalBasis = schemeById.getLegalBases();
         if (Objects.isNull(schemeById)) {
             throw new SearchResultNotFoundException("Scheme details not found::" + scheme.getScNumber());
@@ -259,6 +283,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         }
         if(!StringUtils.isEmpty(scheme.getStatus())){
             schemeById.setStatus(scheme.getStatus());
+            if(!scheme.getStatus().equalsIgnoreCase("active"))
+                schemeById.setReason(scheme.getReason());
+
             if(scheme.getStatus().equals("Deleted")){
                 schemeById.setDeletedBy(userPrinciple.getUserName());
                 schemeById.setDeletedTimestamp(LocalDateTime.now());
@@ -270,6 +297,10 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
         if(!StringUtils.isEmpty(scheme.getSubsidySchemeDescription())){
             schemeById.setSubsidySchemeDescription(scheme.getSubsidySchemeDescription());
         }
+
+       if(!StringUtils.isEmpty(scheme.getSpecificPolicyObjective())){
+           schemeById.setSpecificPolicyObjective(scheme.getSpecificPolicyObjective());
+       }
         if(scheme.getConfirmationDate() != null){
             schemeById.setConfirmationDate(scheme.getConfirmationDate());
         }
@@ -277,23 +308,65 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
            schemeById.setSpendingSectors(scheme.getSpendingSectorJson());
         }
 
+       if(!StringUtils.isEmpty(scheme.getPurposeJson())){
+           schemeById.setPurpose(scheme.getPurposeJson());
+       }
+
         schemeById.setHasNoEndDate(scheme.isHasNoEndDate());
-        schemeById.setLastModifiedTimestamp(LocalDate.now());
+
+        if(scheme.isHasNoEndDate()){
+            schemeById.setEndDate(null);
+        }
+
+
+        schemeById.setLastModifiedTimestamp(LocalDateTime.now());
+
 
         legalBasis.setLastModifiedTimestamp(new Date());
         legalBasis.setCreatedTimestamp(new Date());
         schemeById.setLegalBases(legalBasis);
         legalBasis.setSubsidyMeasure(schemeById);
+        schemeById.setSubsidySchemeInterest(scheme.getSubsidySchemeInterest());
 
         SubsidyMeasure updatedScheme = subsidyMeasureRepository.save(schemeById);
         log.info("Updated successfully : ");
         return updatedScheme.getScNumber();
     }
 
+    private void subsidyMeasureSaveOldVersion(SubsidyMeasure scheme) {
+        SubsidyMeasureVersion version = new SubsidyMeasureVersion(scheme);
+        subsidyMeasureVersionRepository.save(version);
+    }
+
     @Override
     public SubsidyMeasureResponse findSubsidySchemeById(String scNumber) {
         SubsidyMeasure subsidyMeasure = subsidyMeasureRepository.findById(scNumber).get();
         return new SubsidyMeasureResponse(subsidyMeasure);
+    }
+
+    @Override
+    public SubsidyMeasureResponse findSubsidySchemeWithAwardsById(String scNumber, AwardSearchInput awardSearchInput) {
+        SubsidyMeasure subsidyMeasure = subsidyMeasureRepository.findById(scNumber).get();
+
+        List<Sort.Order> orders = getOrderByCondition(awardSearchInput.getSortBy());
+        Pageable awardsPageable = PageRequest.of(awardSearchInput.getPageNumber() - 1,
+                awardSearchInput.getTotalRecordsPerPage(), Sort.by(orders));
+        SearchResults<AwardResponse> searchResults = new SearchResults<>();
+        Page<Award> page = awardRepository.findAll(getSpecificationAwardDetails(awardSearchInput),awardsPageable);
+        searchResults.setResponseList(page.getContent().stream().map(award -> new AwardResponse(award, true)).collect(Collectors.toList()));
+        searchResults.totalSearchResults = subsidyMeasure.getAwardList().size();
+        searchResults.totalPages = (int) Math.ceil((double)subsidyMeasure.getAwardList().size() / awardSearchInput.getTotalRecordsPerPage());
+        searchResults.currentPage = awardSearchInput.getPageNumber();
+        SubsidyMeasureResponse subsidyMeasureResponse = new SubsidyMeasureResponse(subsidyMeasure);
+        subsidyMeasureResponse.setAwardSearchResults(searchResults);
+        return subsidyMeasureResponse;
+    }
+
+    @Override
+    public SubsidyMeasureVersionResponse findSubsidySchemeVersion(String scNumber, String version) {
+        SubsidyMeasureVersion schemeVersion = subsidyMeasureVersionRepository.findByScNumberAndVersion(scNumber, UUID.fromString(version));
+
+        return new SubsidyMeasureVersionResponse(schemeVersion);
     }
 
     private Map<String, Long> schemeCounts(List<SubsidyMeasure> schemeList) {
@@ -330,7 +403,9 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
                         SearchUtils.checkNullOrEmptyString(searchName)
                                 ? null : SchemeSpecificationUtils.subsidySchemeName(searchName.trim())
                                 .or(SearchUtils.checkNullOrEmptyString(searchName)
-                                        ? null : SchemeSpecificationUtils.subsidyNumber(searchName.trim()))
+                                        ? null :SchemeSpecificationUtils.scNumberSearch(searchName.trim()))
+                                //.or(SearchUtils.checkNullOrEmptyString(searchName)
+                                  //      ? null : SchemeSpecificationUtils.subsidyNumber(searchName.trim()))
                                 .or(SearchUtils.checkNullOrEmptyString(searchName)
                                         ? null :SchemeSpecificationUtils.grantingAuthorityName(searchName.trim()))
                 )
@@ -386,7 +461,7 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
     private Sort.Direction getSortDirection(String direction) {
         Sort.Direction sortDir = Sort.Direction.ASC;
-        if (direction.equals("desc")) {
+        if (direction.trim().equals("desc")) {
             sortDir = Sort.Direction.DESC;
         }
         return sortDir;
@@ -406,5 +481,36 @@ public class SubsidySchemeServiceImpl implements SubsidySchemeService {
 
     public  Specification<SubsidyMeasure> subsidyMeasureByGa(Long gaId) {
         return (root, query, builder) -> builder.equal(root.get("grantingAuthority").get("gaId"), gaId);
+    }
+
+    public Specification<Award>  getSpecificationAwardDetails(AwardSearchInput awardSearchInput) {
+        Specification<Award> awardSpecifications = Specification
+
+                // getSubsidyObjective from input parameter
+                .where(awardSearchInput.getSubsidyObjective() == null || awardSearchInput.getSubsidyObjective().isEmpty()
+                        ? null : AwardSpecificationUtils.subsidyObjectiveIn(awardSearchInput.getSubsidyObjective())
+                        //Like search for other subsidy objective
+                        .or(awardSearchInput.getOtherSubsidyObjective() == null || awardSearchInput.getOtherSubsidyObjective().isEmpty()
+                                ? null : AwardSpecificationUtils.otherSubsidyObjective(awardSearchInput.getOtherSubsidyObjective())))
+                .and(awardSearchInput.getScNumber() == null || awardSearchInput.getScNumber().isEmpty()
+                ? null : AwardSpecificationUtils.scNumber(awardSearchInput.getScNumber()))
+                // getSpendingRegion from input parameter
+                .and(awardSearchInput.getSpendingRegion() == null || awardSearchInput.getSpendingRegion().isEmpty()
+                        ? null : AwardSpecificationUtils.spendingRegionIn(awardSearchInput.getSpendingRegion()))
+
+                // getSpendingSector from input parameter
+                .and(awardSearchInput.getSpendingSector() == null || awardSearchInput.getSpendingSector().isEmpty()
+                        ? null : AwardSpecificationUtils.spendingSectorIn(awardSearchInput.getSpendingSector()))
+
+                // getSubsidyInstrument from input parameter
+                .and(awardSearchInput.getSubsidyInstrument() == null || awardSearchInput.getSubsidyInstrument().isEmpty()
+                        ? null : AwardSpecificationUtils.subsidyInstrumentIn(awardSearchInput.getSubsidyInstrument()))
+                // Like search for other instrument
+
+                // getSubsidyMeasureTitle from input parameter
+                .and(SearchUtils.checkNullOrEmptyString(awardSearchInput.getSubsidyMeasureTitle())
+                        ? null : AwardSpecificationUtils.subsidyMeasureTitle(awardSearchInput.getSubsidyMeasureTitle().trim()));
+
+        return awardSpecifications;
     }
 }
