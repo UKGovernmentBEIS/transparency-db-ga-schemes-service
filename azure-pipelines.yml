@@ -19,7 +19,7 @@ pr:
 variables:
 
   # Agent VM image name
-  vmImageName: 'ubuntu-20.04'
+  vmImageName: 'ubuntu-latest'
 
 stages:
   - stage: Build
@@ -30,7 +30,7 @@ stages:
         pool:
           vmImage: $(vmImageName)
         steps:
-          - task: Maven@3
+          - task: Maven@4
             displayName: 'Maven Package'
             inputs:
               mavenPomFile: 'pom.xml'
