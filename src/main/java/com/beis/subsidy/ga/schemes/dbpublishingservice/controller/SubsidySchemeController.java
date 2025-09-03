@@ -99,7 +99,7 @@ public class SubsidySchemeController {
     	        
         String scNumber = subsidySchemeService.addSubsidySchemeDetails(scheme);
         //Audit entry
-        StringBuilder eventMsg = new StringBuilder("Scheme ").append(scNumber).append(" is added");
+        StringBuilder eventMsg = new StringBuilder("Scheme ").append(scNumber).append(" added with status published");
         SearchUtils.saveAuditLog(userPrincipleObj,"create Schemes", scNumber,eventMsg.toString(),auditLogsRepository);
         log.info("{} :: End of  addSchemeDetails method",loggingComponentName);
    	    return scNumber;

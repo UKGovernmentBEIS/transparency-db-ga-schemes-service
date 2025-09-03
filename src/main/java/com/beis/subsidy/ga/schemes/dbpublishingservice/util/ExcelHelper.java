@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -11,8 +12,10 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.AuditLogs;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.AuditLogsRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -309,31 +312,50 @@ public class ExcelHelper {
         return flag;
     }
 
-    public static void saveAuditLog(UserPrinciple userPrinciple, String action,String role,
-                                    AuditLogsRepository auditLogsRepository) {
-        AuditLogs audit = new AuditLogs();
-        try {
-            String status ="Published";
+    public static void saveBulkUploadSchemesAuditLog(List<SubsidyMeasure> savedSchemes, AuditLogsRepository auditLogsRepository) {
+        List<AuditLogs> auditLogs = savedSchemes.stream().map(scheme -> {
+            AuditLogs auditLog = new AuditLogs();
+            auditLog.setUserName(scheme.getCreatedBy());
+            auditLog.setGaName(scheme.getGrantingAuthority().getGrantingAuthorityName());
+            auditLog.setEventType("Bulk upload scheme(s)");
+            auditLog.setEventId(scheme.getScNumber());
+            auditLog.setEventMessage("Scheme " + scheme.getScNumber() + " bulk uploaded.");
+            return auditLog;
+        }).collect(Collectors.toList());
 
-            if ("Granting Authority Encoder".equals(role.trim())) {
-                status = "Awaiting Approval";
-            }
-            StringBuilder msg = new StringBuilder("Award ")
-                    .append(" added with status ").append(status) ;
-
-            String userName = userPrinciple.getUserName();
-            audit.setUserName(userName);
-            audit.setEventType(action);
-            audit.setEventId(role);
-            audit.setEventMessage(msg.toString());
-            audit.setGaName(userPrinciple.getGrantingAuthorityGroupName());
-            audit.setCreatedTimestamp(LocalDate.now());
-            auditLogsRepository.save(audit);
-        } catch(Exception e) {
-            log.error("{} :: saveAuditLog failed to perform action", e);
-        }
+        saveBulkUploadSchemeAuditMessage(savedSchemes, auditLogs, auditLogsRepository);
     }
 
+    public static void saveBulkUploadSchemeAuditMessage (List<?> savedAwardsList, List<AuditLogs> auditLogs, AuditLogsRepository auditLogsRepository){
+        log.info("creating summary scheme bulk upload message");
+        String msg = bulkUploadAuditMsgBuilder(savedAwardsList,auditLogs);
+        AuditLogs audit = new AuditLogs();
+        audit.setUserName(auditLogs.get(0).getUserName());
+        audit.setEventType(auditLogs.get(0).getEventType());
+        audit.setEventId(auditLogs.get(0).getEventId());
+        audit.setEventMessage(msg);
+        audit.setGaName(auditLogs.get(0).getGaName());
+        audit.setCreatedTimestamp(LocalDateTime.now());
+        auditLogsRepository.save(audit);
+    }
+
+    public static String bulkUploadAuditMsgBuilder (List<?> savedSchemesList, List<AuditLogs> auditLogs){
+        String msg = "";
+
+        if(savedSchemesList == null || auditLogs == null || savedSchemesList.isEmpty()){
+            log.error("Error in bulkUploadAuditMsgBuilder :: savedAwardsList: {} auditLogs: {}", savedSchemesList, auditLogs);
+            return msg;
+        }
+
+        List<SubsidyMeasure> savedSchemes = (List<SubsidyMeasure>) savedSchemesList;
+        msg = String.format(
+                "%d Scheme(s) (%s-%s) bulk uploaded successfully",
+                auditLogs.size(),
+                savedSchemes.get(0).getScNumber(),
+                savedSchemes.get(savedSchemes.size() - 1).getScNumber()
+        );
+        return msg;
+    }
     public static void saveAuditLogForUpdate(UserPrinciple userPrinciple, String action,String awardNo, String eventMsg,
                                              AuditLogsRepository auditLogsRepository) {
         AuditLogs audit = new AuditLogs();
@@ -344,7 +366,7 @@ public class ExcelHelper {
             audit.setEventId(awardNo);
             audit.setEventMessage(eventMsg.toString());
             audit.setGaName(userPrinciple.getGrantingAuthorityGroupName());
-            audit.setCreatedTimestamp(LocalDate.now());
+            audit.setCreatedTimestamp(LocalDateTime.now());
             auditLogsRepository.save(audit);
         } catch(Exception e) {
             log.error("{} :: saveAuditLogForUpdate failed to perform action", e);

@@ -47,6 +47,6 @@ public class AuditLogs {
 
 	@CreationTimestamp
 	@Column(name = "CREATED_TIMESTAMP")
-	private LocalDate createdTimestamp;
+	private LocalDateTime createdTimestamp;
 
 }

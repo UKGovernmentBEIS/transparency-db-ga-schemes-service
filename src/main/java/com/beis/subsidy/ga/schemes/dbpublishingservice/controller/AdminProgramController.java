@@ -65,7 +65,7 @@ public class AdminProgramController {
     	        
         AdminProgram adminProgram = adminProgramService.addAdminProgram(adminProgramRequest, userPrincipleObj);
 
-        StringBuilder eventMsg = new StringBuilder("Admin program ").append(adminProgram.getApNumber()).append(" is added");
+        StringBuilder eventMsg = new StringBuilder("Admin program ").append(adminProgram.getApNumber()).append(" added with status published");
         SearchUtils.saveAuditLog(userPrincipleObj,"create Admin Program", adminProgram.getApNumber(),eventMsg.toString(),auditLogsRepository);
         log.info("{} :: End of  addSchemeDetails method",loggingComponentName);
 
