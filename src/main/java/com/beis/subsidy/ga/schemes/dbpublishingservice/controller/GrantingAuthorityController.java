@@ -107,7 +107,7 @@ public class GrantingAuthorityController {
 		response.setMessage("Created successfully");
 
 		StringBuilder eventMsg = new StringBuilder("Public Authority ").append(gaInputRequest.getName())
-				.append(" is added");
+				.append(" has been created");
 
 		SearchUtils.saveAuditLogForCreateGA(gaInputRequest.getUserName(),"Create Public Authority",
 				grantingAuthority.getGaId().toString(),grantingAuthority.getGrantingAuthorityName(),eventMsg.toString(),auditLogsRepository);

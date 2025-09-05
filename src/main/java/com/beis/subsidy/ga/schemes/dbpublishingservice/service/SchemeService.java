@@ -47,11 +47,11 @@ public class SchemeService {
     AuditLogsRepository auditLogsRepository;
 
     @Transactional
-    public List<SubsidyMeasure> processBulkSchemes(List<BulkUploadSchemes> bulkSchemes, String role) {
+    public List<SubsidyMeasure> processBulkSchemes(List<BulkUploadSchemes> bulkSchemes, String userName) {
         try {
 
             List<SubsidyMeasure> schemes = bulkSchemes.stream()
-                    .map((BulkUploadSchemes bulkUploadScheme) -> generateSubsidyMeasureFromBulkUpload(bulkUploadScheme, role)).collect(Collectors.toList());
+                    .map((BulkUploadSchemes bulkUploadScheme) -> generateSubsidyMeasureFromBulkUpload(bulkUploadScheme, userName)).collect(Collectors.toList());
 
 
             List<SubsidyMeasure> savedSchemes = subsidyMeasureRepository.saveAll(schemes);
@@ -65,7 +65,7 @@ public class SchemeService {
         }
     }
 
-    private SubsidyMeasure generateSubsidyMeasureFromBulkUpload(BulkUploadSchemes bulkUploadScheme, String role){
+    private SubsidyMeasure generateSubsidyMeasureFromBulkUpload(BulkUploadSchemes bulkUploadScheme, String userName){
         LegalBasis legalBasis = new LegalBasis(null, null, bulkUploadScheme.getLegalBasis(), "SYSTEM", "SYSTEM", "Active", new Date(), new Date());
         SubsidyMeasure subsidyMeasure = new SubsidyMeasure(
                 null,
@@ -80,7 +80,7 @@ public class SchemeService {
                 false,
                 bulkUploadScheme.getPublicAuthorityPolicyURL(),
                 LocalDate.now(),
-                role,
+                userName,
                 "SYSTEM",
                 "Active",
                 bulkUploadScheme.getPublicAuthorityPolicyPageDescription(),
