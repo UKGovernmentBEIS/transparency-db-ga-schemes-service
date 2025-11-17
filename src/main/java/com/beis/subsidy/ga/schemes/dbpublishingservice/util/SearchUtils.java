@@ -208,7 +208,7 @@ public class SearchUtils {
 			audit.setEventId(scOrGaId);
 			audit.setEventMessage(eventMsg);
 			audit.setGaName("Business Energy And Industrial Strategy");
-			audit.setCreatedTimestamp(LocalDate.now());
+			audit.setCreatedTimestamp(LocalDateTime.now());
 			auditLogsRepository.save(audit);
 		} catch(Exception e) {
 			log.error("{} :: saveAuditLogForCreateGA failed to perform action", e);
@@ -225,7 +225,7 @@ public class SearchUtils {
 			audit.setEventId(scOrGaId);
 			audit.setEventMessage(eventMsg);
 			audit.setGaName(userPrinciple.getGrantingAuthorityGroupName());
-			audit.setCreatedTimestamp(LocalDate.now());
+			audit.setCreatedTimestamp(LocalDateTime.now());
 			auditLogsRepository.save(audit);
 		} catch(Exception e) {
 			log.error("{} :: saveAuditLog failed to perform action", e);

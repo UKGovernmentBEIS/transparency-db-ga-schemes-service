@@ -75,11 +75,7 @@ public class BulkUploadSchemesController {
                     return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(validationResult);
                 }
                 ValidationResult validationResult = bulkUploadSchemesService.validateFile(file,
-                        userPrincipleObj.getRole());
-                if (validationResult.getErrorRows() == 0) {
-                    ExcelHelper.saveAuditLog(userPrincipleObj, "Bulk upload Schemes", userPrincipleObj.getRole(),
-                            auditLogsRepository);
-                }
+                        userPrincipleObj.getUserName());
                 return ResponseEntity.status(HttpStatus.OK).body(validationResult);
 
             } catch (Exception e) {

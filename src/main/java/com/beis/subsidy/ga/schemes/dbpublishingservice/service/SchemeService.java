@@ -1,6 +1,7 @@
 package com.beis.subsidy.ga.schemes.dbpublishingservice.service;
 
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.*;
+import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.AuditLogsRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.LegalBasisRepository;
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.GrantingAuthorityRepository;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.SubsidyMeasureRepository;
 
+import com.beis.subsidy.ga.schemes.dbpublishingservice.util.ExcelHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,17 +43,20 @@ public class SchemeService {
     @Value("${loggingComponentName}")
     private String loggingComponentName;
 
+    @Autowired
+    AuditLogsRepository auditLogsRepository;
+
     @Transactional
-    public List<SubsidyMeasure> processBulkSchemes(List<BulkUploadSchemes> bulkSchemes, String role) {
+    public List<SubsidyMeasure> processBulkSchemes(List<BulkUploadSchemes> bulkSchemes, String userName) {
         try {
 
             List<SubsidyMeasure> schemes = bulkSchemes.stream()
-                    .map(this::generateSubsidyMeasureFromBulkUpload).collect(Collectors.toList());
+                    .map((BulkUploadSchemes bulkUploadScheme) -> generateSubsidyMeasureFromBulkUpload(bulkUploadScheme, userName)).collect(Collectors.toList());
 
 
             List<SubsidyMeasure> savedSchemes = subsidyMeasureRepository.saveAll(schemes);
-            log.info("End process Bulk Awards db");
-
+            ExcelHelper.saveBulkUploadSchemesAuditLog(savedSchemes, auditLogsRepository);
+            log.info("End process Bulk Schemes db");
 
             return savedSchemes;
         } catch(Exception serviceException) {
@@ -60,7 +65,7 @@ public class SchemeService {
         }
     }
 
-    private SubsidyMeasure generateSubsidyMeasureFromBulkUpload(BulkUploadSchemes bulkUploadScheme){
+    private SubsidyMeasure generateSubsidyMeasureFromBulkUpload(BulkUploadSchemes bulkUploadScheme, String userName){
         LegalBasis legalBasis = new LegalBasis(null, null, bulkUploadScheme.getLegalBasis(), "SYSTEM", "SYSTEM", "Active", new Date(), new Date());
         SubsidyMeasure subsidyMeasure = new SubsidyMeasure(
                 null,
@@ -75,7 +80,7 @@ public class SchemeService {
                 false,
                 bulkUploadScheme.getPublicAuthorityPolicyURL(),
                 LocalDate.now(),
-                "SYSTEM",
+                userName,
                 "SYSTEM",
                 "Active",
                 bulkUploadScheme.getPublicAuthorityPolicyPageDescription(),

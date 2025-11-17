@@ -63,7 +63,7 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
     /*
      * the below method validate the excel file passed in request.
      */
-    public ValidationResult validateFile(MultipartFile file, String role) {
+    public ValidationResult validateFile(MultipartFile file, String userName) {
 
         try {
 
@@ -142,7 +142,7 @@ public class BulkUploadSchemesServiceImpl implements BulkUploadSchemesService {
 
                 log.info("No validation error in bulk excel template");
 
-                schemeService.processBulkSchemes(bulkUploadSchemes,role);
+                schemeService.processBulkSchemes(bulkUploadSchemes,userName);
 
                 log.info("After calling process api - response = ");
                 validationResult
