@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -18,11 +19,7 @@ import com.beis.subsidy.ga.schemes.dbpublishingservice.model.AuditLogs;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;
 import com.beis.subsidy.ga.schemes.dbpublishingservice.repository.AuditLogsRepository;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.expression.ParseException;
 import org.springframework.web.multipart.MultipartFile;
@@ -178,30 +175,28 @@ public class ExcelHelper {
                                 break;
 
                             case 10:
-                                if (currentCell.getCellType() == CellType.BLANK) {
+                                if (currentCell == null || currentCell.getCellType() == CellType.BLANK) {
                                     bulkUploadSchemes.setConfirmationDate(null);
-                                }
-                                if (currentCell.getCellType() == CellType.STRING) {
-                                    bulkUploadSchemes.setConfirmationDate(null);
-
+                                } else if (currentCell.getCellType() == CellType.STRING) {
+                                    String dateStr = currentCell.getStringCellValue();
+                                    LocalDate parsedDate = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                                    bulkUploadSchemes.setConfirmationDate(parsedDate);
+                                } else if (currentCell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(currentCell)) {
+                                    Date date = currentCell.getDateCellValue();
+                                    bulkUploadSchemes.setConfirmationDate(convertDateToLocalDate(date));
                                 } else {
-                                    bulkUploadSchemes.setConfirmationDate(convertDateToLocalDate(currentCell.getDateCellValue()));
+                                    bulkUploadSchemes.setConfirmationDate(null);
                                 }
                                 break;
 
                             case 11:
-                                if(currentCell.getCellType()==CellType.BLANK) {
+                                if (currentCell == null || currentCell.getCellType() == CellType.BLANK || currentCell.getCellType() == CellType.STRING) {
                                     bulkUploadSchemes.setStartDate(null);
-                                }
-                                if(currentCell.getCellType()==CellType.STRING) {
-                                    bulkUploadSchemes.setStartDate(null);
-
-                                }
-                                else {
+                                } else {
                                     bulkUploadSchemes.setStartDate(convertDateToLocalDate(currentCell.getDateCellValue()));
                                 }
-
                                 break;
+
 
                             case 12:
                                 if(currentCell.getCellType()==CellType.BLANK || StringUtils.isEmpty(String.valueOf(currentCell))) {
